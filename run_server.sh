@@ -12,12 +12,14 @@ ctx_k=8 # context K
 #llama-server \
 cd "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64"
 
-./llama-server.exe --version
+# ./llama-server.exe --version
 
-./llama-server.exe \
+#./llama-server.exe \
+"D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe"
     --port 8001 \
     --model "$gguf_folder\\$model" \
     --ctx-size $((ctx_k * 1024)) \
     --n-gpu-layers 999 \
-    --no-warmup
+    --no-warmup \
+    --verbose
   
