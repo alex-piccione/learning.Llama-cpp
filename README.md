@@ -4,8 +4,152 @@ Website: https://llama-cpp.com
 Documentation: ???  
 GitHub: https://github.com/ggml-org/llama.cpp
 
-## Videos about it
 
+# Goal
+
+Evaluate whether `llama.cpp` can provide better performance and better hardware utilization than Ollama for a personal, single-user coding assistant running on a consumer graphic card (16GB-24GB).  
+Focus is not "largest model possible", but **quality × tokens/sec × usable context**.  
+
+---
+
+# Context
+
+Ollama is essentially a convenience layer on top of `llama.cpp`.  
+  
+Advantages of Ollama:
+
+* easy setup
+* model management
+* ready-to-use API
+
+Potential advantages of `llama.cpp`:
+
+* finer GPU control
+* direct GGUF usage
+* earlier access to new features
+* tuning of memory, context and decoding
+* potentially better speed / larger practical models
+
+---
+
+# Things to investigate
+
+## GPU usage vs GPU offload
+
+Important metric:
+
+```text
+offloaded X/Y layers to GPU
+```
+
+Target:
+
+```text
+offloaded all layers
+```
+
+---
+
+## Features to test
+
+### Flash Attention
+
+`--flash-attn`
+
+Expected:
+
+* faster inference
+* lower memory usage
+
+---
+
+### KV cache tuning
+
+Examples:
+
+```bash
+--cache-type-k q8_0
+--cache-type-v q8_0
+```
+
+Expected:
+
+* lower VRAM use
+* larger practical context
+
+Tradeoff:
+
+* possible quality loss
+
+---
+
+### MTP (Multi-Token Prediction)
+
+Expected:
+
+* faster generation
+* potentially useful for coding
+
+Tradeoff:
+
+* more VRAM
+
+---
+
+### Speculative decoding
+
+Expected:
+
+* faster generation using draft predictions
+
+---
+
+### Context size
+
+Investigate practical context range:
+
+* performance impact
+* VRAM growth
+* usefulness for coding tasks
+
+---
+
+# TODO: benchmarking
+
+Use `llama-bench` and runtime measurements.
+
+Metrics:
+
+* tokens/sec
+* prompt tokens/sec
+* VRAM usage
+* RAM usage
+* CPU usage
+* context size
+* GPU offload (X/Y layers)
+
+Suggested comparison:
+
+1. Ollama baseline
+2. llama.cpp default
+3. * Flash Attention
+4. * cache tuning
+5. * MTP
+6. * speculative decoding
+
+---
+
+# Step 2
+
+Investigate:
+
+* best coding models
+* best quantization
+* best context size
+* best settings for RTX 4060 Ti 16GB
+
+
+## Videos about it
 
 
 Running a 35B AI Model on 6GB VRAM, FAST (llama.cpp Guide):
