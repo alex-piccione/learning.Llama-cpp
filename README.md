@@ -120,3 +120,8 @@ https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
 - --tools TOOL1,TOOL2,...                 experimental: whether to enable built-in tools for AI agents - do not enable in untrusted environments (default: no tools)
                                         specify "all" to enable all tools available tools: read_file, file_glob_search, grep_search, exec_shell_command, write_file, edit_file, apply_diff, get_datetime  (env: LLAMA_ARG_TOOLS)
 - --ui,  --no-ui                          whether to enable the Web UI (default: enabled)  (env: LLAMA_ARG_UI)
+
+
+## llama-bench
+
+https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
