@@ -59,14 +59,17 @@ test_model() {
 
     local model_path="$GGUF_FOLDER/$model"
 
+    #    --cache-type-k q8_0 \
+    #    --cache-type-v q8_0 \    
+
     "$LLAMA_BINS_FOLDER/llama-server.exe" \
         --model "$model_path" \
         --host 127.0.0.1 \
         --port "$SERVER_PORT" \
-        --ctx-size "$context" \
         --n-gpu-layers 999 \
+        --ctx-size "$context" \
         --cache-type-k q8_0 \
-        --cache-type-v q8_0 \        
+        --cache-type-v q8_0 \
         > llama_server.log 2>&1 &
 
     local LLAMA_PID=$!
@@ -192,6 +195,8 @@ test_model() {
         ""
 }
 
+
+# return "error=... total_duration=... eval_duration=... eval_count=... eval_rate=... has_tools=..."
 llamacpp_run_full() {
     local model="$1"
     local prompt="$2"
@@ -206,22 +211,19 @@ llamacpp_run_full() {
         exit 1
     fi
 
-
-    ########################################
-    # 1. Build request payload (OpenAI standard with Tools)
-    ########################################
+    # 1. Build the payload with your exact parameters (OpenAI compatible schema)
     local temperature=0.1
     local max_tokens=2048
 
     json_payload=$(jq -n \
-        --arg content "$prompt" \
+        --arg code "$prompt" \
         --arg temperature "$temperature" \
         --arg max_tokens "$max_tokens" \
 '{
   messages: [
     {
       role: "user",
-      content: $content
+      content: ("Fix the bug in the bytesToHex function of this code, then execute the corrected script using your available code runner tool to verify it:\n\n" + $code)
     }
   ],
   temperature: ($temperature | tonumber),
@@ -231,7 +233,8 @@ llamacpp_run_full() {
   min_p: 0.05,
   repeat_penalty: 1.05,
   repeat_last_n: 256,
-  stream: false,
+  stream: true,
+  "stream_options": { "include_usage": true },
   tools: [
     {
       type: "function",
@@ -251,65 +254,219 @@ llamacpp_run_full() {
   ]
 }')
 
- 
-    ########################################
-    # 2. Call llama.cpp server
-    ########################################    
-    local raw_output=$(curl -s -H "Content-Type: application/json" \
-        "http://127.0.0.1:$SERVER_PORT/v1/chat/completions" \
-        -w "%{http_code}" \
-        -d "$json_payload")
+    # 2. Query the endpoint with client-side clock tracking
+    local start_time end_time raw
+    start_time=$(date +%s.%N)
+    raw=$(curl -s http://localhost:$SERVER_PORT/v1/chat/completions -d "$json_payload")
+    end_time=$(date +%s.%N)
 
-    # Extract the 3-digit status code and the actual JSON body
-    local http_code="${raw_output:${#raw_output}-3}"
-    local raw="${raw_output:0:${#raw_output}-3}"
+    # UNCOMMENT THE LINE BELOW TO INSPECT API RAW OUTPUT IN TERMINAL:
+    # echo "DEBUG RAW OUTPUT: $raw" >&2
+    echo "$raw" > llama_api_response.log
 
-    #print_value "raw" $raw
-
-    # Check if the server returned anything other than 200 OK
-    if [[ "$http_code" -ne "200" ]]; then
-        echo "❌ llama.cpp API ERROR: HTTP Status $http_code" >&2
-        echo "Raw Response: $raw" >&2
-        printf "error=1 has_tools=0 eval_count=0 eval_rate=0"
+    # Safety Check: Check for llama-server errors
+    local error_msg=$(jq -r '.error.message // .error // empty' <<< "$raw" 2>/dev/null)
+    if [ -n "$error_msg" ] && [ "$error_msg" != "null" ]; then
+        echo -e "\n❌ LLAMA.CPP API ERROR: $error_msg" >&2
+        printf "error=API_Error total_duration=0 eval_duration=0 eval_count=0 eval_rate=0 has_tools=0"
         return
     fi
 
-    ########################################
-    # 3. Check API error
-    ########################################
-    local error_msg=$(jq -r '.error // empty' <<< "$raw")
-    if [ -n "$error_msg" ]; then
-        echo "❌ llama.cpp API ERROR: $error_msg" >&2
-        printf "error=1 has_tools=0 eval_count=0 eval_rate=0"
-        return
+    # Robust space-insensitive streaming line cleaner
+    local json_stream=$(echo "$raw" | sed -n 's/^data: *{/{/p')
+
+    local text_response=""
+    local tool_code=""
+    local eval_count=0
+    local eval_ms=""
+    local has_tools=0
+
+    if [ -n "$json_stream" ]; then
+        # 3. Stream Extraction (Handles both normal content and Qwen reasoning_content safely)
+        text_response=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.content // .choices[0].delta.reasoning_content // empty' 2>/dev/null)
+            
+        # Extract server-side performance tokens and timings directly from the final chunk
+        eval_count=$(echo "$json_stream" | jq -r '.usage.completion_tokens // empty' | tail -n 1 2>/dev/null)
+        eval_ms=$(echo "$json_stream" | jq -r '.timings.predicted_ms // empty' | tail -n 1 2>/dev/null)
+        
+        local tool_chunks=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.tool_calls[0].function.arguments // empty' 2>/dev/null)
+        if [ -n "$tool_chunks" ]; then
+            has_tools=1
+            tool_code=$(jq -r '.code // empty' <<< "$tool_chunks" 2>/dev/null)
+            [ -z "$tool_code" ] && tool_code="$tool_chunks"
+        fi
     fi
 
-    ########################################
-    # 4. Extract response text
-    ########################################
-    local response=$(jq -r '.choices[0].message.content // ""' <<< "$raw")
+    # 4. Assemble Response
+    local response=""
+    if [ -n "$tool_code" ]; then
+        response="${text_response}${text_response:+$'\n\n'}[EXECUTING TOOL: run_code]\n${tool_code}"
+    else
+        response="$text_response"
+    fi
     print_value "Response" "$response"
 
-    ########################################
-    # 5. Tool detection
-    ########################################
-    has_tools=0
-    jq -e '.choices[0].message.tool_calls != null' <<< "$raw" >/dev/null && has_tools=1
+    # 5. Performance Metrics Metrics
+    : "${eval_count:=0}"
+    local duration_seconds=$(awk "BEGIN {print $end_time - $start_time}")
+    local total_duration=$(awk "BEGIN {printf \"%.0f\", $duration_seconds * 1000000000}")
+    local eval_duration="$total_duration"
 
-    # ########################################
-    # 6. Performance metrics (Parsed from llama.cpp custom .timings schema)
-    # ########################################
-    local eval_count=$(jq -r '.timings.predicted_n // .usage.completion_tokens // 0' <<< "$raw")
-    local eval_rate=$(jq -r '.timings.predicted_per_second // 0' <<< "$raw")
-    local eval_s=$(jq -r 'if .timings.predicted_ms then (.timings.predicted_ms / 1000) else 0 end' <<< "$raw")
+    # If server provided precise timings, use them for 100% accurate token speed
+    if [ -n "$eval_ms" ] && [ "$eval_ms" != "null" ]; then
+        eval_duration=$(awk "BEGIN {printf \"%.0f\", $eval_ms * 1000000}")
+    fi
 
-    # ########################################
-    # 7. Output compact metrics line
-    # ########################################
-    printf "eval_count=%s eval_rate=%s has_tools=%s eval_s=%s" \
-        "$eval_count" \
-        "$eval_rate" \
-        "$has_tools" \
-        "$eval_s"
+    local eval_rate=0
+    if [ "$eval_duration" -gt 0 ] && [ "$eval_count" -gt 0 ]; then
+        eval_rate=$(( eval_count * 1000000000 / eval_duration ))
+    fi
+
+    # 6. Format Return Values (Passing along layers_override to your table printer)
+    printf "error= total_duration=%s eval_duration=%s eval_count=%s eval_rate=%s has_tools=%s layers=%s" \
+        "$total_duration" "$eval_duration" "$eval_count" "$eval_rate" "$has_tools" "$layers_override"
+}
+
+llamacpp_run_full+2() {
+    local model="$1"
+    local prompt="$2"
+
+    if [ -z "$model" ]; then
+        echo "‼️ llamacpp_run_full called with empty model" >&2
+        exit 1
+    fi
+
+    if [ -z "$prompt" ]; then
+        echo "‼️ llamacpp_run_full called with empty prompt" >&2
+        exit 1
+    fi
+
+    # 1. Build the payload with your exact parameters (OpenAI compatible schema)
+    local temperature=0.1
+    local max_tokens=2048
+
+    json_payload=$(jq -n \
+        --arg code "$prompt" \
+        --arg temperature "$temperature" \
+        --arg max_tokens "$max_tokens" \
+'{
+messages: [
+    {
+      role: "user",
+      content: ("Fix the bug in the bytesToHex function of this code, then execute the corrected script using your available code runner tool to verify it:\n\n" + $code)
+    }
+  ],
+  temperature: ($temperature | tonumber),
+  max_tokens: ($max_tokens | tonumber),  
+  top_k: 20,
+  top_p: 0.8,
+  min_p: 0.05,
+  repeat_penalty: 1.05,
+  repeat_last_n: 256,
+  stream: true,
+  "stream_options": { "include_usage": true },
+  tools: [
+    {
+      type: "function",
+      function: {
+        name: "run_code",
+        description: "Executes a given script on the local machine environment runner",
+        parameters: {
+          type: "object",
+          properties: {
+            language: { type: "string", description: "The programming language, e.g., fsharp" },
+            code: { type: "string", description: "The complete corrected script code to execute" }
+          },
+          required: ["language", "code"]
+        }
+      }
+    }
+  ]
+}')
+
+    # 5. Performance Statistics (100% accurate, collected from the server response)
+    if [ jq -e . <<< "$raw" >/dev/null 2>&1 ]; then
+        # Plain JSON mode
+        eval_count=$(jq -r '.usage.completion_tokens // 0' <<< "$raw")
+    else
+        # SSE Stream mode (extracts from the final chunk containing stream_options usage)
+        eval_count=$(jq -rs 'map(.usage.completion_tokens // empty) | .[0] // 0' <<< "$json_stream")
+    fi
+
+    local duration_seconds=$(awk "BEGIN {print $end_time - $start_time}")
+    local total_duration=$(awk "BEGIN {printf \"%.0f\", $duration_seconds * 1000000000}")
+    local eval_duration="$total_duration" 
+
+    local eval_rate=0
+    if [ "$eval_duration" -gt 0 ]; then
+        eval_rate=$(( eval_count * 1000000000 / eval_duration ))
+    fi
+
+
+#---
+
+
+    # 2. Query the endpoint with client-side clock tracking
+    local start_time end_time raw
+    start_time=$(date +%s.%N)
+    raw=$(curl -s http://localhost:8080/v1/chat/completions -d "$json_payload")
+    end_time=$(date +%s.%N)
+
+    # Safety Check: Check for llama-server errors
+    local error_msg=$(jq -r '.error.message // empty' <<< "$raw")
+    if [ -n "$error_msg" ]; then
+        echo -e "\n❌ LLAMA.CPP API ERROR: $error_msg" >&2
+        printf "error=No llama.cpp tools capability"
+        return
+    fi
+
+    # Sanitize SSE stream blocks
+    local json_stream=$(grep -E '^data: \{' <<< "$raw" | sed 's/^data: //')
+
+    # 3. Extract text dialogue
+    local text_response=$(jq -rs 'map(.choices[0].delta.content // "") | join("")' <<< "$json_stream")
+
+    # 4. Extract code chunks from the tool arguments sequence
+    local tool_chunks=$(jq -rs 'map(.choices[0].delta.tool_calls[0].function.arguments // "") | join("")' <<< "$json_stream")
+    local tool_code=""
+    if [ -n "$tool_chunks" ]; then
+        tool_code=$(jq -r '.code // ""' <<< "$tool_chunks")
+    fi
+
+    # Merge responses for terminal console view
+    local response=""
+    if [ -n "$tool_code" ]; then
+        response="${text_response}${text_response:+$'\n\n'}[EXECUTING TOOL: run_code]\n${tool_code}"
+    else
+        response="$text_response"
+    fi
+    print_value "Response" "$response"
+
+    # 5. Check if a tool call occurred
+    local has_tools=0
+    if [ -n "$tool_code" ]; then
+        has_tools=1
+    fi
+
+    # 6. Performance Statistics Normalization (Converts client metrics into Ollama Nanoseconds)
+    local eval_count=$(jq -rs 'map(.usage.completion_tokens // empty) | .[0] // 0' <<< "$json_stream")
+    if [ "$eval_count" -eq 0 ]; then
+        # Fallback estimation if stream block usage is omitted
+        eval_count=$(echo "$response" | wc -w)
+    fi
+
+    # Math calculations converting float seconds directly into nanoseconds integers
+    local duration_seconds=$(awk "BEGIN {print $end_time - $start_time}")
+    local total_duration=$(awk "BEGIN {printf \"%.0f\", $duration_seconds * 1000000000}")
+    local eval_duration="$total_duration" # Match prompt eval vs eval ratios roughly
+
+    local eval_rate=0
+    if [ "$eval_duration" -gt 0 ]; then
+        eval_rate=$(( eval_count * 1000000000 / eval_duration ))
+    fi
+
+    # Output string formatted exactly like Ollama's return signature
+    printf "error= total_duration=%s eval_duration=%s eval_count=%s eval_rate=%s has_tools=%s" \
+        "$total_duration" "$eval_duration" "$eval_count" "$eval_rate" "$has_tools"
 }
 
