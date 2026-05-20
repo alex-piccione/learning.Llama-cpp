@@ -2,6 +2,7 @@
 
 GGUF_FOLDER="V:\GGUF"
 LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64"
+SERVER_PORT=8001
 
 
 # $'' makes the inteprets to be done at assignation time, so it doesn't require "-e" whan used in echo command

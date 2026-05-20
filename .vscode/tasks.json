@@ -1,0 +1,14 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🧪 Test Models",
+            "type": "shell",
+            "command": "./test_models.sh",
+            "group": "build",            
+            "options": {
+                "cwd": "${workspaceFolder}/scripts"
+            },
+        }
+    ]
+}
