@@ -70,6 +70,7 @@ test_model() {
         --ctx-size "$context" \
         --cache-type-k q8_0 \
         --cache-type-v q8_0 \
+        --verbose \
         > llama_server.log 2>&1 &
 
     local LLAMA_PID=$!
@@ -96,7 +97,6 @@ test_model() {
     kill "$LLAMA_PID" >/dev/null 2>&1
     wait "$LLAMA_PID" 2>/dev/null
     sleep 2
-
 
     # Parse metrics
 

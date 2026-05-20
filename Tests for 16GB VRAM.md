@@ -1,8 +1,9 @@
 # Tests for 16GB VRAM
 
 
-| Model                                                        |〰️| Size  | Ctx  | GPU  | Tk/s | Time  |🔨|Pi| Note                                     |
-| Qwen3.5-9B-Q4_K_M.gguf                                       |✔️| ?          |   8 k |   ? % |   42 |  18 s |✔️|〰️|                                          |
+| Model                                                        |〰️| Size  | Ctx   | GPU   | Tk/s | Time  |🔨|Pi| Note                                     
+| Qwen3.5-9B-Q4_K_M.gguf                                       |✔️| ?     |   8 k |   ? % |   42 |  18 s |✔️|〰️|                                          |  <-- strem: false
+| Qwen3.5-9B-Q4_K_M.gguf                                       |✔️| ?     |   8 k | 100 % |   38 |   0 s |✔️|〰️|                                          |
 
 
 
