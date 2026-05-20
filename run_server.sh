@@ -1,20 +1,23 @@
 # Test llama-server
 
-export MSYS_NO_PATHCONV=0
+#export MSYS_NO_PATHCONV=0
+gguf_folder="V:\GGUF"
 
 model="Qwen3.5-9B-Q4_K_M.gguf"
 #model=qwen3.5:9b-q4_K_M
+ctx_k=8 # context K
 
-bin_folder="D:\Standalone Programs\llama-b9222-bin-win-cuda-12.4-x64"
-gguf_folder="V:\GGUF"
 
-cd "$bin_folder"
+# restart to find llama-server from PATH
+#llama-server \
+cd "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64"
 
-## Note. It needs to be Windows-style path
+./llama-server.exe --version
+
 ./llama-server.exe \
     --port 8001 \
-    -m "$gguf_folder\\$model"
-    #-m "/v/GGUF/Qwen3.5-9B-Q4_K_M.gguf"
-    #-hf ggml-org/gemma-3-1b-it-GGUF 
-    
-
+    --model "$gguf_folder\\$model" \
+    --ctx-size $((ctx_k * 1024)) \
+    --n-gpu-layers 999 \
+    --no-warmup
+  

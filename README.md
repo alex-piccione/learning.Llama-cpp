@@ -23,23 +23,35 @@ https://www.youtube.com/watch?v=hAHFENCe59M
 DFlash on GTX 1060: Can Dense AI Models Cheat VRAM Like MoE?
 https://www.youtube.com/watch?v=9vY4-Z-tkHs
 
+
 ## Installation
 
 Which version I need to download ?  
-Which CUDA version is my grapgic card ?
+Which CUDA version is my graphic card ?
 ``nvidia-smi`` says 12.6 . 
+
+### Windows
+- download both the compoiled binaries zip and the CUDA libraries
+- unzip both the folders
+- move the binaries folder (containing llama-server.exe, llama-cli.exe) where you want.
+- copy hte libraries in hte unzipped CUDA folder in the same folder of llama.cpp
+- Add (or update) the PATH variable to point to the folder.
+
+### Ubuntu
+[TODO]
 
 
 ## Running
 
 ```bash
-bin_folder="D:\Standalone Programs\llama-b9222-bin-win-cuda-12.4-x64"
-cd "$bin_folder"
+llama-server 
 
-qwen3.5:9b-q4_K_M
-llama-server -hf ggml-org/gemma-3-1b-it-GGUF
+- -m path to the GGUF file
+- --port: 8001
+- --no-warmup to avoid the server to pre-load the model with an empty message (to have it available immediately)
+- --ctx-size: N * 1024  DEPENDS FROM MODEL
+- --n-gpu-layers 999  offload (practically) all possible layers to the GPU
 
---port
 
 ```
 
