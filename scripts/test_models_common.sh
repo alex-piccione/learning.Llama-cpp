@@ -2,6 +2,13 @@ source common.sh
 
 test_code_file="test_code_1.fs"
 
+draft_model="Qwen3.5-2B-Q4_K_M.gguf"
+#draft_model="Qwen3.5-0.8B-Base-Q4_0.gguf" ## BETTER than instruct model
+#draft_model="qwen3.5-0.8b-instruct.gguf"
+predict_token=12
+#spec-draft-type="f16"  # "q8_0"
+#--spec-draft-type-v f16,
+
 # test_models()
 test_models() {
     local -n __models=$1   # nameref: array passed by name
@@ -32,7 +39,7 @@ test_models() {
     echo
     echo "========================================================="
     echo
-    printf "| Model                                                        |〰️| Size  | Ctx  | GPU  | Tk/s | Time  |🔨|Pi| Note                                     |\n"
+    printf "| Model                                                        |〰️| Size  | Ctx   | GPU   | Tk/s | Time  |🔨|Pi| Note                                     |\n"
 
     for result in "${results[@]}"; do
         echo -e "$result"
@@ -44,8 +51,6 @@ test_models() {
 test_model() {
     local model="$1"
     local context="$2"
-    #local draft_model="Qwen3.5-2B-Q4_K_M.gguf"
-    local draft_model="Qwen3.5-0.8B-Base-Q4_0.gguf"  ## TODO@ pass as argument, and DFlash choice too
 
     if [ -z "$model" ]; then
         echo "‼️ test_model was called with empty model" >&2
@@ -65,25 +70,33 @@ test_model() {
 
     # --parallel 1
     # --threads 2 
-
    #--spec-draft-type-k q8_0 \
    #--spec-draft-type-v q8_0 \
+   #--spec-draft-type-k f16 
+   #--spec-draft-type-v f16,
 
     local use_dflash=1
 
     if [[ "$use_dflash" = "1" ]] ; then
 
+        print_value "DFlash" "enabled"
+        print_value "Predict model" "$draft_model"
+        print_value "Predict Token N" "$predict_token"
+
         "$LLAMA_BINS_FOLDER/llama-server.exe" \
             --model "$model_path" \
             --spec-draft-model "$draft_model_path" \
             --spec-type draft-simple \
-            --spec-draft-n-max 2 \
+            --spec-draft-n-max $predict_token \
+            --spec-draft-type-k q8_0 \
+            --spec-draft-type-v q8_0 \
             --host 127.0.0.1 \
             --port "$SERVER_PORT" \
             --n-gpu-layers 999 \
             --ctx-size "$context" \
             --cache-type-k q8_0 \
             --cache-type-v q8_0 \
+            --parallel 1 \
             --verbose \
             > llama_server.log 2>&1 &      
     else
@@ -206,6 +219,10 @@ test_model() {
     ########################################
 
     print_value "Model" "$model"
+
+    if [[ "$use_dflash" = "1" ]] ; then
+        print_value "Draft Model" "$draft_model"
+    fi
     #print_value "Draft Model" "$draft_model"
     print_value "Context" "${ctx_k}k"
     print_value "Eval time" "$(printf "%.1f s" "$total_duration_s")"
@@ -224,7 +241,7 @@ test_model() {
     fi
 
     # Swapped columns 3 and 5 to use the newly parsed variables
-    printf "| %-60s |%-2s| %-10s | %3s k | %3s %% | %4.0f | %3.0f s |%s|〰️| %-40s |\n" \
+    printf "| %-60s |%-2s| %-4s GB | %3s k | %3s %% | %4.0f | %3.0f s |%s|〰️| %-40s |\n" \
         "$model" \
         "✔️" \
         "$size_info" \
@@ -381,7 +398,7 @@ llamacpp_run() {
     else
         response="$text_response"
     fi
-    print_value "Response" "$response"
+    #print_value "Response" "$response"
 
     # Output in ke=value per-line style
     printf "total_duration_s=%s\n" "$total_duration_s"
@@ -389,4 +406,30 @@ llamacpp_run() {
     printf "eval_count=%s\n" "$eval_count"
     printf "eval_rate=%s\n" "$eval_rate"
     printf "has_tools=%s\n" "$has_tools"
+    
+
+    # extract DFlash values 
+    local predicted_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk" 2>/dev/null)
+    if [ -n "$predicted_ms" ]; then
+        local predicted_s=$(from_ms "$predicted_ms")
+
+        local predicted_tps=$(jq -r '.timings.predicted_per_second' <<< "$final_usage_chunk" 2>/dev/null)
+        if [ -z "$predicted_tps" ] || [ "$predicted_tps" = "null" ]; then
+            echo "\n❌ ERROR: Failed to extract .timings.predicted_per_second from API response" >&2
+            printf "error=Failed_to_extract_predicted_tps"
+            return 1
+        fi
+
+        local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk" 2>/dev/null)
+        local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk" 2>/dev/null)
+
+        local accepted_pct=$(awk -v a="$draft_n_accepted" -v n="$draft_n" 'BEGIN {
+            if (n > 0) printf "%.1f\n", (a / n) * 100
+            else printf "0.0\n"
+        }')
+
+        printf "predicted_s=%s\n" "$predicted_s"
+        printf "predicted_tps=%s\n" "$predicted_tps"
+        printf "accepted_pct=%s\n" "$accepted_pct"
+    fi
 }

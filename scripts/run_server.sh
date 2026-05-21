@@ -21,6 +21,36 @@ context=$((ctx_k * 1024))
 
 # ./llama-server.exe --version
 
+test=gpu_layer
+
+if [[ "$test" = "gpu_layer" ]] ; then 
+
+    echo "$test"
+    
+    model="Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf"
+    context_k=16
+    GPU_LAYER_N=40
+
+    "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
+        --model "$gguf_folder\\$model" \
+        --host 127.0.0.1 \
+        --port "$SERVER_PORT" \
+        --parallel 1 \
+        --n-gpu-layers $GPU_LAYER_N \
+        --ctx-size "$((context_k * 1024))" \
+        --temperature 0.1 \
+        --top-k 20 \
+        --top-p 0.8 \
+        --min-p 0.05 \
+        --repeat-penalty 1.05 \
+        --repeat-last-n 256
+        --verbose 
+
+        open "http://127.0.0.1:$SERVER_PORT"
+
+    return 0
+fi
+
 #./llama-server.exe \
 "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
     --host 127.0.0.1 \
