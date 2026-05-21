@@ -9,6 +9,15 @@
             "options": {
                 "cwd": "${workspaceFolder}/scripts"
             },
+        },
+        {
+            "label": "▶️ Run Server",
+            "type": "shell",
+            "command": "./run_server.sh",
+            "group": "build",            
+            "options": {
+                "cwd": "${workspaceFolder}/scripts"
+            },
         }
     ]
 }
