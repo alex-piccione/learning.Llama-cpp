@@ -21,56 +21,127 @@ context=$((ctx_k * 1024))
 
 # ./llama-server.exe --version
 
+
+test_call() {
+
+    local temperature=0.1
+    local max_tokens=2048
+
+    local prompt="Write F# code that defines a sum function."
+
+    json_payload=$(jq -n \
+        --arg prompt "$prompt" \
+        --arg temperature "$temperature" \
+        --arg max_tokens "$max_tokens" \
+'{
+  messages: [
+    {
+      role: "user",
+      content: $prompt
+    }
+  ],
+  temperature: ($temperature | tonumber),
+  max_tokens: ($max_tokens | tonumber),  
+  top_k: 20,
+  top_p: 0.8,
+  min_p: 0.05,
+  repeat_penalty: 1.05,
+  repeat_last_n: 256,
+  stream: true,
+  "stream_options": { "include_usage": true },
+  tools: [
+    {
+      type: "function",
+      function: {
+        name: "run_code",
+        description: "Executes a given script on the local machine environment runner",
+        parameters: {
+          type: "object",
+          properties: {
+            language: { type: "string", description: "The programming language, e.g., fsharp" },
+            code: { type: "string", description: "The complete corrected script code to execute" }
+          },
+          required: ["language", "code"]
+        }
+      }
+    }
+  ]
+}')
+
+    curl -s http://localhost:$SERVER_PORT/v1/chat/completions -d "$json_payload"
+}
+
+
 test=gpu_layer
 
 if [[ "$test" = "gpu_layer" ]] ; then 
 
     echo "$test"
     
-    model="Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf"
-    context_k=16
-    GPU_LAYER_N=40
+    #model="Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf" #1.2 tk/s !!
+    #model=mammoth-coder-13b.Q4_K_M.gguf
+    #model=Qwen3.5-9B-Q4_K_M.gguf  # 35 layer: 40 tk/s
+    #model=Qwen3.5-35B-A3B-UD-Q4_K_M.gguf
+    model=gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
 
+    context_k=16
+    GPU_LAYER_N=999  #50
+    CPU_MOE=5  # 10-20
+    
+    # TurboQuant
+    #--cache-type-k turbo4
+    #--cache-type-v turbo3
+
+    # Force to load all cacche in RAM (?) to save some VRAM  (?)
+    # --no-mmap \
+
+    ## MTP ... it works ONLY with MTP models!
+    #--spec-type draft-mtp \ only if model support MTP
+    #--spec-draft-n-max 3 \   can try 4 or 5
+
+    echo "Start Server"
     "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
         --model "$gguf_folder\\$model" \
         --host 127.0.0.1 \
         --port "$SERVER_PORT" \
         --parallel 1 \
+        --flash-attn on \
         --n-gpu-layers $GPU_LAYER_N \
+        --n-cpu-moe $CPU_MOE \
         --ctx-size "$((context_k * 1024))" \
+        --cache-type-k q8_0 \
+        --cache-type-v q8_0 \
         --temperature 0.1 \
         --top-k 20 \
         --top-p 0.8 \
         --min-p 0.05 \
         --repeat-penalty 1.05 \
-        --repeat-last-n 256
+        --repeat-last-n 256 \
         --verbose 
 
-        open "http://127.0.0.1:$SERVER_PORT"
+    echo "Test call"
+    test_call
+
+    #open "http://127.0.0.1:$SERVER_PORT"
 
     return 0
-fi
 
-#./llama-server.exe \
-"D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
-    --host 127.0.0.1 \
-    --port "$SERVER_PORT" \
-    --model "$model_path" \
-    --spec-draft-model "$draft_model_path" \
-    --ctx-size "$context" \
-    --n-gpu-layers 999 \
-    --no-warmup \
-    --verbose
-  
-or
+else
+    #./llama-server.exe \
+    "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
+        --host 127.0.0.1 \
+        --port "$SERVER_PORT" \
+        --model "$model_path" \
+        --spec-draft-model "$draft_model_path" \
+        --ctx-size "$context" \
+        --n-gpu-layers 999 \
+        --no-warmup \
+        --verbose   
 
-
-#         --threads 2 \            Gemini says to use 4
-#        --cache-type-k q8_0 \     Gemini says it will reduce quality
-#        --cache-type-v q8_0 \     Gemini says it will reduce quality
-
-
-"D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
+    #         --threads 2 \            Gemini says to use 4
+    #        --cache-type-k q8_0 \     Gemini says it will reduce quality
+    #        --cache-type-v q8_0 \     Gemini says it will reduce quality
+    "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
         --model "$model_path" \
         --spec-draft-model "$draft_model_path" \
         --spec-type draft-simple \
@@ -89,3 +160,4 @@ or
         --repeat-penalty 1.05 \
         --repeat-last-n 256
         #--verbose 
+fi

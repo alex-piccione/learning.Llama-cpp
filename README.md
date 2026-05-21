@@ -266,6 +266,13 @@ https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
 - --ui,  --no-ui                          whether to enable the Web UI (default: enabled)  (env: LLAMA_ARG_UI)
 
 
+--mlock                                 force system to keep model in RAM rather than swapping or compressing
+                                        (env: LLAMA_ARG_MLOCK)
+--mmap, --no-mmap                       whether to memory-map model. (if mmap disabled, slower load but may
+                                        reduce pageouts if not using mlock) (default: enabled)
+                                        (env: LLAMA_ARG_MMAP)
+
+
 ## llama-bench
 
 https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
