@@ -2,6 +2,8 @@ source common.sh
 
 test_code_file="test_code_1.fs"
 
+### Enable DFlash (draft model to predict tokens)
+use_dflash=0
 draft_model="Qwen3.5-2B-Q4_K_M.gguf"
 #draft_model="Qwen3.5-0.8B-Base-Q4_0.gguf" ## BETTER than instruct model
 #draft_model="qwen3.5-0.8b-instruct.gguf"
@@ -67,15 +69,12 @@ test_model() {
     local model_path="$GGUF_FOLDER/$model"
     local draft_model_path="$GGUF_FOLDER/$draft_model"
 
-
     # --parallel 1
     # --threads 2 
    #--spec-draft-type-k q8_0 \
    #--spec-draft-type-v q8_0 \
    #--spec-draft-type-k f16 
    #--spec-draft-type-v f16,
-
-    local use_dflash=1
 
     if [[ "$use_dflash" = "1" ]] ; then
 

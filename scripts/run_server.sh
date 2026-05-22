@@ -82,13 +82,13 @@ if [[ "$test" = "gpu_layer" ]] ; then
     #model=mammoth-coder-13b.Q4_K_M.gguf
     #model=Qwen3.5-9B-Q4_K_M.gguf  # 35 layer: 40 tk/s
     #model=Qwen3.5-35B-A3B-UD-Q4_K_M.gguf
-    model=gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
+    model=unsloth_gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
 
-    context_k=16
+    context_k=32
     GPU_LAYER_N=999  #50
     CPU_MOE=5  # 10-20
     
-    # TurboQuant
+    # TurboQuant, not available
     #--cache-type-k turbo4
     #--cache-type-v turbo3
 
@@ -99,16 +99,18 @@ if [[ "$test" = "gpu_layer" ]] ; then
     #--spec-type draft-mtp \ only if model support MTP
     #--spec-draft-n-max 3 \   can try 4 or 5
 
+
     echo "Start Server"
+    #llama-server \
     "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
-        --model "$gguf_folder\\$model" \
         --host 127.0.0.1 \
         --port "$SERVER_PORT" \
+        --model "$gguf_folder\\$model" \
+        --ctx-size "$(($context_k * 1024))" \
         --parallel 1 \
         --flash-attn on \
         --n-gpu-layers $GPU_LAYER_N \
         --n-cpu-moe $CPU_MOE \
-        --ctx-size "$((context_k * 1024))" \
         --cache-type-k q8_0 \
         --cache-type-v q8_0 \
         --temperature 0.1 \
@@ -116,11 +118,11 @@ if [[ "$test" = "gpu_layer" ]] ; then
         --top-p 0.8 \
         --min-p 0.05 \
         --repeat-penalty 1.05 \
-        --repeat-last-n 256 \
-        --verbose 
+        --repeat-last-n 256 
+        # --verbose
 
     echo "Test call"
-    test_call
+    #test_call
 
     #open "http://127.0.0.1:$SERVER_PORT"
 
