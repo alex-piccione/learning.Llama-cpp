@@ -1,5 +1,10 @@
 source common.sh
 
+## This is called by specific models, look at their .sopecific .md file.
+
+# used memory
+# nvidia-smi --query-gpu memory.used --format=csv,noheader | awk '{print $1}'
+
 
 # start_server 
 #   model: the model name
@@ -18,6 +23,8 @@ start_server() {
     local dflash="$5"
     local draft_model="$6"
     local predict_token="$7"
+    local mtp="$8"
+    local jinjia="$9"
 
     if [ -z "$model" ]; then
         echo "‼️ start_server was called with empty model" >&2
@@ -50,6 +57,8 @@ start_server() {
     local model_path="$GGUF_FOLDER/$model"
     local context=$(($ctx_k * 1024))
 
+    print_value "Context" "$context"
+
     if [[ "$dflash" = "1" ]] ; then
 
         print_value "DFlash" "on"
@@ -81,6 +90,8 @@ start_server() {
             --port "$SERVER_PORT" \
             --model "$model_path" \
             --ctx-size "$context" \
+            --parallel 1 \
+            --flash-attn on \
             --n-gpu-layers $gpu_layers \
             --n-cpu-moe $cpu_moe \
             --cache-type-k q8_0 \
@@ -90,38 +101,72 @@ start_server() {
             --spec-draft-n-max $predict_token \
             --spec-draft-type-k q8_0 \
             --spec-draft-type-v q8_0 \
-            --flash-attn on \
-            --parallel 1 \
                 --temperature 0.1 \
                 --top-k 20 \
                 --top-p 0.8 \
                 --min-p 0.05 \
                 --repeat-penalty 1.05 \
-                --repeat-last-n 256 
-            > llama_server.log 2>&1 & 
+                --repeat-last-n 256            
+            > logs/llama_server.log 2>&1 & 
+
     else
 
         print_value "DFlash" "off"
 
-        "$LLAMA_BINS_FOLDER/llama-server.exe" \
+        args=(
             --host 127.0.0.1 \
             --port "$SERVER_PORT" \
             --model "$model_path" \
             --ctx-size "$context" \
+            --parallel 1 \
+            --flash-attn on \
             --n-gpu-layers $gpu_layers \
             --n-cpu-moe $cpu_moe \
             --cache-type-k q8_0 \
             --cache-type-v q8_0 \
-            --flash-attn on \
             --no-mmap \
-            --parallel 1 \
-                --temperature 0.1 \
-                --top-k 20 \
-                --top-p 0.8 \
-                --min-p 0.05 \
-                --repeat-penalty 1.05 \
-                --repeat-last-n 256 
-            > llama_server.log 2>&1 &   
+            --mlock \
+            --ubatch-size  1024 \
+
+            --temperature 0.1 \
+            --top-k 20 \
+            --top-p 0.8 \
+            --min-p 0.05 \
+            --repeat-penalty 1.05 \
+            --repeat-last-n 256             
+        )
+
+
+        if [ "$mtp" == "1" ] ; then
+            print_value "MTP" "yes"
+            print_value "Predict token" "$predict_token"
+            args+=(--spec-type draft-mtp)
+            args+=(--spec-draft-n-max $predict_token)
+        fi
+
+        "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}"
+            > logs/llama_server.log 2>&1 &   
+
+
+        #"$LLAMA_BINS_FOLDER/llama-server.exe" \
+        #    --host 127.0.0.1 \
+        #    --port "$SERVER_PORT" \
+        #    --model "$model_path" \
+        #    --ctx-size "$context" \
+         #   --parallel 1 \
+        #    --flash-attn on \
+        #    --n-gpu-layers $gpu_layers \
+        #    --n-cpu-moe $cpu_moe \
+        #    --cache-type-k q8_0 \
+        #    --cache-type-v q8_0 \
+        #    --no-mmap \
+        #    --temperature 0.1 \
+        #    --top-k 20 \
+        #    --top-p 0.8 \
+        #    --min-p 0.05 \
+        #    --repeat-penalty 1.05 \
+        #    --repeat-last-n 256 
+        #    > logs/llama_server.log 2>&1 &   
     fi
 
     local LLAMA_PID=$!

@@ -1,2 +1,1 @@
-/scripts/llama_server.log*
-/scripts/llama_api_response.log*
+/scripts/logs/

@@ -6,6 +6,7 @@
 - ID: gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
 - MTP: NO
 - MoE: Yes
+- OpenAI Tools capability: yes
 
 
 ## Best Setup
@@ -24,11 +25,12 @@ llama-server \
 Result: **30 tk/s** on llema-server UI  (using 15.9/16 GB VRAM)
 
 
-| GPU layer | CPU-MoE | CTX K | Cache Type | VRAM   | TK/s | Pi  | Note                    |  
-| ---       | ---     | ---   | ---        | ---    | ---  | --- | ---                     |  
-| 999       | 5       | 16    | q8_0       | 14.9   |   27 |     |                         |
-| 999       | 3       | 16    | q8_0       | 15.9   |   30 |     |                         |
-| 999       | 5       | 32    | q8_0       | 15.1   |   25 |     |                         |
+| GPU layer | CPU-MoE | Ctx  | Cache Type | VRAM   | T/s | Pi | Note                    |  
+| ---       | ---     | ---- | ---        | ---    | --- | -- | ---                     |  
+| 999       | 5       | 16 k | q8_0       | 14.9   |  27 | Ok |                         |
+| 999       | 3       | 16 k | q8_0       | 15.9   |  30 |    |                         |
+| 999       | 5       | 32 k | q8_0       | 15.1   |  25 |    |                         |
+| 999       | 8       | 32 k | q8_0       | 13.5   |  20 |    |                         |
 
 
 ## Run tests
@@ -39,9 +41,9 @@ cd scripts
 source start_server_common.sh
 
 model="unsloth_gemma-4-26B-A4B-it-UD-Q4_K_M.gguf"
-ctx_k=8
+ctx_k=32
 gpu_layers=999
-cpu_moe=7
+cpu_moe=5
 dflash=0
 draft_model="not-empty"
 predict_token=0

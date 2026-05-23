@@ -1,25 +1,116 @@
-# Test llama-server
+source common.sh
 
-#export MSYS_NO_PATHCONV=0
-gguf_folder="V:\GGUF"
+## This script is for quick experimentation
+## Once some basis are found, create and use the proper <model>.md script suggestions.
 
-SERVER_PORT=8001
+### Customization
 
-model="Qwen3.5-9B-Q4_K_M.gguf"
+run_type=gpu_layer   # gpu_layer, mtp, dflash
+
+#model="Qwen3.5-9B-Q4_K_M.gguf"
+#model="Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf" #1.2 tk/s !!
+#model=mammoth-coder-13b.Q4_K_M.gguf
+#model=Qwen3.5-9B-Q4_K_M.gguf  # 35 layer: 40 tk/s
+#model=Qwen3.5-35B-A3B-UD-Q4_K_M.gguf
+model=unsloth_gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
+
 draft_model="Qwen3.5-0.8B-Base-Q4_0.gguf"
 #draft_model="Qwen3.5-2B-Base-Q4_0.gguf"
 
-model_path="$gguf_folder\\$model"
-draft_model_path="$gguf_folder\\$draft_model"
+context_k=32  # context K
 
-
-ctx_k=8 # context K
+# calculate values
+model_path="$GGUF_FOLDER/$model"
+draft_model_path="$GGUF_FOLDER\\$draft_model"
 context=$((ctx_k * 1024))
 
-# restart to find llama-server from PATH
-#llama-server \
+run_server() {
 
-# ./llama-server.exe --version
+    if [[ "$run_type" = "gpu_layer" ]] ; then 
+
+        echo "GPU LAYER"       
+
+        GPU_LAYER_N=999  #50
+        CPU_MOE=6  # 10-20
+        
+        # TurboQuant, not available
+        #--cache-type-k turbo4
+        #--cache-type-v turbo3
+
+        # Force to load all cacche in RAM (?) to save some VRAM  (?)
+        # --no-mmap \
+
+        ## MTP ... it works ONLY with MTP models!
+        #--spec-type draft-mtp \ only if model support MTP
+        #--spec-draft-n-max 3 \   can try 4 or 5
+
+        #llama-server \
+        "$LLAMA_BINS_FOLDER/llama-server.exe" \
+            --host 127.0.0.1 \
+            --port "$SERVER_PORT" \
+            --model "$model_path" \
+            --ctx-size "$(($context_k * 1024))" \
+            --parallel 1 \
+            --flash-attn on \
+            --n-gpu-layers $GPU_LAYER_N \
+            --n-cpu-moe $CPU_MOE \
+            --cache-type-k q8_0 \
+            --cache-type-v q8_0 \
+            --no-mmap \
+            --temperature 0.1 \
+            --top-k 20 \
+            --top-p 0.8 \
+            --min-p 0.05 \
+            --repeat-penalty 1.05 \
+            --repeat-last-n 256 
+            # --verbose
+
+        echo -e "SERVER STOPPED"
+
+        # TODO
+        #test_call
+
+        # used memory
+        # nvidia-smi --query-gpu memory.used --format=csv,noheader | awk '{print $1}'
+
+        #open "http://127.0.0.1:$SERVER_PORT"
+    else
+        # TODO: cleanup and tst
+        #./llama-server.exe \
+        "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
+            --host 127.0.0.1 \
+            --port "$SERVER_PORT" \
+            --model "$model_path" \
+            --spec-draft-model "$draft_model_path" \
+            --ctx-size "$context" \
+            --n-gpu-layers 999 \
+            --no-warmup \
+            --verbose   
+
+        #         --threads 2 \            Gemini says to use 4
+        #        --cache-type-k q8_0 \     Gemini says it will reduce quality
+        #        --cache-type-v q8_0 \     Gemini says it will reduce quality
+        "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
+            --model "$model_path" \
+            --spec-draft-model "$draft_model_path" \
+            --spec-type draft-simple \
+            --spec-draft-n-max 4 \
+            --spec-draft-type-k q8_0 \
+            --spec-draft-type-v q8_0 \
+            --host 127.0.0.1 \
+            --port "$SERVER_PORT" \
+            --parallel 1 \
+            --n-gpu-layers 999 \
+            --ctx-size "$context" \
+            --temperature 0.1 \
+            --top-k 20 \
+            --top-p 0.8 \
+            --min-p 0.05 \
+            --repeat-penalty 1.05 \
+            --repeat-last-n 256
+            #--verbose 
+    fi
+}
 
 
 test_call() {
@@ -72,94 +163,4 @@ test_call() {
 }
 
 
-test=gpu_layer
-
-if [[ "$test" = "gpu_layer" ]] ; then 
-
-    echo "$test"
-    
-    #model="Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf" #1.2 tk/s !!
-    #model=mammoth-coder-13b.Q4_K_M.gguf
-    #model=Qwen3.5-9B-Q4_K_M.gguf  # 35 layer: 40 tk/s
-    #model=Qwen3.5-35B-A3B-UD-Q4_K_M.gguf
-    model=unsloth_gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
-
-    context_k=32
-    GPU_LAYER_N=999  #50
-    CPU_MOE=5  # 10-20
-    
-    # TurboQuant, not available
-    #--cache-type-k turbo4
-    #--cache-type-v turbo3
-
-    # Force to load all cacche in RAM (?) to save some VRAM  (?)
-    # --no-mmap \
-
-    ## MTP ... it works ONLY with MTP models!
-    #--spec-type draft-mtp \ only if model support MTP
-    #--spec-draft-n-max 3 \   can try 4 or 5
-
-
-    echo "Start Server"
-    #llama-server \
-    "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
-        --host 127.0.0.1 \
-        --port "$SERVER_PORT" \
-        --model "$gguf_folder\\$model" \
-        --ctx-size "$(($context_k * 1024))" \
-        --parallel 1 \
-        --flash-attn on \
-        --n-gpu-layers $GPU_LAYER_N \
-        --n-cpu-moe $CPU_MOE \
-        --cache-type-k q8_0 \
-        --cache-type-v q8_0 \
-        --temperature 0.1 \
-        --top-k 20 \
-        --top-p 0.8 \
-        --min-p 0.05 \
-        --repeat-penalty 1.05 \
-        --repeat-last-n 256 
-        # --verbose
-
-    echo "Test call"
-    #test_call
-
-    #open "http://127.0.0.1:$SERVER_PORT"
-
-    return 0
-
-else
-    #./llama-server.exe \
-    "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
-        --host 127.0.0.1 \
-        --port "$SERVER_PORT" \
-        --model "$model_path" \
-        --spec-draft-model "$draft_model_path" \
-        --ctx-size "$context" \
-        --n-gpu-layers 999 \
-        --no-warmup \
-        --verbose   
-
-    #         --threads 2 \            Gemini says to use 4
-    #        --cache-type-k q8_0 \     Gemini says it will reduce quality
-    #        --cache-type-v q8_0 \     Gemini says it will reduce quality
-    "D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64\llama-server.exe" \
-        --model "$model_path" \
-        --spec-draft-model "$draft_model_path" \
-        --spec-type draft-simple \
-        --spec-draft-n-max 4 \
-        --spec-draft-type-k q8_0 \
-        --spec-draft-type-v q8_0 \
-        --host 127.0.0.1 \
-        --port "$SERVER_PORT" \
-        --parallel 1 \
-        --n-gpu-layers 999 \
-        --ctx-size "$context" \
-        --temperature 0.1 \
-        --top-k 20 \
-        --top-p 0.8 \
-        --min-p 0.05 \
-        --repeat-penalty 1.05 \
-        --repeat-last-n 256
-        #--verbose 
-fi
+run_server

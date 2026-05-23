@@ -1,5 +1,7 @@
 # Learning LLAMA.cpp
 
+What I was doing ?  [TODO](TODO.md)  
+  
 Website: https://llama-cpp.com  
 Documentation: ???  
 GitHub: https://github.com/ggml-org/llama.cpp
@@ -52,55 +54,53 @@ offloaded all layers
 
 ## Features to test
 
-### Flash Attention
+### ✔️ Flash Attention
 
-`--flash-attn`
+`--flash-attn` seems to be always good
 
-Expected:
++ faster inference
++ lower memory usage
 
-* faster inference
-* lower memory usage
-
----
-
-### KV cache tuning
-
-Examples:
+### ✔️ KV cache tuning
 
 ```bash
 --cache-type-k q8_0
 --cache-type-v q8_0
 ```
 
-Expected:
-
-* lower VRAM use
-* larger practical context
-
-Tradeoff:
-
-* possible quality loss
++ lower VRAM use
++ larger practical context
+- possible quality loss
 
 ---
 
-### MTP (Multi-Token Prediction)
+### ✔️ MTP (Multi-Token Prediction)
 
-Expected:
-
-* faster generation
-* potentially useful for coding
-
-Tradeoff:
-
-* more VRAM
+It requires a recent llama.cpp build, and works only on models that have this capability.  
+Models that have MTP can be started with `--spec-type draft-mtp`  
+  
++ faster generation
++ potentially useful for coding
+- more VRAM
 
 ---
 
-### Speculative decoding
+### ✔️ Speculative decoding
 
-Expected:
+In practice, a small model generates a predefined number of tokens (2-12) and the real model can accept ot re-generate them itself.  
+So, an important parameter is the acceptance percentage: 90% means that most of the **predicted** tokens are ok and used.  
+A small number of predicted tokens are more prone to have a higher acceptance percentage.
+  
+I tried a 0.8B and a 2B model for prediction... not sure what is the best, needs more test.  
+Some AI says that the affinity of draft model and actual model increase teh acceptance percentage. Is it true?  
+  
+To improve the performance the draft model has its own cache-types and its own 
 
-* faster generation using draft predictions
++ faster generation using draft predictions
+- some VRAM goes to the draft model
+- the total duration for getting the answer is the sum of draft tokens and final tokens generation.
+
+I got a very high amount of predicted token accepted (10-12) but the performace (final tk/s) was worst.  
 
 ---
 

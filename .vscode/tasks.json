@@ -14,7 +14,7 @@
             "label": "▶️ Run Server",
             "type": "shell",
             "command": "./run_server.sh",
-            "group": "build",            
+            "group": "build",
             "options": {
                 "cwd": "${workspaceFolder}/scripts"
             },
