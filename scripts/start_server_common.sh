@@ -5,26 +5,35 @@ source common.sh
 # used memory
 # nvidia-smi --query-gpu memory.used --format=csv,noheader | awk '{print $1}'
 
+# Functions
+# start_server: used to start Lllama.cpp server
+# stop_server: used to stop the Llama.cpp server instance
+
+#---
 
 # start_server 
 #   model: the model name
 #   ctx_k: context size (8 for 8k, 16 for 16k...) 
 #   gpu_layers: max. number of layers to store in VRAM, either an exact number, 'auto', or 'all'
-#   cpu_moe: expert layer to offload to ythe CPU, the lower the better (ignored for non-MOE models)  
+#   cpu_moe: expert layer to offload to the CPU, the lower the better (ignored for non-MOE models)  
 #   dflash: 0 = Dflash off, 1 = DFlash on 
 #   draft_model: draft model, required if DFlash is on
 #   predict_token: number of token to predict, required if DFlash is on
-#
+#   mtp: 1 = model support MTP (will set --spec-type draft-mtp) 0 otherwise 
+#   jinja: not used... (possibly required by some models)
 start_server() {
     local model="$1"
     local ctx_k="$2"
     local gpu_layers="$3"
-    local moe_cpu="$4"
+    local cpu_moe="$4"
     local dflash="$5"
     local draft_model="$6"
     local predict_token="$7"
     local mtp="$8"
     local jinjia="$9"
+
+    # stop running server
+    stop_server
 
     if [ -z "$model" ]; then
         echo "‼️ start_server was called with empty model" >&2
@@ -106,8 +115,8 @@ start_server() {
                 --top-p 0.8 \
                 --min-p 0.05 \
                 --repeat-penalty 1.05 \
-                --repeat-last-n 256            
-            > logs/llama_server.log 2>&1 & 
+                --repeat-last-n 256 \
+                > logs/llama_server.log 2>&1 & 
 
     else
 
@@ -144,7 +153,7 @@ start_server() {
             args+=(--spec-draft-n-max $predict_token)
         fi
 
-        "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}"
+        "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \
             > logs/llama_server.log 2>&1 &   
 
 
@@ -153,7 +162,7 @@ start_server() {
         #    --port "$SERVER_PORT" \
         #    --model "$model_path" \
         #    --ctx-size "$context" \
-         #   --parallel 1 \
+        #    --parallel 1 \
         #    --flash-attn on \
         #    --n-gpu-layers $gpu_layers \
         #    --n-cpu-moe $cpu_moe \
@@ -169,7 +178,7 @@ start_server() {
         #    > logs/llama_server.log 2>&1 &   
     fi
 
-    local LLAMA_PID=$!
+    #local LLAMA_PID=$!
 
     # Wait for the server to come alive (up to 30 seconds)
     echo -n "Waiting for llama-server to load model..." >&2
@@ -178,8 +187,22 @@ start_server() {
             echo " Ready!" >&2
             break
         fi
-        echo -n "." >&2
-        sleep 2
+
+        if [[ $i -eq 30 ]] ; then
+            echo " not ready after 60 seconds" >&2
+        else
+            echo -n "." >&2
+            sleep 3
+        fi
     done
 }
 
+
+stop_server() {
+    PID=$(tasklist | grep llama-server | awk '{print $2}')
+    if [ -n "$PID" ]; then
+        taskkill /F /PID $PID
+    else
+        echo "llama-server is not running."
+    fi
+}
