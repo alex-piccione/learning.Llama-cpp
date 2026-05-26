@@ -32,8 +32,10 @@ start_server() {
     local mtp="$8"
     local jinjia="$9"
 
+
+    
     # stop running server
-    stop_server
+    stop_server >&2
 
     if [ -z "$model" ]; then
         echo "‼️ start_server was called with empty model" >&2
@@ -61,12 +63,56 @@ start_server() {
     echo "=========================================================" >&2
     echo "START SERVER WITH MODEL: ${yellow}$model${reset}" >&2
     echo "=========================================================" >&2
-
     
     local model_path="$GGUF_FOLDER/$model"
     local context=$(($ctx_k * 1024))
 
     print_value "Context" "$context"
+
+
+    ### Set common parameters
+        #--draft-min 1            # min tokens to draft before verifying
+        #--draft-p-min 0.6 \        # stop drafting if token probability drops below this
+
+    # A good rule: batch-size = 2x your ubatch-size.
+    local batch=2048
+    local ubatch=1024
+
+    #--defrag-thold 0.1
+
+    local cache_reuse=256        # reuse KV cache chunks across requests (big win for similar prompts)
+
+    args=(
+        --host 127.0.0.1 \
+        --port "$SERVER_PORT" \
+        --model "$model_path" \
+        --ctx-size "$context" \
+        --parallel 1 \
+        --flash-attn on \
+        --n-gpu-layers $gpu_layers \
+        --n-cpu-moe $cpu_moe \
+        --cache-type-k q8_0 \
+        --cache-type-v q8_0 \
+        --no-mmap \
+        --mlock \
+
+        --batch-size $batch \
+        --ubatch-size $ubatch \
+
+        --draft-p-min 0.6 \
+
+        --temperature 0.1 \
+        --top-k 20 \
+        --top-p 0.8 \
+        --min-p 0.05 \
+        --repeat-penalty 1.05 \
+        --repeat-last-n 256 \
+        --cache-reuse 256
+    )
+
+    # Logging settings
+    args+=(--log-verbosity 4) # default is 3, see if this print out the layers
+
 
     if [[ "$dflash" = "1" ]] ; then
 
@@ -104,10 +150,12 @@ start_server() {
             --n-gpu-layers $gpu_layers \
             --n-cpu-moe $cpu_moe \
             --cache-type-k q8_0 \
-            --cache-type-v q8_0 \
+            --cache-type-v tbq4_0 \
             --spec-draft-model "$draft_model_path" \
             --spec-type draft-simple \
             --spec-draft-n-max $predict_token \
+            --spec-draft-n-min 1 \
+            --draft-p-min 0.6 \
             --spec-draft-type-k q8_0 \
             --spec-draft-type-v q8_0 \
                 --temperature 0.1 \
@@ -122,41 +170,17 @@ start_server() {
 
         print_value "DFlash" "off"
 
-        args=(
-            --host 127.0.0.1 \
-            --port "$SERVER_PORT" \
-            --model "$model_path" \
-            --ctx-size "$context" \
-            --parallel 1 \
-            --flash-attn on \
-            --n-gpu-layers $gpu_layers \
-            --n-cpu-moe $cpu_moe \
-            --cache-type-k q8_0 \
-            --cache-type-v q8_0 \
-            --no-mmap \
-            --mlock \
-            --ubatch-size  1024 \
-
-            --temperature 0.1 \
-            --top-k 20 \
-            --top-p 0.8 \
-            --min-p 0.05 \
-            --repeat-penalty 1.05 \
-            --repeat-last-n 256             
-        )
-
-
         if [ "$mtp" == "1" ] ; then
             print_value "MTP" "yes"
             print_value "Predict token" "$predict_token"
             args+=(--spec-type draft-mtp)
             args+=(--spec-draft-n-max $predict_token)
+            args+=(--spec-draft-n-min 1)
         fi
 
         "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \
-            > logs/llama_server.log 2>&1 &   
-
-
+            > logs/llama_server.log 2>&1 &
+        
         #"$LLAMA_BINS_FOLDER/llama-server.exe" \
         #    --host 127.0.0.1 \
         #    --port "$SERVER_PORT" \
@@ -182,14 +206,18 @@ start_server() {
 
     # Wait for the server to come alive (up to 30 seconds)
     echo -n "Waiting for llama-server to load model..." >&2
-    for i in {1..30}; do
+    for i in {1..60}; do
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
             echo " Ready!" >&2
+
+            local vram_usage=get_readable_VRAM_usage
+            echo "VRAM used/total: $vram_usage" >&2
+
             break
         fi
 
-        if [[ $i -eq 30 ]] ; then
-            echo " not ready after 60 seconds" >&2
+        if [[ $i -eq 60 ]] ; then
+            echo " not ready after 180 seconds" >&2
         else
             echo -n "." >&2
             sleep 3
@@ -199,10 +227,23 @@ start_server() {
 
 
 stop_server() {
-    PID=$(tasklist | grep llama-server | awk '{print $2}')
+    # Find the process ID    
+    local PID=$(tasklist | grep "llama-server" | awk '{print $2}' | head -n 1)
+
     if [ -n "$PID" ]; then
-        taskkill /F /PID $PID
+        echo "Killing PID $PID..." >&2
+        taskkill /F /PID "$PID" > /dev/null
+        
+        # Check if it is a child of the current shell before waiting
+        if ps -p "$PID" > /dev/null ; then
+            wait "$PID" > /dev/null
+        else
+            # It's an orphan or already reaped, just sleep briefly
+            sleep 2
+        fi
+        
+        echo "The process \"llama-server\" with PID $PID has been terminated." >&2
     else
-        echo "llama-server is not running."
+        echo "llama-server is not running." >&2
     fi
 }

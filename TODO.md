@@ -3,7 +3,9 @@
 ## Current
 
 - 5 Quick test for check if the model can use open-ai tools
-I'm working on 
+  - the output od test_call doesn't print model and context !!
+  - the output of test_call doesn't print GPU info and LAyers
+  - the memory used/free:     nvidia-smi --query-gpu=memory.used,memory.free --format=csv,noheader
 
 
 ## Backlog
@@ -19,6 +21,8 @@ I'm working on
 - prepare Qwen3.6 27B readme for tests
 
 - 1 cleanup README
+
+- 1 Removed/commented out error check of JSON response in run_llamacpp function
 
 
 ## Done

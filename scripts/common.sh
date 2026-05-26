@@ -24,6 +24,10 @@ print_value() {
         "$gray_light" "$1" "$yellow" "$2" "$reset" >&2
 }
 
+return_value() {
+    printf '%s=%s\n' "$1" "$2"
+}
+
 from_nano() {
     # echo $(echo "scale=9; $1 / 1000000000" | bc)  ## requires bc          
     local seconds=$(($1/ 1000000000))
@@ -36,26 +40,6 @@ from_ms() {
     awk -v ms="$1" 'BEGIN { printf "%.3f\n", ms / 1000 }'
 }
 
-# float_div 100.1 1.23 6
-float_div_bak() {
-    local a="$1"
-    local b="$2"
-    local scale="${3:-6}"
-
-    if [[ -z "$a" || -z "$b" ]]; then
-        echo "ERROR: float_div requires 2 numbers" >&2
-        return 1
-    fi
-
-    if [[ "$b" == "0" || "$b" == "0.0" ]]; then
-        echo "ERROR: float_div division by zero" >&2
-        return 1
-    fi
-
-    awk -v a="$a" -v b="$b" -v scale="$scale" 'BEGIN {
-        printf "%.*f\n", scale, a / b
-    }'
-}
 
 # float_div 100.1 1.23 6
 float_div() {
@@ -63,6 +47,47 @@ float_div() {
         if (b == 0) exit 1
         printf "%.*f\n", scale, a / b
     }'
+}
+
+
+get_memory_info() {
+    #  16380 MiB, 15717 MiB, 393 MiB
+    # Read the output directly into variables
+    # We use sed to remove "MiB" and spaces, then set IFS to comma
+    IFS=',' read -r total used free < <(nvidia-smi --query-gpu=memory.total,memory.used,memory.free --format=csv,noheader | sed 's/ MiB//g; s/ //g')
+
+    return_value "total" "$total"
+    return_value "used" "$used"
+    return_value "free" "$free"
+}
+
+# get_VRAM_ratio h=1 means human readable
+get_VRAM_ratio() {
+    # We use eval to populate the variables 'total' and 'used' in the subshell
+    # eval "$(get_memory_info | grep -E 'total|used')"
+    eval "$(get_memory_info)"
+
+    # Calculate ratio using awk
+    awk -v t="$total" -v u="$used" 'BEGIN { printf "%.4f", u / t }'
+}
+
+get_readable_VRAM_usage() {
+    # Get current memory stats
+    eval "$(get_memory_info)"
+
+    # Convert to GiB (scale 1 for "14.5" format)
+    local used_gib=$(float_div "$used" 1024 1)
+    local total_gib=$(float_div "$total" 1024 1)
+
+    printf "%s/%s" "$used_gib" "$total_gib"
+}
+
+
+### return used/total
+print_used_VRAM_ratio() {
+    local data=get_memory_info
+
+    return_value ""
 }
 
 

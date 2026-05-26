@@ -116,7 +116,7 @@ test_model() {
 
     local LLAMA_PID=$!
 
-    # Wait for the server to come alive (up to 30 seconds)
+    # Wait for the server to come alive
     echo -n "Waiting for llama-server to load model..." >&2
     for i in {1..30}; do
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
@@ -127,17 +127,12 @@ test_model() {
         sleep 1
     done
 
-    ### TODO: call test_call() instead of execute the job here
-
-    ### call test_call
-    ### code moved to _temp_test_call_.sh
-
-    test_call "$use_dflash"
+    # TODO: capture and print result row
+    test_call "$use_dflash"  
 
     ## Stop the server
+    stop_server
 
-    kill "$LLAMA_PID" >/dev/null 2>&1
-    wait "$LLAMA_PID" 2>/dev/null
     sleep 2
 }
 
@@ -145,27 +140,39 @@ test_model() {
 test_call() {
     local use_dflash="$1"
 
-    if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
-        echo "Server ready!" >&2
-    else
-        echo "❌ ERROR: Server is not ready" >&2
-        printf "error=Server is not ready\n"
-        return 1
-    fi
+    for i in {1..60}; do
+        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
+            break
+        fi
 
-    local code_payload
-    code_payload=$(cat "$test_code_file")
+        if [[ $i -eq 1 ]] ; then
+            echo -n "Waiting for llama-server to load model..." >&2
+        fi
 
-    local run_result
-    run_result=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload" "$use_dflash")
+        if [[ $i -eq 60 ]] ; then
+            echo " not ready after 180 seconds" >&2
+            echo "❌ ERROR: Server is not ready" >&2
+            printf "error=Server is not ready\n"
+            return 1
+        else
+            echo -n "." >&2
+            sleep 3
+        fi
+    done
+    
+    local code_payload=$(cat "$test_code_file")
+    
+    local run_result=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload" "$use_dflash")
 
+    echo "run_result: $run_result" >&2
+    return 1
     # Parse metrics
 
     local key value
     while IFS='=' read -r key value; do
         if [[ -z "$value" ]]; then
             echo "❌ ERROR: the value for \"$key\" is empty." >&2
-            printf "error=the value for key ${key} is empty\n"
+            printf "error=the value for key \"${key}\" is empty\n"
             return 1
         fi
 
@@ -199,26 +206,30 @@ test_call() {
     # generation: xx tok/s
     # accepted draft tokens: xx%
 
-    if [[ -f llama_server.log ]]; then
+     ## TODO: moved old logic here: _temp_gpu_info_.sh
+
+    local log="logs/llama_server.log"
+    if [[ -f $log ]]; then
+    echo "1" >&2
         # Extracts graphic card info
-        gpu_info=$(grep -E "CUDA0.*:" logs/llama_server.log | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
+        gpu_info=$(grep -E "CUDA0.*:" "$log" | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
         
         # Extracts "41/41"
-        layers_info=$(grep -oE "offloaded [0-9]+/[0-9]+" llama_server.log | awk '{print $2}' | head -1)
+        layers_info=$(grep -oE "offloaded [0-9]+/[0-9]+" "$log" | awk '{print $2}' | head -1)
 
-        size_info=$(grep -iE "model size\s*=\s*[0-9.]+\s*(GiB|MiB|GB|MB)" llama_server.log | grep -oE "[0-9.]+\s*(GiB|MiB|GB|MB)" | head -1)
+        size_info=$(grep -iE "model size\s*=\s*[0-9.]+\s*(GiB|MiB|GB|MB)" "$log" | grep -oE "[0-9.]+\s*(GiB|MiB|GB|MB)" | head -1)
         if [ -z "$size_info" ]; then
             size_info="?"
         fi
                
         # Calculates offload %
-        layers_match=$(grep -oE "offloaded\s+[0-9]+/[0-9]+" llama_server.log | head -1)
+        layers_match=$(grep -oE "offloaded\s+[0-9]+/[0-9]+" "$log" | head -1)
         if [ -n "$layers_match" ]; then
             layers_info=$(echo "$layers_match" | awk '{print $2}')
         else
             # Fallback for explicit layer counting lines
-            num_offloaded=$(grep -oE "offloading [0-9]+ repeating layers" llama_server.log | head -1 | awk '{print $2}')
-            total_layers=$(grep -oE "n_layer = [0-9]+" llama_server.log | head -1 | awk '{print $3}')
+            num_offloaded=$(grep -oE "offloading [0-9]+ repeating layers" "$log" | head -1 | awk '{print $2}')
+            total_layers=$(grep -oE "n_layer = [0-9]+" "$log" | head -1 | awk '{print $3}')
             if [ -n "$num_offloaded" ] && [ -n "$total_layers" ]; then
                 layers_info="${num_offloaded}/${total_layers}"
             else
@@ -243,39 +254,44 @@ test_call() {
     # 8. Debug output
     ########################################
 
-    #print_value "Model" "$model"
-
     if [[ "$use_dflash" = "1" ]] ; then
-        print_value "Draft Model" "$draft_model"
+        return_value "draft_model" "$draft_model"
     fi
     #print_value "Draft Model" "$draft_model"
     #print_value "Context" "${ctx_k}k"
-    print_value "Eval time" "$(printf "%.1f s" "$total_duration_s")"
-    print_value "Tokens" "$eval_count"
-    print_value "Speed" "$(printf "%.0f t/s" "$eval_rate")"
-    print_value "GPU info" "$gpu_info"
-    print_value "Layers" "$layers_info"
+    #print_value "Eval time" "$(printf "%.1f s" "$total_duration_s")"
+    #print_value "Tokens" "$eval_count"
+    #print_value "Speed" "$(printf "%.0f t/s" "$eval_rate")"
+    #print_value "GPU info" "$gpu_info"
+    #print_value "Layers" "$layers_info"
 
-    ########################################
-    # 9. Table row output
-    ########################################
+
+    return_value "model" "$model"
+    return_value "ctx_k" "$ctx_k"
+    return_value "size_info" "$size_info"
+    return_value "layers_info" "$layers_info"
+    return_value "has_tools" "$has_tools"
+    return_value "eval_rate" "$eval_rate"
+    return_value "has_tools" "$has_tools"
+}
+
+# TODO
+test_call_print() {
+
+    eval "$(test_call)"
 
     local tool_flag="❌"
     if [[ $has_tools = "1" ]]; then
         tool_flag="✔️"
     fi
 
-    # Swapped columns 3 and 5 to use the newly parsed variables
-    printf "| %-60s |%-2s| %-4s GB | %3s k | %3s %% | %4.0f | %3.0f s |%s|〰️| %-40s |\n" \
-        "$model" \
-        "✔️" \
-        "$size_info" \
-        "$ctx_k" \
-        "$gpu_pct" \
-        "$eval_rate" \
-        "$eval_duration_s" \
-        "$tool_flag" \
-        ""
+    printf "%s" \
+        $cpu_moe
+
+    #| GPU layer | CPU-MoE | Ctx  | Cache Type | VRAM   | T/s | Pi | Note                    |  
+    #| ---       | ---     | ---- | ---        | ---    | --- | -- | ---                     |  
+    #| 999       | 18      | 16 k | q8_0       |        |  16 |    |                         |
+    #| 999       | 17      | 32 k | q8_0       |        |   2 |    |                         |   
 }
 
 # return "error=... total_duration=... eval_duration=... eval_count=... eval_rate=... has_tools=..."
@@ -344,15 +360,20 @@ llamacpp_run() {
     # data: {"choices":[],"created":1779349198,"id":"chatcmpl-nFCxRKKHfmmnVXEHbeKtPcEqHXBZvQCr","model":"Qwen3.5-9B-Q4_K_M.gguf","system_fingerprint":"b9251-e2b129e1b","object":"chat.completion.chunk","usage":{"completion_tokens":665,"prompt_tokens":808,"total_tokens":1473,"prompt_tokens_details":{"cached_tokens":804}},"timings":{"cache_n":804,"prompt_n":4,"prompt_ms":128.301,"prompt_per_token_ms":32.07525,"prompt_per_second":31.17668607415375,"predicted_n":665,"predicted_ms":20629.211,"predicted_per_token_ms":31.021369924812028,"predicted_per_second":32.235842660196745,"draft_n":604,"draft_n_accepted":515}}
     # data: [DONE]
 
-    # TODO use draft_n and  draft_n_accepted to calculate draft acceptance percentage ?
-
+    # TODO: comemnted out because not valid for "stream" response
     # Safety Check: Check for llama-server errors
-    local error_msg=$(jq -r '.error.message // .error // empty' <<< "$raw" 2>/dev/null)
-    if [ -n "$error_msg" ] && [ "$error_msg" != "null" ]; then
-        echo "❌ LLAMA.CPP API ERROR: $error_msg" >&2
-        printf "error=API_Error\n"
-        return 1
-    fi
+    #if ! local error_msg=$(jq -r '.error.message // .error // empty' <<< "$raw"); then
+    #    echo "❌ CRITICAL: jq failed to parse API response" >&2
+    #    echo "Raw input that caused failure:" >&2
+    #    echo "$raw" | head -c 200 >&2
+    #    return 1
+    #fi
+
+    #if [ -n "$error_msg" ] && [ "$error_msg" != "null" ]; then
+    #    echo "❌ LLAMA.CPP API ERROR: $error_msg" >&2
+    #    printf "error=API_Error\n"
+    #    return 1
+    #fi    
 
     # Robust space-insensitive streaming line cleaner
     local json_stream=$(echo "$raw" | sed -n 's/^data: *{/{/p')
@@ -363,23 +384,27 @@ llamacpp_run() {
     fi
 
     # Stream Extraction (Handles both normal content and Qwen reasoning_content safely)
-    local text_response=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.content // .choices[0].delta.reasoning_content // empty' 2>/dev/null)
-        
+    local text_response=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.content // .choices[0].delta.reasoning_content // empty')
+           
     # last line, containing timings/metrics
     local final_usage_chunk=$(jq -c 'select(.usage.completion_tokens != null)' <<< "$json_stream" | tail -1)
+    if [[ -z "$final_usage_chunk" ]]; then
+         echo "❌ ERROR: Failed to extract .usage.completion_tokens from json_stream" >&2
+         printf 'error=Failed to extract .usage.completion_tokens n'
+         return 1
+    fi
 
     local first_created=$(jq -r 'select(.created != null) | .created' <<< "$json_stream" | head -1)
-    #local last_created=$(jq -r 'select(.created != null) | .created' <<< "$json_stream" | tail -1)
-    local last_created=$(jq -r '.created' <<< "$final_usage_chunk" 2>/dev/null)
+    local last_created=$(jq -r '.created' <<< "$final_usage_chunk")
     if [[ -z "$first_created" || -z "$last_created" ]]; then
-         echo "❌ ERROR: Failed to extract total_duration from json_stream" >&2
+         echo "❌ ERROR: Failed to extract .created from json_stream" >&2
          printf 'error=Failed_to_extract_total_duration\n'
          return 1
     fi
-    local total_duration_s=$(( last_created - first_created ))
+    local total_duration_s=$(( last_created - first_created ))    
 
     # Extract completion_tokens with error checking
-    local eval_count=$(jq -r '.usage.completion_tokens' <<< "$final_usage_chunk" 2>/dev/null)
+    local eval_count=$(jq -r '.usage.completion_tokens' <<< "$final_usage_chunk")
     if [ -z "$eval_count" ] || [ "$eval_count" = "null" ]; then
         echo "❌ ERROR: Failed to extract .usage.completion_tokens from API response" >&2
         printf "error=Failed_to_extract_completion_tokens\n"
@@ -387,7 +412,7 @@ llamacpp_run() {
     fi
 
     # Extract predicted_ms with error checking
-    local eval_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk" 2>/dev/null)
+    local eval_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk")
     if [ -z "$eval_ms" ] || [ "$eval_ms" = "null" ]; then
         echo "❌ ERROR: Failed to extract .timings.predicted_ms from API response" >&2
         printf "error=Failed_to_extract_predicted_ms\n"
@@ -398,42 +423,45 @@ llamacpp_run() {
     local eval_s=$(from_ms "$eval_ms")
     local eval_rate=$(float_div "$eval_count" "$eval_s" 6)
       
-    local tool_code
-    local has_tools
-    local tool_chunks=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.tool_calls[0].function.arguments // empty' 2>/dev/null)
+    local has_tools=0
+    local tool_chunks=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.tool_calls[0].function.arguments // empty')
     if [ -n "$tool_chunks" ]; then
         has_tools=1
-        tool_code=$(jq -r '.code // empty' <<< "$tool_chunks" 2>/dev/null)
-        [ -z "$tool_code" ] && tool_code="$tool_chunks"
-    fi
 
+        local tool_code=$(jq -r '.code // empty' <<< "$tool_chunks") # set to epmpty means NOT set it
+
+        if [[ ! -n tool_code ]]; then
+            echo "❌ ERROR: Failed to extract .code from API response" >&2
+            printf "error=FAild to extract .code\n"
+            return 1
+        fi
+    fi
 
     # 4. Assemble Response
     local response
-    if [ -n "$tool_code" ]; then
-        response="${text_response}${text_response:+$'\n\n'}[EXECUTING TOOL: run_code]\n${tool_code}"
+    if [ -n "$tool_chunks" ]; then
+        response="${text_response}${text_response:+$'\n\n'}[EXECUTING TOOL: run_code]\n${tool_chunks}"
     else
         response="$text_response"
     fi
     #print_value "Response" "$response"
 
-    # Output in ke=value per-line style
-    #printf "error=\n"
-    printf "model=%s\n" "AAA"
-    printf "context=%s\n" "999"
+    # collect data of memory usage (memory used/free)
+    local vram_usage=$(get_readable_VRAM_usage)
+    return_value "vram_usage" "$vram_usage"
 
-    printf "total_duration_s=%s\n" "$total_duration_s"
-    printf "eval_duration_s=%s\n" "$eval_s"
-    printf "eval_count=%s\n" "$eval_count"
-    printf "eval_rate=%s\n" "$eval_rate"
-    printf "has_tools=%s\n" "$has_tools"    
+    return_value "total_duration_s" "$total_duration_s"
+    return_value "eval_duration_s" "$eval_s"
+    return_value "eval_count" "$eval_count"
+    return_value "eval_rate" "$eval_rate"
+    return_value "has_tools" "$has_tools"    
 
     # extract DFlash values 
-    local predicted_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk" 2>/dev/null)
+    local predicted_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk")
     if [ -n "$predicted_ms" ]; then
         local predicted_s=$(from_ms "$predicted_ms")
 
-        local predicted_tps=$(jq -r '.timings.predicted_per_second' <<< "$final_usage_chunk" 2>/dev/null)
+        local predicted_tps=$(jq -r '.timings.predicted_per_second' <<< "$final_usage_chunk")
         if [ -z "$predicted_tps" ] || [ "$predicted_tps" = "null" ]; then
             echo "❌ ERROR: Failed to extract .timings.predicted_per_second from API response" >&2
             printf "error=Failed_to_extract_predicted_tps\n"
@@ -442,8 +470,8 @@ llamacpp_run() {
 
         if [[ "$use_dflash" = "1" ]] ; then
 
-            local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk" 2>/dev/null)
-            local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk" 2>/dev/null)
+            local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk")
+            local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk")
 
             if [ -z "$draft_n" ] || [ "$draft_n" = "null" ]; then
                 echo "❌ ERROR: Failed to extract .timings.draft_n from API response" >&2
@@ -465,9 +493,8 @@ llamacpp_run() {
             local accepted_pct="0.0"
         fi
 
-
-        printf "predicted_s=%s\n" "$predicted_s"
-        printf "predicted_tps=%s\n" "$predicted_tps"
-        printf "accepted_pct=%s\n" "$accepted_pct"
+        return_value "predicted_s" "$predicted_s"
+        return_value "predicted_tps" "$predicted_tps"
+        return_value "accepted_pct" "$accepted_pct"
     fi
 }
