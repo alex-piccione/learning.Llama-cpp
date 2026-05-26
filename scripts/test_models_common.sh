@@ -72,8 +72,6 @@ test_model() {
     local model_path="$GGUF_FOLDER/$model"
     local draft_model_path="$GGUF_FOLDER/$draft_model"
 
-    # --parallel 1
-    # --threads 2 
    #--spec-draft-type-k q8_0 \
    #--spec-draft-type-v q8_0 \
    #--spec-draft-type-k f16 
@@ -136,9 +134,10 @@ test_model() {
     sleep 2
 }
 
+
 # call the model with a pompt that check if the model supports OpenAI tools calling
 test_call() {
-    local use_dflash="$1"
+    local use_prediction="$1"
 
     for i in {1..60}; do
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
@@ -160,12 +159,10 @@ test_call() {
         fi
     done
     
-    local code_payload=$(cat "$test_code_file")
-    
-    local run_result=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload" "$use_dflash")
+    local code_payload=$(cat "$test_code_file")    
 
-    echo "run_result: $run_result" >&2
-    return 1
+    local run_result=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload" "$use_prediction")
+
     # Parse metrics
 
     local key value
@@ -180,12 +177,12 @@ test_call() {
 
         # check if it returned an error
         if [[ -n "${error:-}" ]]; then
-            echo "❌ ERROR: $error" >&2
-            printf "error=%s\n" "$error"
+            echo "❌ ERROR: llamacpp_run call failed" >&2
+            #printf "error=%s\n" "$error"
             return 1
         fi
 
-        print_value "$key" "$value"
+        #print_value "$key" "$value"
     done < <(printf '%s\n' "$run_result")
 
     ########################################
@@ -275,6 +272,8 @@ test_call() {
     return_value "has_tools" "$has_tools"
 }
 
+
+
 # TODO
 test_call_print() {
 
@@ -294,10 +293,12 @@ test_call_print() {
     #| 999       | 17      | 32 k | q8_0       |        |   2 |    |                         |   
 }
 
+
+
 # return "error=... total_duration=... eval_duration=... eval_count=... eval_rate=... has_tools=..."
 llamacpp_run() {
     local prompt="$1"
-    local use_dflash="$2"
+    local use_prediction="$2"
 
     if [ -z "$prompt" ]; then
         echo "‼️ llamacpp_run_full called with empty prompt" >&2
@@ -360,21 +361,6 @@ llamacpp_run() {
     # data: {"choices":[],"created":1779349198,"id":"chatcmpl-nFCxRKKHfmmnVXEHbeKtPcEqHXBZvQCr","model":"Qwen3.5-9B-Q4_K_M.gguf","system_fingerprint":"b9251-e2b129e1b","object":"chat.completion.chunk","usage":{"completion_tokens":665,"prompt_tokens":808,"total_tokens":1473,"prompt_tokens_details":{"cached_tokens":804}},"timings":{"cache_n":804,"prompt_n":4,"prompt_ms":128.301,"prompt_per_token_ms":32.07525,"prompt_per_second":31.17668607415375,"predicted_n":665,"predicted_ms":20629.211,"predicted_per_token_ms":31.021369924812028,"predicted_per_second":32.235842660196745,"draft_n":604,"draft_n_accepted":515}}
     # data: [DONE]
 
-    # TODO: comemnted out because not valid for "stream" response
-    # Safety Check: Check for llama-server errors
-    #if ! local error_msg=$(jq -r '.error.message // .error // empty' <<< "$raw"); then
-    #    echo "❌ CRITICAL: jq failed to parse API response" >&2
-    #    echo "Raw input that caused failure:" >&2
-    #    echo "$raw" | head -c 200 >&2
-    #    return 1
-    #fi
-
-    #if [ -n "$error_msg" ] && [ "$error_msg" != "null" ]; then
-    #    echo "❌ LLAMA.CPP API ERROR: $error_msg" >&2
-    #    printf "error=API_Error\n"
-    #    return 1
-    #fi    
-
     # Robust space-insensitive streaming line cleaner
     local json_stream=$(echo "$raw" | sed -n 's/^data: *{/{/p')
     if [ -z "$json_stream" ]; then
@@ -384,7 +370,7 @@ llamacpp_run() {
     fi
 
     # Stream Extraction (Handles both normal content and Qwen reasoning_content safely)
-    local text_response=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.content // .choices[0].delta.reasoning_content // empty')
+    local text_response=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.content // .choices[0].delta.reasoning_content // empty' 2>/dev/null)
            
     # last line, containing timings/metrics
     local final_usage_chunk=$(jq -c 'select(.usage.completion_tokens != null)' <<< "$json_stream" | tail -1)
@@ -404,7 +390,7 @@ llamacpp_run() {
     local total_duration_s=$(( last_created - first_created ))    
 
     # Extract completion_tokens with error checking
-    local eval_count=$(jq -r '.usage.completion_tokens' <<< "$final_usage_chunk")
+    local eval_count=$(jq -r '.usage.completion_tokens' <<< "$final_usage_chunk" 2>/dev/null)
     if [ -z "$eval_count" ] || [ "$eval_count" = "null" ]; then
         echo "❌ ERROR: Failed to extract .usage.completion_tokens from API response" >&2
         printf "error=Failed_to_extract_completion_tokens\n"
@@ -412,10 +398,17 @@ llamacpp_run() {
     fi
 
     # Extract predicted_ms with error checking
-    local eval_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk")
+    local eval_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk" 2>/dev/null)
     if [ -z "$eval_ms" ] || [ "$eval_ms" = "null" ]; then
         echo "❌ ERROR: Failed to extract .timings.predicted_ms from API response" >&2
         printf "error=Failed_to_extract_predicted_ms\n"
+        return 1
+    fi
+
+    local predicted_tps=$(jq -r '.timings.predicted_per_second' <<< "$final_usage_chunk" 2>/dev/null)
+    if [ -z "$predicted_tps" ] || [ "$predicted_tps" = "null" ]; then
+        echo "❌ ERROR: Failed to extract .timings.predicted_per_second from API response" >&2
+        printf "error=Failed_to_extract_predicted_tps\n"
         return 1
     fi
 
@@ -424,11 +417,11 @@ llamacpp_run() {
     local eval_rate=$(float_div "$eval_count" "$eval_s" 6)
       
     local has_tools=0
-    local tool_chunks=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.tool_calls[0].function.arguments // empty')
+    local tool_chunks=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.tool_calls[0].function.arguments // empty' 2>/dev/null)
     if [ -n "$tool_chunks" ]; then
         has_tools=1
 
-        local tool_code=$(jq -r '.code // empty' <<< "$tool_chunks") # set to epmpty means NOT set it
+        local tool_code=$(jq -r '.code // empty' <<< "$tool_chunks" 2>/dev/null) # set to epmpty means NOT set it
 
         if [[ ! -n tool_code ]]; then
             echo "❌ ERROR: Failed to extract .code from API response" >&2
@@ -457,44 +450,31 @@ llamacpp_run() {
     return_value "has_tools" "$has_tools"    
 
     # extract DFlash values 
-    local predicted_ms=$(jq -r '.timings.predicted_ms' <<< "$final_usage_chunk")
-    if [ -n "$predicted_ms" ]; then
-        local predicted_s=$(from_ms "$predicted_ms")
 
-        local predicted_tps=$(jq -r '.timings.predicted_per_second' <<< "$final_usage_chunk")
-        if [ -z "$predicted_tps" ] || [ "$predicted_tps" = "null" ]; then
-            echo "❌ ERROR: Failed to extract .timings.predicted_per_second from API response" >&2
-            printf "error=Failed_to_extract_predicted_tps\n"
+    if [[ "$use_prediction" = "1" ]] ; then
+
+        local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk" 2>/dev/null)
+        local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk" 2>/dev/null)
+
+        if [ -z "$draft_n" ] || [ "$draft_n" = "null" ]; then
+            echo "❌ ERROR: Failed to extract .timings.draft_n from API response" >&2
+            printf "error=Failed to extract .timings.draft_n \n"
             return 1
         fi
 
-        if [[ "$use_dflash" = "1" ]] ; then
-
-            local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk")
-            local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk")
-
-            if [ -z "$draft_n" ] || [ "$draft_n" = "null" ]; then
-                echo "❌ ERROR: Failed to extract .timings.draft_n from API response" >&2
-                printf "error=Failed to extract .timings.draft_n \n"
-                return 1
-            fi
-
-            if [ -z "$draft_n_accepted" ] || [ "$draft_n_accepted" = "null" ]; then
-                echo "❌ ERROR: Failed to extract .timings.draft_n_accepted from API response" >&2
-                printf "error=Failed to extract .timings.draft_n_accepted \n"
-                return 1
-            fi
-
-            local accepted_pct=$(awk -v a="$draft_n_accepted" -v n="$draft_n" 'BEGIN {
-                if (n > 0) printf "%.1f\n", (a / n) * 100
-                else printf "0.0\n"
-            }')
-        else
-            local accepted_pct="0.0"
+        if [ -z "$draft_n_accepted" ] || [ "$draft_n_accepted" = "null" ]; then
+            echo "❌ ERROR: Failed to extract .timings.draft_n_accepted from API response" >&2
+            printf "error=Failed to extract .timings.draft_n_accepted \n"
+            return 1
         fi
 
-        return_value "predicted_s" "$predicted_s"
-        return_value "predicted_tps" "$predicted_tps"
+        local accepted_pct=$(awk -v a="$draft_n_accepted" -v n="$draft_n" 'BEGIN {
+            if (n > 0) printf "%.1f\n", (a / n) * 100
+            else printf "0.0\n"
+        }')
+
+        #return_value "predicted_s" "$predicted_s"
+        #return_value "predicted_tps" "$predicted_tps"
         return_value "accepted_pct" "$accepted_pct"
     fi
 }
