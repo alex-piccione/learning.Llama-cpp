@@ -182,115 +182,151 @@ test_call() {
             return 1
         fi
 
-        #print_value "$key" "$value"
+        print_value "$key" "$value"
+
+        return_value "$key" "$value"
+        
     done < <(printf '%s\n' "$run_result")
 
     ########################################
-    # 7. Server log insights
+    #  Server log insights
     ########################################
+
+    local log="logs/llama_server.log"
+
+    #0.01.849.268 I llama_model_loader: - kv   6:                       general.quantized_by str              = Unsloth
 
     ### TODO: extract context from server log
     #65.53.239.735 D slot update_batch: id  3 | task 17351 | slot decode token, id=248059, n_ctx = 8192, n_tokens = 1385, truncated = 0
-
-    #local ctx_k=$(($context / 1024))
-    local ctx_k="?"
-    local gpu_info="?"
-    local layers_info="?"
-    local size_info="?"
-    local gpu_pct="?"
+    #5.31.553.211 I llama_context: n_ctx         = 16384
+    #5.31.553.233 W llama_context: n_ctx_seq (16384) < n_ctx_train (1048576) -- the full capacity of the model will not be utilized
+    #5.31.576.317 I llama_kv_cache: size =   51.00 MiB ( 16384 cells,   6 layers,  1/1 seqs), K (q8_0):   25.50 MiB, V (q8_0):   25.50 MiB
+    #5.36.300.899 I slot   load_model: id  0 | task -1 | new slot, n_ctx = 16384
+    
 
     # TODO  look at these values
     # generation: xx tok/s
     # accepted draft tokens: xx%
 
-     ## TODO: moved old logic here: _temp_gpu_info_.sh
+    local context_size=$(echo "$log" | grep -oP 'n_ctx\s*=\s*\K\d+' | head -1)
+    if [ "$ctx_k" -eq "0" ]; then
+        echo "❌ ERROR: Failed to extract context size from server log" >&2
+        printf "error=FAild to extract context size \n"
+        return 1
+    fi
 
-    local log="logs/llama_server.log"
-    if [[ -f $log ]]; then
-    echo "1" >&2
-        # Extracts graphic card info
-        gpu_info=$(grep -E "CUDA0.*:" "$log" | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
-        
-        # Extracts "41/41"
-        layers_info=$(grep -oE "offloaded [0-9]+/[0-9]+" "$log" | awk '{print $2}' | head -1)
+    # Extracts the number after "n_ctx_train"
+    local train_ctx=$(echo "$log" | grep -oP 'n_ctx_train\s*\(\s*\K\d+' | head -1)
+    if [ $context_size -gt $train_ctx ]; then
+        echo "WARNING: Context ($context_size) is greater than training context ($train_ctx)." >&2
+    fi
 
-        size_info=$(grep -iE "model size\s*=\s*[0-9.]+\s*(GiB|MiB|GB|MB)" "$log" | grep -oE "[0-9.]+\s*(GiB|MiB|GB|MB)" | head -1)
-        if [ -z "$size_info" ]; then
-            size_info="?"
-        fi
-               
-        # Calculates offload %
-        layers_match=$(grep -oE "offloaded\s+[0-9]+/[0-9]+" "$log" | head -1)
-        if [ -n "$layers_match" ]; then
-            layers_info=$(echo "$layers_match" | awk '{print $2}')
+    # Extracts graphic card info
+    local gpu_info=$(grep -E "CUDA0.*:" "$log" | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
+    
+    # Extracts layers: GPU_offload/total ("41/41")
+    local layers_info=$(grep -oE "offloaded [0-9]+/[0-9]+" "$log" | awk '{print $2}' | head -1)
+
+    # Calculates offload %
+    local layers_match=$(grep -oE "offloaded\s+[0-9]+/[0-9]+" "$log" | head -1)
+    if [ -n "$layers_match" ]; then
+        layers_info=$(echo "$layers_match" | awk '{print $2}')
+    else
+        # Fallback for explicit layer counting lines
+        local num_offloaded=$(grep -oE "offloading [0-9]+ repeating layers" "$log" | head -1 | awk '{print $2}')
+        local total_layers=$(grep -oE "n_layer = [0-9]+" "$log" | head -1 | awk '{print $3}')
+        if [ -n "$num_offloaded" ] && [ -n "$total_layers" ]; then
+            layers_info="${num_offloaded}/${total_layers}"
         else
-            # Fallback for explicit layer counting lines
-            num_offloaded=$(grep -oE "offloading [0-9]+ repeating layers" "$log" | head -1 | awk '{print $2}')
-            total_layers=$(grep -oE "n_layer = [0-9]+" "$log" | head -1 | awk '{print $3}')
-            if [ -n "$num_offloaded" ] && [ -n "$total_layers" ]; then
-                layers_info="${num_offloaded}/${total_layers}"
-            else
-                layers_info="?"
-            fi
-        fi
-
-        if [[ "$layers_info" =~ ([0-9]+)/([0-9]+) ]]; then
-            curr="${BASH_REMATCH[1]}"
-            total="${BASH_REMATCH[2]}"
-            if [ "$total" -gt 0 ]; then
-                gpu_pct=$(( curr * 100 / total ))
-            else
-                gpu_pct="0"
-            fi
-        else
-            gpu_pct="?"
+            layers_info="?"
         fi
     fi
 
-    ########################################
-    # 8. Debug output
-    ########################################
+    local gpu_pct="?"
+    if [[ "$layers_info" =~ ([0-9]+)/([0-9]+) ]]; then
+        curr="${BASH_REMATCH[1]}"
+        total="${BASH_REMATCH[2]}"
+        if [ "$total" -gt 0 ]; then
+            gpu_pct=$(( curr * 100 / total ))
+        else
+            gpu_pct="0"
+        fi
+    else
+        gpu_pct="?"
+    fi
+
+    #  Extract exact static buffers (Useful to calculate KV cache overhead later)
+    local cuda_vram=$(grep -E "CUDA0 model buffer size" "$log" | grep -oE "[0-9.]+\s*MiB" | head -1)
+    local host_ram=$(grep -E "CUDA_Host model buffer size" "$log" | grep -oE "[0-9.]+\s*MiB" | head -1)
+    [[ -z "$cuda_vram" ]] && cuda_vram="0 MiB"
+    [[ -z "$host_ram" ]] && host_ram="0 MiB"
+
+    print_value "cuda_vram" "$cuda_vram"
+    print_value "host_ram" "$host_ram"
+
 
     if [[ "$use_dflash" = "1" ]] ; then
         return_value "draft_model" "$draft_model"
     fi
-    #print_value "Draft Model" "$draft_model"
-    #print_value "Context" "${ctx_k}k"
-    #print_value "Eval time" "$(printf "%.1f s" "$total_duration_s")"
-    #print_value "Tokens" "$eval_count"
-    #print_value "Speed" "$(printf "%.0f t/s" "$eval_rate")"
-    #print_value "GPU info" "$gpu_info"
-    #print_value "Layers" "$layers_info"
 
-
-    return_value "model" "$model"
     return_value "ctx_k" "$ctx_k"
-    return_value "size_info" "$size_info"
     return_value "layers_info" "$layers_info"
-    return_value "has_tools" "$has_tools"
-    return_value "eval_rate" "$eval_rate"
-    return_value "has_tools" "$has_tools"
 }
 
 
 
 # TODO
-test_call_print() {
+test_call_result_row() {
 
-    eval "$(test_call)"
+    #eval "$(test_call $@)"
+    local call_output="$(test_call $@)"
+
+    local key value
+    while IFS='=' read -r key value; do
+        if [[ -z "$value" ]]; then
+            echo "❌ ERROR: the value for \"$key\" is empty." >&2
+            printf "error=the value for key \"${key}\" is empty\n"
+            return 1
+        fi
+
+        declare "$key=$value"
+
+        # check if it returned an error
+        if [[ -n "${error:-}" ]]; then
+            echo "❌ ERROR: test_call call failed" >&2
+            #printf "error=%s\n" "$error"
+            return 1
+        fi
+
+        print_value "$key" "$value"
+    done < <(printf '%s\n' "$call_output")
+
 
     local tool_flag="❌"
     if [[ $has_tools = "1" ]]; then
         tool_flag="✔️"
     fi
 
-    printf "%s" \
-        $cpu_moe
+    printf "Open-AI tools compatibility: $tool_flag \n"
 
-    #| GPU layer | CPU-MoE | Ctx  | Cache Type | VRAM   | T/s | Pi | Note                    |  
-    #| ---       | ---     | ---- | ---        | ---    | --- | -- | ---                     |  
-    #| 999       | 18      | 16 k | q8_0       |        |  16 |    |                         |
-    #| 999       | 17      | 32 k | q8_0       |        |   2 |    |                         |   
+    # fix values
+    local cache_type="q8_0"
+    local pred_size=0
+    local pred_acc_pct=0
+
+    #      "| GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time  | pred | pred acc | Note                           |" 
+    printf "| %5s | %3s | %3s k | %4.1f GB | %-5s | %3.0f | %6s | %3.0fs | %4i | %6.0f %% | %30s |" \
+        "$layers_info" \
+        "$cpu_moe" \
+        "$ctx_k" \
+        "${vram_usage:0:4}" \
+        "$cache_type" \
+        "$eval_rate" \
+        "$eval_count" \
+        "$total_duration_s" \
+        "$pred_size" \
+        "$pred_acc_pct" \
+        "" 
 }
 
 

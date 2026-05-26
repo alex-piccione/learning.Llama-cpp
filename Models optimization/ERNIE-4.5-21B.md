@@ -8,33 +8,32 @@
 - OpenAI Tools capability:
 
 
-## Tests result
+## Run tests
 
-Result: 75 tk/s with 16K
+Best result: 75 tk/s with 16K
 
+| GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
+| ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
+ 
+old results
 | GPU layer | CPU-MoE | Ctx  | Cache Type | Predict Token | VRAM    | T/s | Pi | Note                    |  
 | ---       | ---     | ---- | ---        | ---           | ---     | --- | -- | ---                     |  
 | 999       |       0 | 16 k | q8_0       |             0 |         |  75 |    |                         |
 
-It is replying only to the first prompt...
-
-## Run tests
-
 ```bash
 cd scripts
 
-source start_server_common.sh
-
 model=unsloth_ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf
-ctx_k=32
+ctx_k=16
 gpu_layers=999
 cpu_moe=0
 dflash=0
 draft_model="not-empty"
 predict_token=0
 mtp=0
-jinjia=1
+jinjia=0
 
+source start_server_common.sh && \
 start_server \
     $model \
     $ctx_k \
@@ -45,5 +44,8 @@ start_server \
     $predict_token \
     $mtp \
     $jinjia
+
+source test_models_common.sh && \
+test_call_result_row $(flag_or $dflash $mtp)
 
 ```

@@ -91,6 +91,16 @@ print_used_VRAM_ratio() {
 }
 
 
+# returns 1 if any of the argument is 1, 0 otherwise
+flag_or() {
+    local val=0
+    for arg in "$@"; do
+        [[ "$arg" == "1" ]] && val=1 && break
+    done
+    echo "$val"
+}
+
+
 # https://antofthy.gitlab.io/info/ascii/Spinners.txt
 run_with_spinner() {
     local label="$1"

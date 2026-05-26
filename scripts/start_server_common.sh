@@ -32,7 +32,6 @@ start_server() {
     local mtp="$8"
     local jinjia="$9"
 
-
     
     # stop running server
     stop_server >&2
@@ -233,9 +232,10 @@ stop_server() {
     if [ -n "$PID" ]; then
         echo "Killing PID $PID..." >&2
 
-        # TODO:  in run_with_spinenr it iuses this:      kill -0 "$pid" 2>/dev/null , try it
+        # TODO:  in run_with_spinenr it uses this:      kill -0 "$pid" 2>/dev/null , try it
 
-        taskkill /F /PID "$PID" > /dev/null
+        #taskkill /F /PID "$PID" > /dev/null
+        kill -0 "$PID" 2>/dev/null
         
         # Check if it is a child of the current shell before waiting
         if ps -p "$PID" > /dev/null ; then
