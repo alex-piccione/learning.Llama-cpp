@@ -12,6 +12,11 @@ GitHub: https://github.com/ggml-org/llama.cpp
 Test `llama.cpp` to get better performance than Ollama for a personal, single-user coding assistant running on a consumer graphic card (16GB-24GB).  
 Focus is not "largest model possible", but **quality × tokens/sec × usable context**.  
 
+
+## Results
+
+Look here: [Models optimization results](Models%20optimization/README.md)  
+
 ---
 
 ## Llama cpp vd Ollama

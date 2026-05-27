@@ -6,7 +6,7 @@
 | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                       | Unsloth      | 25 t/s |   128 k |                                |   
 | Qwen3-14B-Q4_K_M.gguf                                   | Unsloth      | 27 t/s |    64 k |                                |
 | Qwen3.6-35B-A3B-UD-Q4_K_M.gguf                          | Unsloth      | 25 t/s |    16 k |                                |
-| Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf         |              | 18 t/s |    16 k | Test with DFlash               |
+| Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf         |              | 18 t/s |    16 k | To test with DFlash            |
 | Nemotron-3-Nano-30B-A3B-Q4_K_M.gguf                     | Unsloth      | 16 t/s |    16 k |                                |
 
 Note tested yet:

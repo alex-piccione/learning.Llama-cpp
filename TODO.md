@@ -3,7 +3,7 @@
 ## Current
 
 - 3 Test MTP models (it needs to verify llamacpp_run and test_call functions)
-- 3 Test DFlash model
+- 3 Test DFlash models
 
 
 ## Backlog
