@@ -1,37 +1,34 @@
-# Erniw 4.5 21B A3B Thinking
+# Mistral Small 3.2 24B Instruct
 
-
- Can't process the prompt !!!  
- It fails to proces sthe json at some point.
-
-
-
-- Hu6ggingFace link: (https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF?show_file_info=qwen2.5-coder-14b-instruct-q4_k_m.gguf ?)
+- Hu6ggingFace link: 
 - Provider: unsloth
-- ID: ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf
-- MTP: No
-- MoE: 
-- OpenAI Tools capability:
+- ID: Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf
+- MTP: ?
+- MoE: ?
+- OpenAI tools compatibility: ✔️
 
 
 ## Run tests
 
-
+Best Result: 
 
 | GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
 | ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
- 
+| 41/41 |  10 |  16 k | 15.1 GB | q8_0  |  18 |   1006 |  57s |    0 |      0 % |                                |
+| 41/41 |   8 |  16 k | 15.1 GB | q8_0  |  18 |   1053 |  60s |    0 |      0 % |                                |
+
+
 
 ```bash
 cd scripts
 
-model=unsloth_ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf
+model=unsloth_Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf
 ctx_k=16
 gpu_layers=999
-cpu_moe=0
+cpu_moe=8
 dflash=0
-draft_model="not-empty"
-predict_token=0
+draft_model=none
+predict_token=6
 mtp=0
 jinjia=0
 

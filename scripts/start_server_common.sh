@@ -56,8 +56,6 @@ start_server() {
         exit 1
     fi
 
-    print_value "Model" "$model"
-
     echo >&2
     echo "=========================================================" >&2
     echo "START SERVER WITH MODEL: ${yellow}$model${reset}" >&2
@@ -67,7 +65,6 @@ start_server() {
     local context=$(($ctx_k * 1024))
 
     print_value "Context" "$context"
-
 
     ### Set common parameters
         #--draft-min 1            # min tokens to draft before verifying
@@ -209,7 +206,7 @@ start_server() {
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
             echo " Ready!" >&2
 
-            local vram_usage=get_readable_VRAM_usage
+            local vram_usage=$(get_readable_VRAM_usage)
             echo "VRAM used/total: $vram_usage" >&2
 
             break
@@ -233,9 +230,9 @@ stop_server() {
         echo "Killing PID $PID..." >&2
 
         # TODO:  in run_with_spinenr it uses this:      kill -0 "$pid" 2>/dev/null , try it
+        # kill -0 "$PID" 2>/dev/null  ## does not stop the process!!
 
-        #taskkill /F /PID "$PID" > /dev/null
-        kill -0 "$PID" 2>/dev/null
+        taskkill /F /PID "$PID" > /dev/null        
         
         # Check if it is a child of the current shell before waiting
         if ps -p "$PID" > /dev/null ; then

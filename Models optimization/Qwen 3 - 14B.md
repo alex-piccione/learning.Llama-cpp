@@ -19,10 +19,18 @@
 - ID: unsloth_Qwen3-14B-Q4_K_M.gguf
 - MTP: ?
 - MoE: ?
-- OpenAI Tools capability: ?
+- Training context: 40k 
+- OpenAI tools compatibility: ✔️
 
 
 ## Run tests
+
+Best Result: **27 toksns/s on 40k context**.
+
+| GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
+| ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
+| 41/41 |   0 |  40 k | 12.1 GB | q8_0  |  27 |    832 |  31s |    0 |      0 % |                                |
+| 41/41 |   0 |  64 k | 14.1 GB | q8_0  |  27 |    853 |  32s |    0 |      0 % |                                |
 
 Unsloth
 | GPU layer | CPU-MoE | Ctx  | Cache Type | VRAM   | T/s | Pi | Note                    |  
@@ -35,7 +43,7 @@ Unsloth
 cd scripts
 
 model=unsloth_Qwen3-14B-Q4_K_M.gguf
-ctx_k=40
+ctx_k=64
 gpu_layers=999
 cpu_moe=0
 dflash=0
@@ -57,6 +65,6 @@ start_server \
     $jinjia
 
 source test_models_common.sh && \
-test_call $dflash
+test_call_result_row $(flag_or $dflash $mtp)
 
 ```

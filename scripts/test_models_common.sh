@@ -218,7 +218,7 @@ test_call() {
     # Extracts the number after "n_ctx_train"
     local train_ctx=$(echo "$log" | grep -oP 'n_ctx_train\s*\(\s*\K\d+' | head -1)
     if [ $context_size -gt $train_ctx ]; then
-        echo "WARNING: Context ($context_size) is greater than training context ($train_ctx)." >&2
+        echo "WARNING: Context (${context_size}) is greater than training context ({$train_ctx})." >&2
     fi
 
     # Extracts graphic card info
