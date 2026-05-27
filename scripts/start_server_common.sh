@@ -71,8 +71,8 @@ start_server() {
         #--draft-p-min 0.6 \        # stop drafting if token probability drops below this
 
     # A good rule: batch-size = 2x your ubatch-size.
-    local batch=2048
-    local ubatch=1024
+    local batch=1024
+    local ubatch=$((batch / 2))
 
     #--defrag-thold 0.1
 
@@ -176,26 +176,6 @@ start_server() {
 
         "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \
             > logs/llama_server.log 2>&1 &
-        
-        #"$LLAMA_BINS_FOLDER/llama-server.exe" \
-        #    --host 127.0.0.1 \
-        #    --port "$SERVER_PORT" \
-        #    --model "$model_path" \
-        #    --ctx-size "$context" \
-        #    --parallel 1 \
-        #    --flash-attn on \
-        #    --n-gpu-layers $gpu_layers \
-        #    --n-cpu-moe $cpu_moe \
-        #    --cache-type-k q8_0 \
-        #    --cache-type-v q8_0 \
-        #    --no-mmap \
-        #    --temperature 0.1 \
-        #    --top-k 20 \
-        #    --top-p 0.8 \
-        #    --min-p 0.05 \
-        #    --repeat-penalty 1.05 \
-        #    --repeat-last-n 256 
-        #    > logs/llama_server.log 2>&1 &   
     fi
 
     #local LLAMA_PID=$!

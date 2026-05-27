@@ -1,7 +1,7 @@
 # Qwen 3.6 35B A3B
 
 - Hu6ggingFace link: ?
-- Provider: unsloth
+- Provider: Unsloth
 - ID: Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 - MTP: ?
 - MoE: Yes
@@ -19,8 +19,9 @@ Best result: **25 tokens/s with 16k context**
 | GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
 | ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
 | 41/41 |  13 |  16 k | 15.6 GB | q8_0  |  25 |   1194 |  48s |    0 |      0 % |                                |
-| 39/41 |  12 |  16 k | 15.7 GB | q8_0  |  21 |    722 |  35s |    0 |      0 % |                                |
 | 41/41 |  12 |  16 k | 15.7 GB | q8_0  |  24 |    755 |  31s |    0 |      0 % |                                |
+| 39/41 |  12 |  16 k | 15.7 GB | q8_0  |  21 |    722 |  35s |    0 |      0 % |                                |
+
 
 | GPU layer | CPU-MoE | Ctx  | Cache Type | VRAM    | T/s | Pi | Note                    |  
 | ---       | ---     | ---- | ---        | ---     | --- | -- | ---                     |  

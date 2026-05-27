@@ -1,35 +1,36 @@
-# Mistral Small 3.2 24B Instruct
+# Qwen 3.6 27B MTP
 
 - Hu6ggingFace link: 
 - Provider: unsloth
-- ID: Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf
-- MTP: ?
+- ID: unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf
+- MTP: Yes
 - MoE: ?
-- OpenAI tools compatibility: ✔️
+- OpenAI Tools capability: ?
 
 
 ## Run tests
 
-Best Result: 
+Result: 1 tk/s
 
 | GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
 | ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
-| 41/41 |  10 |  16 k | 15.1 GB | q8_0  |  18 |   1006 |  57s |    0 |      0 % |                                |
-| 41/41 |   8 |  16 k | 15.1 GB | q8_0  |  18 |   1053 |  60s |    0 |      0 % |                                |
-
+| 999   |  10 |   16  |                 | 0.4 |   
+| 999   |  12 |   16  |                 | ?   |   
+| 999   |   8 |    8  |                 | 0.6 |   
+| 999   |  15 |    8  |                 | 0.6 |   
 
 
 ```bash
 cd scripts
 
-model=unsloth_Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf
-ctx_k=16
+model=unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf
+ctx_k=8
 gpu_layers=999
-cpu_moe=8
+cpu_moe=15
 dflash=0
 draft_model=none
 predict_token=6
-mtp=0
+mtp=1
 jinjia=0
 
 source start_server_common.sh && \

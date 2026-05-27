@@ -1,36 +1,33 @@
-# Qwen 3.6 27B MTP
+# Erniw 4.5 21B A3B Thinking
 
-- Hu6ggingFace link: 
+❌ Can't process the prompt !!!  
+It fails to proces sthe json at some point.
+
+- Hu6ggingFace link: (https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF?show_file_info=qwen2.5-coder-14b-instruct-q4_k_m.gguf ?)
 - Provider: unsloth
-- ID: Qwen3.6-27B-Q4_K_M.gguf
-- MTP: Yes
-- MoE: ?
-- OpenAI Tools capability: ?
+- ID: ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf
+- MTP: No
+- MoE: 
+- OpenAI Tools capability:
 
 
 ## Run tests
 
-Result: 1 tk/s
-
 | GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
 | ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
-| 999   |  10 |   16  |                 | 0.4 |   
-| 999   |  12 |   16  |                 | ?   |   
-| 999   |   8 |    8  |                 | 0.6 |   
-| 999   |  15 |    8  |                 | 0.6 |   
-
+ 
 
 ```bash
 cd scripts
 
-model=unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf
-ctx_k=8
+model=unsloth_ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf
+ctx_k=16
 gpu_layers=999
-cpu_moe=15
+cpu_moe=0
 dflash=0
-draft_model=none
-predict_token=6
-mtp=1
+draft_model="not-empty"
+predict_token=0
+mtp=0
 jinjia=0
 
 source start_server_common.sh && \

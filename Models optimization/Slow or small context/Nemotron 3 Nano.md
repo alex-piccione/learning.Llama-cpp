@@ -11,8 +11,9 @@ Total layers: 53
 Best result: **16 tokens/s with 16K context**.  
   
 | GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
-| 49/53 |  18 |  16 k | 15.7 GB | q8_0  |  13 |    556 |  42s |    0 |      0 % |                                |
+| ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
 | 53/53 |  18 |  16 k | 15.7 GB | q8_0  |  16 |    880 |  56s |    0 |      0 % |                                |
+| 49/53 |  18 |  16 k | 15.7 GB | q8_0  |  13 |    556 |  42s |    0 |      0 % |                                |
 | 53/53 |  18 |  16 k | 15.7 GB | q8_0  |  13 |   1014 |  80s |    0 |      0 % |                                |
 
 old tests  

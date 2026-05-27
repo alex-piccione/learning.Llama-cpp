@@ -194,21 +194,16 @@ test_call() {
 
     local log="logs/llama_server.log"
 
-    #0.01.849.268 I llama_model_loader: - kv   6:                       general.quantized_by str              = Unsloth
-
-    ### TODO: extract context from server log
-    #65.53.239.735 D slot update_batch: id  3 | task 17351 | slot decode token, id=248059, n_ctx = 8192, n_tokens = 1385, truncated = 0
-    #5.31.553.211 I llama_context: n_ctx         = 16384
-    #5.31.553.233 W llama_context: n_ctx_seq (16384) < n_ctx_train (1048576) -- the full capacity of the model will not be utilized
-    #5.31.576.317 I llama_kv_cache: size =   51.00 MiB ( 16384 cells,   6 layers,  1/1 seqs), K (q8_0):   25.50 MiB, V (q8_0):   25.50 MiB
-    #5.36.300.899 I slot   load_model: id  0 | task -1 | new slot, n_ctx = 16384
+    #0.01.849.268 I llama_model_loader: - kv   6:                       general.quantized_by str              = Unsloth  
     
 
     # TODO  look at these values
     # generation: xx tok/s
     # accepted draft tokens: xx%
 
-    local context_size=$(echo "$log" | grep -oP 'n_ctx\s*=\s*\K\d+' | head -1)
+    # Extract context from server log
+    #local context_size=$(echo "$log" | grep -oP 'n_ctx\s*=\s*\K\d+' | head -1)
+    local context_size=$(echo "$log" | sed -nE 's/.*n_ctx\s*=\s*([0-9]+).*/\1/p' | head -1)
     if [ "$ctx_k" -eq "0" ]; then
         echo "❌ ERROR: Failed to extract context size from server log" >&2
         printf "error=FAild to extract context size \n"
@@ -216,9 +211,10 @@ test_call() {
     fi
 
     # Extracts the number after "n_ctx_train"
-    local train_ctx=$(echo "$log" | grep -oP 'n_ctx_train\s*\(\s*\K\d+' | head -1)
+    #local train_ctx=$(echo "$log" | grep -oP 'n_ctx_train\s*\(\s*\K\d+' | head -1)
+    local train_ctx=$(echo "$log" | grep -oP 'n_ctx_train\s*=\s*\K\d+' | head -1)
     if [ $context_size -gt $train_ctx ]; then
-        echo "WARNING: Context (${context_size}) is greater than training context ({$train_ctx})." >&2
+        echo "WARNING: Context (${context_size}) is greater than training context (${train_ctx})." >&2
     fi
 
     # Extracts graphic card info
@@ -261,9 +257,19 @@ test_call() {
     [[ -z "$cuda_vram" ]] && cuda_vram="0 MiB"
     [[ -z "$host_ram" ]] && host_ram="0 MiB"
 
-    print_value "cuda_vram" "$cuda_vram"
-    print_value "host_ram" "$host_ram"
+    return_value "cuda_vram" "$cuda_vram"
+    return_value "host_ram" "$host_ram"
 
+
+    ### TODO
+    # Extract Batch and UBatch parameters
+    # 0.15.035.996 I llama_context: n_batch       = 2048
+    # 0.15.035.996 I llama_context: n_ubatch      = 1024
+    local batch=$(grep "llama_context: n_batch" "$log" | head -1 | sed -E 's/.*n_batch\s*=\s*([0-9]+).*/\1/')
+    local ubatch=$(grep "llama_context: n_ubatch" "$log" | head -1 | sed -E 's/.*n_ubatch\s*=\s*([0-9]+).*/\1/')
+
+    return_value "batch" "$batch"
+    return_value "ubatch" "$ubatch"
 
     if [[ "$use_dflash" = "1" ]] ; then
         return_value "draft_model" "$draft_model"
@@ -275,7 +281,7 @@ test_call() {
 
 
 
-# TODO
+
 test_call_result_row() {
 
     #eval "$(test_call $@)"
@@ -307,15 +313,15 @@ test_call_result_row() {
         tool_flag="✔️"
     fi
 
-    printf "Open-AI tools compatibility: $tool_flag \n"
+    printf "OpenAI tools compatibility: $tool_flag \n"
 
     # fix values
     local cache_type="q8_0"
     local pred_size=0
     local pred_acc_pct=0
 
-    #      "| GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time  | pred | pred acc | Note                           |" 
-    printf "| %5s | %3s | %3s k | %4.1f GB | %-5s | %3.0f | %6s | %3.0fs | %4i | %6.0f %% | %30s |" \
+    #      "| GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time  | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |" 
+    printf "| %5s | %3s | %3s k | %4.1f GB | %-5s | %3.0f | %6s | %3.0fs | %4i | %6.0f %% | %10s | %8s | %30s |" \
         "$layers_info" \
         "$cpu_moe" \
         "$ctx_k" \
@@ -326,6 +332,8 @@ test_call_result_row() {
         "$total_duration_s" \
         "$pred_size" \
         "$pred_acc_pct" \
+        "" \
+        "" \
         "" 
 }
 

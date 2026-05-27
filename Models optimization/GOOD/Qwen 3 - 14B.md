@@ -29,8 +29,9 @@ Best Result: **27 toksns/s on 40k context**.
 
 | GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
 | ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
-| 41/41 |   0 |  40 k | 12.1 GB | q8_0  |  27 |    832 |  31s |    0 |      0 % |                                |
 | 41/41 |   0 |  64 k | 14.1 GB | q8_0  |  27 |    853 |  32s |    0 |      0 % |                                |
+| 41/41 |   0 |  40 k | 12.1 GB | q8_0  |  27 |    832 |  31s |    0 |      0 % |                                |
+
 
 Unsloth
 | GPU layer | CPU-MoE | Ctx  | Cache Type | VRAM   | T/s | Pi | Note                    |  
