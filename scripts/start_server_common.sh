@@ -140,29 +140,41 @@ start_server() {
             exit 1
         fi
 
+        # For speculative type:
+        # (none, draft-simple, draft-eagle3, draft-mtp, ngram-simple, ngram-map-k, ngram-map-k4v, ngram-mod, ngram-cache)
+        # use "draft-simple" when ther is a small draft model
+        # use ngram-simple
+
         if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
             # Case A: Speculative decoding using a secondary model
             local draft_model_path="$GGUF_FOLDER/$draft_model"
             print_value "Speculation Type" "Draft Model ($draft_model)"
-            
+            print_value "Predict token" "$predict_token"            
             args+=(--spec-type draft-simple)
             args+=(--spec-draft-model "$draft_model_path")
             
+            args+=(--spec-draft-n-max "$predict_token")
+            args+=(--spec-draft-n-min 1)
+
             # Configure KV cache type specifically for the draft model
             args+=(--spec-draft-type-k "$spec_cache_type_k")
             args+=(--spec-draft-type-v "$spec_cache_type_v")
         else
-            # Case B: Self-speculative decoding (N-Gram) without a draft model
-            # none, draft-simple, draft-eagle3, draft-mtp, ngram-simple, ngram-map-k, ngram-map-k4v, ngram-mod, ngram-cache
-
-            print_value "Speculation Type" "N-Gram (No separate GGUF)"
+            # Case B: Self-speculative decoding (N-Gram) without a draft model            
+            print_value "Speculation Type" "N-Gram simple"
+            print_value "Predict token" "$predict_token"
             args+=(--spec-type ngram-simple)
+
+            args+=(--spec-ngram-simple-size-m "$predict_token")  # default is 48
+            #args+=(--spec-ngram-simple-size-n "$((predict_token * 2))") # default is 12            
+            args+=(--spec-ngram-simple-size-n 12) # default is 12            
+            args+=(--spec-ngram-simple-min-hits 1)               # default is 1   
         fi
 
         # Apply token prediction limits to any active speculation
-        print_value "Predict tokens (min/max)" "1 / $predict_token"
-        args+=(--spec-draft-n-max "$predict_token")
-        args+=(--spec-draft-n-min 1)
+        #print_value "Predict tokens (min/max)" "1 / $predict_token"
+        #args+=(--spec-draft-n-max "$predict_token")
+        #args+=(--spec-draft-n-min 1)
         
         # MCP not managed for now
 
@@ -170,12 +182,15 @@ start_server() {
             > logs/llama_server.log 2>&1 &
     else
 
-        print_value "DFlash" "off"
+        #print_value "DFlash" "off"
 
         if [ "$mtp" == "1" ]; then
-            print_value "MTP" "yes"
-            print_value "Predict token" "$predict_token"
+            # Case B: Self-speculative decoding (MTP)
+            print_value "MTP" "on"
+            print_value "Speculation Type" "MTP"
+            print_value "Predict token" "$predict_token"            
             args+=(--spec-type draft-mtp)
+
             args+=(--spec-draft-n-max $predict_token)
             args+=(--spec-draft-n-min 1)
         fi

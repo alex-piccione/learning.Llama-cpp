@@ -18,26 +18,6 @@ Provider: noctrex
 File: noctrex_gemma-4-26B-A4B-it-MXFP4_MOE.gguf
 
 
-unsloth_gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
-| GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
-| ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            |
-| 31/31 |   5 |  64 k | 15.7 GB | q8_0  |  29 |   1463 |  51s |    0 |      0 % |                                |
-| 31/31 |   5 |  64 k | 15.7 GB | q8_0  |  28 |    802 |  29s |    0 |      0 % | Batch=2048                     |
-| 31/31 |   5 |  64 k | 14.8 GB | q8_0  |  28 |   1576 |  55s |    0 |      0 % | Batch=512                      |
-| 31/31 |   6 |  96 k | 15.0 GB | q8_0  |  27 |   1246 |  47s |    0 |      0 % |                                |
-| 31/31 |   6 |  80 k | 14.8 GB | q8_0  |  27 |   1761 |  66s |    0 |      0 % |                                |
-| 31/31 |   6 | 128 k | 15.3 GB | q8_0  |  26 |    745 |  28s |    0 |      0 % |                                |
-| 31/31 |   6 |  64 k | 15.2 GB | q8_0  |  26 |   1683 |  64s |    0 |      0 % |                                |
-| 31/31 |   5 |  80 k | 15.7 GB | q8_0  |  23 |   1172 |  50s |    0 |      0 % |                                |
-| 29/31 |   5 |  64 k | 15.0 GB | q8_0  |  22 |    708 |  32s |    0 |      0 % |                                |
-| 29/31 |   6 | 128 k | 15.2 GB | q8_0  |  21 |   1741 |  82s |    0 |      0 % |                                |
-| 29/31 |   7 |  64 k | 14.1 GB | q8_0  |  20 |    822 |  40s |    0 |      0 % |                                |
-| 31/31 |   4 |  64 k | 15.7 GB | q8_0  |  16 |    883 |  56s |    0 |      0 % |                                |
-
-
-unsloth_gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
-
-
 ## Run tests
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |
@@ -68,8 +48,6 @@ unsloth_gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
 |  13 t/s | 31/31 |   1 | 128 k | 15.7 GB | q8_0  |   1599 | 123s |    0 |      0 % | 2048/1024    | 14.0/1.8 | ↓ batch 1024 > 2048            |
 |   4 t/s | 31/31 |   1 | 192 k | 15.7 GB | q8_0  |   1711 | 479s |    0 |      0 % | 1024/512     | 14.0/1.8 |                                |
 
-
-↑
 
 ```bash
 cd scripts

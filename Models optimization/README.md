@@ -2,8 +2,9 @@
 
 | Model                                                   | Quantized by | Speed  | Context | Note                           |
 | ------------------------------------------------------- | ------------ | ------ | ------- | ------------------------------ |
-| unsloth_gpt-oss-20b-Q4_K_M.gguf                         | Unsloth      | 75 t/s |   128 k |                                |
+| gpt-oss-20b-Q4_K_M.gguf                                 | Unsloth      | 75 t/s |   128 k |                                |
 | Qwen 3.5 9B                                             | Unsloth      | 39 t/s |   256 k |                                |
+| gemma-4-26B-A4B-it-MXFP4_MOE.gguf                       | noctrex      | 36 t/s |   128 k |                                |
 | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                       | Unsloth      | 28 t/s |    64 k |                                |
 | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                       | Unsloth      | 25 t/s |   128 k |                                |
 | Qwen3-14B-Q4_K_M.gguf                                   | Unsloth      | 27 t/s |    64 k |                                |

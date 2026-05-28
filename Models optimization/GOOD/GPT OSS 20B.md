@@ -4,6 +4,7 @@ Model: GPT OSS 20B
 Quantized by: Unsloth
 File 1: unsloth_gpt-oss-20b-Q4_K_M.gguf
 File 2: unsloth_gpt-oss-20b-UD-Q6_K_XL.gguf
+File 3: 
 Moe: ?
 MTP: No
 OpenAI tools compatibility: ✔️

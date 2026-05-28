@@ -196,11 +196,6 @@ test_call() {
 
     #0.01.849.268 I llama_model_loader: - kv   6:                       general.quantized_by str              = Unsloth  
     
-
-    # TODO  look at these values
-    # generation: xx tok/s
-    # accepted draft tokens: xx%
-
     # Extract context from server log   
     local ctx=$(grep "llama_context: n_ctx" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
     if [ "$ctx" -eq "0" ]; then
@@ -311,12 +306,18 @@ test_call_result_row() {
         tool_flag="✔️"
     fi
 
-    printf "OpenAI tools compatibility: $tool_flag \n"
+    printf "\nOpenAI tools compatibility: $tool_flag \n"
+
+    
+    # TODO  look at these values
+    # generation: xx tok/s
+    # accepted draft tokens: xx%
+
 
     # fix values
-    local cache_type="q8_0"
+    local cache_type="---"
     local pred_size=0
-    local pred_acc_pct=0
+    local pred_acc_pct=$accepted_pct
     local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
     local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")
     
@@ -501,25 +502,30 @@ llamacpp_run() {
         local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk" 2>/dev/null)
         local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk" 2>/dev/null)
 
-        if [ -z "$draft_n" ] || [ "$draft_n" = "null" ]; then
-            echo "❌ ERROR: Failed to extract .timings.draft_n from API response" >&2
-            printf "error=Failed to extract .timings.draft_n \n"
-            return 1
+        if [[ -n "$draft_n" && "$draft_n_accepted" = "null" ]]; then
+
+            #if [ -z "$draft_n" ] || [ "$draft_n" = "null" ]; then
+            #    echo "❌ ERROR: Failed to extract .timings.draft_n from API response" >&2
+            #    printf "error=Failed to extract .timings.draft_n \n"
+            #    return 1
+            #fi
+
+            if [ -z "$draft_n_accepted" ] || [ "$draft_n_accepted" = "null" ]; then
+                echo "❌ ERROR: Failed to extract .timings.draft_n_accepted from API response" >&2
+                printf "error=Failed to extract .timings.draft_n_accepted \n"
+                return 1
+            fi
+
+            local accepted_pct=$(awk -v a="$draft_n_accepted" -v n="$draft_n" 'BEGIN {
+                if (n > 0) printf "%.1f\n", (a / n) * 100
+                else printf "0.0\n"
+            }')
+
+            #return_value "predicted_s" "$predicted_s"
+            #return_value "predicted_tps" "$predicted_tps"
+            return_value "accepted_pct" "$accepted_pct"
+        else
+            return_value "accepted_pct" "n.a."        
         fi
-
-        if [ -z "$draft_n_accepted" ] || [ "$draft_n_accepted" = "null" ]; then
-            echo "❌ ERROR: Failed to extract .timings.draft_n_accepted from API response" >&2
-            printf "error=Failed to extract .timings.draft_n_accepted \n"
-            return 1
-        fi
-
-        local accepted_pct=$(awk -v a="$draft_n_accepted" -v n="$draft_n" 'BEGIN {
-            if (n > 0) printf "%.1f\n", (a / n) * 100
-            else printf "0.0\n"
-        }')
-
-        #return_value "predicted_s" "$predicted_s"
-        #return_value "predicted_tps" "$predicted_tps"
-        return_value "accepted_pct" "$accepted_pct"
     fi
 }

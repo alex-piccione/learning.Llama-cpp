@@ -1,20 +1,18 @@
 # Qwen 3.6 35B A3B
 
-- Hu6ggingFace link: ?
-- Provider: Unsloth
-- ID: Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
-- MTP: ?
-- MoE: Yes
-- OpenAI tools compatibility: ✔️
+Hu6ggingFace link: ?
+Quantized by: Unsloth
+file: unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
+MTP: ?
+MoE: Yes
+OpenAI tools compatibility: ✔️
 
 
 ## Run tests
 
-Result: 27 tk/s max with 16k
+| Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |
+| ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | ------------------------------ |
 
-See here: https://www.reddit.com/r/LocalLLM/comments/1t878cw/best_coding_model_for_16gb_vram/
-
-Best result: **25 tokens/s with 16k context**  
 
 | GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
 | ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
@@ -45,6 +43,8 @@ draft_model=none
 predict_token=0
 mtp=0
 jinjia=0
+batch=1024
+ubatch=auto
 
 source start_server_common.sh && \
 start_server \
@@ -56,7 +56,9 @@ start_server \
     $draft_model \
     $predict_token \
     $mtp \
-    $jinjia
+    $jinjia \
+    $batch \
+    $ubatch
 
 source test_models_common.sh && \
 test_call_result_row $(flag_or $dflash $mtp)
