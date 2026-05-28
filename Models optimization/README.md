@@ -7,16 +7,18 @@
 | gemma-4-26B-A4B-it-MXFP4_MOE.gguf                       | noctrex      | 36 t/s |   128 k |                                |
 | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                       | Unsloth      | 28 t/s |    64 k |                                |
 | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                       | Unsloth      | 25 t/s |   128 k |                                |
+| Qwen3.6-35B-A3B-UD-Q4_K_M.gguf                          | Unsloth      | 25 t/s |    96 k |                                |
 | Qwen3-14B-Q4_K_M.gguf                                   | Unsloth      | 27 t/s |    64 k |                                |
 | GLM 4.7 Flash                                           | Unsloth      | 24 t/s |    32 k |                                |  
-| Qwen3.6-35B-A3B-UD-Q4_K_M.gguf                          | Unsloth      | 25 t/s |    16 k |                                |
+
 
 | Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf         |              | 18 t/s |    16 k | To test with DFlash            |
 | Nemotron-3-Nano-30B-A3B-Q4_K_M.gguf                     | Unsloth      | 16 t/s |    16 k |                                |
 
 Note tested yet:
+- https://huggingface.co/noctrex/Qwopus3.6-35B-A3B-v1-MTP-MXFP4_MOE-GGUF      <<<<<<<----------
 - https://huggingface.co/noctrex/gemma-4-26B-A4B-it-MXFP4_MOE-GGUF?show_file_info=gemma-4-26B-A4B-it-MXFP4_MOE.gguf       
-- https://huggingface.co/Anbeeld/Qwen3.6-27B-DFlash-GGUF   draft model for  Qwen 5.6 27B
+- https://huggingface.co/Anbeeld/Qwen3.6-27B-DFlash-GGUF   draft model for  Qwen 3.6 27B
   With llama.cpp latest version (B9371 28/05/2026) it is not supported:
   > 0.16.418.984 E llama_model_load: error loading model: unknown model architecture: 'dflash-draft'
   It requires special compiled version of llama.cpp. 

@@ -159,6 +159,8 @@ start_server() {
             # Configure KV cache type specifically for the draft model
             args+=(--spec-draft-type-k "$spec_cache_type_k")
             args+=(--spec-draft-type-v "$spec_cache_type_v")
+
+            print_value "(test note)" "DFlash, draft-simple predict ${predict_token}/1 "
         else
             # Case B: Self-speculative decoding (N-Gram) without a draft model            
             print_value "Speculation Type" "N-Gram simple"
@@ -166,9 +168,12 @@ start_server() {
             args+=(--spec-type ngram-simple)
 
             args+=(--spec-ngram-simple-size-m "$predict_token")  # default is 48
-            #args+=(--spec-ngram-simple-size-n "$((predict_token * 2))") # default is 12            
-            args+=(--spec-ngram-simple-size-n 12) # default is 12            
+            #args+=(--spec-ngram-simple-size-n "$((predict_token * 2))") # default is 12    
+            local imple_size_n=10
+            args+=(--spec-ngram-simple-size-n $imple_size_n) # default is 12            
             args+=(--spec-ngram-simple-min-hits 1)               # default is 1   
+
+            print_value "(test note)" "DFlash, ngram-simple, predict $predict_token ($imple_size_n)"
         fi
 
         # Apply token prediction limits to any active speculation
@@ -193,6 +198,8 @@ start_server() {
 
             args+=(--spec-draft-n-max $predict_token)
             args+=(--spec-draft-n-min 1)
+
+            print_value "(test note)" "DFlash, draft-mtp, predict ${predict_token}/1"
         fi
 
         "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \

@@ -502,7 +502,8 @@ llamacpp_run() {
         local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk" 2>/dev/null)
         local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk" 2>/dev/null)
 
-        if [[ -n "$draft_n" && "$draft_n_accepted" = "null" ]]; then
+        if [[ "$draft_n" != "null" && "$draft_n_accepted" != "null" ]]; then
+        #if [[ "${draft_n:null}" != "null" && "${draft_n_accepted:null}" != "null" ]]; then
 
             #if [ -z "$draft_n" ] || [ "$draft_n" = "null" ]; then
             #    echo "❌ ERROR: Failed to extract .timings.draft_n from API response" >&2
@@ -524,8 +525,10 @@ llamacpp_run() {
             #return_value "predicted_s" "$predicted_s"
             #return_value "predicted_tps" "$predicted_tps"
             return_value "accepted_pct" "$accepted_pct"
-        else
-            return_value "accepted_pct" "n.a."        
+        else 
+            return_value "accepted_pct" "n.a."   
         fi
+    else
+        return_value "accepted_pct" "--"        
     fi
 }
