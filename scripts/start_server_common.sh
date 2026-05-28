@@ -21,17 +21,19 @@ source common.sh
 #   predict_token: number of token to predict, required if DFlash is on
 #   mtp: 1 = model support MTP (will set --spec-type draft-mtp) 0 otherwise 
 #   jinja: not used... (possibly required by some models)
+#   batch: batch size... 1024 is the usual value
 start_server() {
     local model="$1"
     local ctx_k="$2"
     local gpu_layers="$3"
-    local cpu_moe="$4"
+    local cpu_moe="$4"    
     local dflash="$5"
     local draft_model="$6"
     local predict_token="$7"
     local mtp="$8"
     local jinjia="$9"
-
+    local batch="${10}"
+    local ubatch="${11}"
     
     # stop running server
     stop_server >&2
@@ -67,14 +69,19 @@ start_server() {
     print_value "Context" "$context"
 
     ### Set common parameters
-        #--draft-min 1            # min tokens to draft before verifying
-        #--draft-p-min 0.6 \        # stop drafting if token probability drops below this
+    local cache_type_k="q8_0"
+    local cache_type_v="q8_0"
+    local spec_cache_type_k="q8_0"
+    local spec_cache_type_v="q8_0"
 
     # A good rule: batch-size = 2x your ubatch-size.
-    local batch=1024
-    local ubatch=$((batch / 2))
+    if [[ "$ubatch" == "auto" || "$ubatch" == "0" || "$ubatch" == "-1" ]]; then
+        ubatch=$((batch / 2))
+    fi
 
     #--defrag-thold 0.1
+    #--draft-min 1            # min tokens to draft before verifying
+    #--draft-p-min 0.6 \        # stop drafting if token probability drops below this
 
     local cache_reuse=256        # reuse KV cache chunks across requests (big win for similar prompts)
 
@@ -87,8 +94,8 @@ start_server() {
         --flash-attn on \
         --n-gpu-layers $gpu_layers \
         --n-cpu-moe $cpu_moe \
-        --cache-type-k q8_0 \
-        --cache-type-v q8_0 \
+        --cache-type-k $cache_type_k \
+        --cache-type-v $cache_type_v \
         --no-mmap \
         --mlock \
 
@@ -110,63 +117,62 @@ start_server() {
     args+=(--log-verbosity 4) # default is 3, see if this print out the layers
 
 
+    if [[ "$mtp" = "1" && "$dflash" = "1" ]] ; then
+        echo "‼️ You can't used both DFlash and MTP" >&2
+        exit 1
+    fi
+
+    #if [ "$mtp" == "1" ] ; then
+    #    print_value "MTP" "yes"
+    #    print_value "Predict token" "$predict_token"
+    #    args+=(--spec-type draft-mtp)
+    #    args+=(--spec-draft-n-max $predict_token)
+    #    args+=(--spec-draft-n-min 1)
+    #fi
+
+
     if [[ "$dflash" = "1" ]] ; then
 
         print_value "DFlash" "on"
-
-        if [ -z "$draft_model" ]; then
-            echo "‼️ start_server was called with empty draft_model" >&2
-            exit 1
-        fi
-
+        
         if [ -z "$predict_token" ]; then
             echo "‼️ start_server was called with empty predict_token" >&2
             exit 1
         fi
 
-        local draft_model_path="$GGUF_FOLDER/$draft_model"
+        if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
+            # Case A: Speculative decoding using a secondary model
+            local draft_model_path="$GGUF_FOLDER/$draft_model"
+            print_value "Speculation Type" "Draft Model ($draft_model)"
+            
+            args+=(--spec-type draft-simple)
+            args+=(--spec-draft-model "$draft_model_path")
+            
+            # Configure KV cache type specifically for the draft model
+            args+=(--spec-draft-type-k "$spec_cache_type_k")
+            args+=(--spec-draft-type-v "$spec_cache_type_v")
+        else
+            # Case B: Self-speculative decoding (N-Gram) without a draft model
+            # none, draft-simple, draft-eagle3, draft-mtp, ngram-simple, ngram-map-k, ngram-map-k4v, ngram-mod, ngram-cache
 
+            print_value "Speculation Type" "N-Gram (No separate GGUF)"
+            args+=(--spec-type ngram-simple)
+        fi
+
+        # Apply token prediction limits to any active speculation
+        print_value "Predict tokens (min/max)" "1 / $predict_token"
+        args+=(--spec-draft-n-max "$predict_token")
+        args+=(--spec-draft-n-min 1)
+        
         # MCP not managed for now
 
-        print_value "Predict model" "$draft_model"
-        print_value "Predict Token N" "$predict_token"
-
-        #--spec-draft-type-k q8_0
-        #--spec-draft-type-v q8_0
-        #--spec-draft-type-k f16 
-        #--spec-draft-type-v f16
-
-        "$LLAMA_BINS_FOLDER/llama-server.exe" \
-            --host 127.0.0.1 \
-            --port "$SERVER_PORT" \
-            --model "$model_path" \
-            --ctx-size "$context" \
-            --parallel 1 \
-            --flash-attn on \
-            --n-gpu-layers $gpu_layers \
-            --n-cpu-moe $cpu_moe \
-            --cache-type-k q8_0 \
-            --cache-type-v tbq4_0 \
-            --spec-draft-model "$draft_model_path" \
-            --spec-type draft-simple \
-            --spec-draft-n-max $predict_token \
-            --spec-draft-n-min 1 \
-            --draft-p-min 0.6 \
-            --spec-draft-type-k q8_0 \
-            --spec-draft-type-v q8_0 \
-                --temperature 0.1 \
-                --top-k 20 \
-                --top-p 0.8 \
-                --min-p 0.05 \
-                --repeat-penalty 1.05 \
-                --repeat-last-n 256 \
-                > logs/llama_server.log 2>&1 & 
-
+        "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \
+            > logs/llama_server.log 2>&1 &
     else
 
         print_value "DFlash" "off"
 
-        if [ "$mtp" == "1" ] ; then
+        if [ "$mtp" == "1" ]; then
             print_value "MTP" "yes"
             print_value "Predict token" "$predict_token"
             args+=(--spec-type draft-mtp)

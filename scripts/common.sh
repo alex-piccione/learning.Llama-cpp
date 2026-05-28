@@ -1,7 +1,8 @@
 ## source "scripts.sh"
 
 GGUF_FOLDER="L:\GGUF"
-LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64"  # b9251 CUDA
+#LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64"  # b9251 CUDA
+LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9371-bin-win-cuda-12.4-x64"  # b9371 CUDA
 SERVER_PORT=8001
 
 

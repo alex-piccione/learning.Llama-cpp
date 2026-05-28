@@ -201,20 +201,18 @@ test_call() {
     # generation: xx tok/s
     # accepted draft tokens: xx%
 
-    # Extract context from server log
-    #local context_size=$(echo "$log" | grep -oP 'n_ctx\s*=\s*\K\d+' | head -1)
-    local context_size=$(echo "$log" | sed -nE 's/.*n_ctx\s*=\s*([0-9]+).*/\1/p' | head -1)
-    if [ "$ctx_k" -eq "0" ]; then
+    # Extract context from server log   
+    local ctx=$(grep "llama_context: n_ctx" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
+    if [ "$ctx" -eq "0" ]; then
         echo "❌ ERROR: Failed to extract context size from server log" >&2
         printf "error=FAild to extract context size \n"
         return 1
     fi
 
     # Extracts the number after "n_ctx_train"
-    #local train_ctx=$(echo "$log" | grep -oP 'n_ctx_train\s*\(\s*\K\d+' | head -1)
-    local train_ctx=$(echo "$log" | grep -oP 'n_ctx_train\s*=\s*\K\d+' | head -1)
-    if [ $context_size -gt $train_ctx ]; then
-        echo "WARNING: Context (${context_size}) is greater than training context (${train_ctx})." >&2
+    local ctx_train=$(grep "n_ctx_train" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
+    if [ $ctx -gt $ctx_train ]; then
+        echo "WARNING: Context (${ctx}) is greater than training context (${ctx_train})." >&2
     fi
 
     # Extracts graphic card info
@@ -252,12 +250,12 @@ test_call() {
     fi
 
     #  Extract exact static buffers (Useful to calculate KV cache overhead later)
-    local cuda_vram=$(grep -E "CUDA0 model buffer size" "$log" | grep -oE "[0-9.]+\s*MiB" | head -1)
-    local host_ram=$(grep -E "CUDA_Host model buffer size" "$log" | grep -oE "[0-9.]+\s*MiB" | head -1)
-    [[ -z "$cuda_vram" ]] && cuda_vram="0 MiB"
-    [[ -z "$host_ram" ]] && host_ram="0 MiB"
+    local cuda_vram=$(grep "CUDA0 model buffer size" "$log" | head -1 | awk -F'=' '{print $2}' | awk '{print $1}' )
+    local host_ram=$(grep -E "CUDA_Host (model|compute) buffer size" "$log"  | head -1 | awk -F'=' '{print $2}' | awk '{print $1}')
+    #[[ -z "$cuda_vram" ]] && local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}"); return_value "cuda_vram_gb" "$cuda_vram_gb"    
+    #[[ -z "$host_ram" ]] && local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}"); return_value "host_ram_gb" "$host_ram_gb"   
 
-    return_value "cuda_vram" "$cuda_vram"
+    return_value "cuda_vram" "$cuda_vram"    
     return_value "host_ram" "$host_ram"
 
 
@@ -319,21 +317,24 @@ test_call_result_row() {
     local cache_type="q8_0"
     local pred_size=0
     local pred_acc_pct=0
-
-    #      "| GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time  | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |" 
-    printf "| %5s | %3s | %3s k | %4.1f GB | %-5s | %3.0f | %6s | %3.0fs | %4i | %6.0f %% | %10s | %8s | %30s |" \
+    local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
+    local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")
+    
+    #       | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |
+    #       | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | ------------------------------ |
+    printf "| %3.0f t/s | %5s | %3s | %3s k | %4.1f GB | %-5s | %6s | %3.0fs | %4i | %6.0f %% | %-12s | %-7s | %30s |" \
+        "$eval_rate" \
         "$layers_info" \
         "$cpu_moe" \
         "$ctx_k" \
         "${vram_usage:0:4}" \
         "$cache_type" \
-        "$eval_rate" \
         "$eval_count" \
         "$total_duration_s" \
         "$pred_size" \
         "$pred_acc_pct" \
-        "" \
-        "" \
+        "$batch/$ubatch" \
+        "$cuda_vram_gb/$host_ram_gb" \
         "" 
 }
 

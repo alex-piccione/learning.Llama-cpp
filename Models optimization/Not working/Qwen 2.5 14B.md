@@ -1,7 +1,7 @@
 # ❌ Qwen 2.5 Coder 14B
 
 - Hu6ggingFace link: (https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF?show_file_info=qwen2.5-coder-14b-instruct-q4_k_m.gguf ?)
-- Provider: (unsloth ?)
+- Quantized by: (unsloth ?)
 - ID: qwen2.5-coder-14b-instruct-q4_k_m.gguf
 - MTP: No
 - MoE: Yes
