@@ -1,4 +1,5 @@
 source common.sh
+source server_common.sh
 
 test_code_file="test_code_1.fs"
 
@@ -14,129 +15,11 @@ predict_token=12
 cache_type_k="q8_0" # q8_0, tbq4_0, tbq3_0 
 cache_type_v="q8_0" # q8_0, tbq4_0, tbq3_0 
 
-# test_models()
-test_models() {
-    local -n __models=$1   # nameref: array passed by name
-
-    local length=${#__models[@]}
-
-    echo
-    echo "${blue}========================================================="
-    echo "==============        ${yellow}Test $length models${blue}        =============="
-    echo "=========================================================${reset}"
-
-    for model in "${__models[@]}"; do
-        echo -e "${blue} • ${white}$model${reset}"
-    done
-
-    echo "${blue}=========================================================${reset}"
-
-    local results=()
-
-    local context=8192   ## TODO pass as argument
-
-    for model in "${__models[@]}"; do
-        model_result=$(test_model "$model" $context)
-        results+=("$model_result")
-        echo ""
-    done
-
-    echo
-    echo "========================================================="
-    echo
-    printf "| Model                                                        |〰️| Size  | Ctx   | GPU   | Tk/s | Time  |🔨|Pi| Note                                     |\n"
-
-    for result in "${results[@]}"; do
-        echo -e "$result"
-    done
-}
-
-
-# test_model <model> <ctx>
-test_model() {
-    local model="$1"
-    local context="$2"
-
-    if [ -z "$model" ]; then
-        echo "‼️ test_model was called with empty model" >&2
-        exit 1
-    fi
-
-    echo >&2
-    echo "=========================================================" >&2
-    echo "TESTING: ${yellow}$model${reset}" >&2
-    echo "=========================================================" >&2
-
-    # Start llama.cpp server
-
-    local model_path="$GGUF_FOLDER/$model"
-    local draft_model_path="$GGUF_FOLDER/$draft_model"
-
-   #--spec-draft-type-k q8_0 \
-   #--spec-draft-type-v q8_0 \
-   #--spec-draft-type-k f16 
-   #--spec-draft-type-v f16,
-
-    if [[ "$use_dflash" = "1" ]] ; then
-
-        print_value "DFlash" "enabled"
-        print_value "Predict model" "$draft_model"
-        print_value "Predict Token N" "$predict_token"
-
-        "$LLAMA_BINS_FOLDER/llama-server.exe" \
-            --model "$model_path" \
-            --spec-draft-model "$draft_model_path" \
-            --spec-type draft-simple \
-            --spec-draft-n-max $predict_token \
-            --spec-draft-type-k q8_0 \
-            --spec-draft-type-v q8_0 \
-            --host 127.0.0.1 \
-            --port "$SERVER_PORT" \
-            --n-gpu-layers 999 \
-            --ctx-size "$context" \
-            --cache-type-k q8_0 \
-            --cache-type-v q8_0 \
-            --parallel 1 \
-            --verbose \
-            > logs/llama_server.log 2>&1 &      
-    else
-        "$LLAMA_BINS_FOLDER/llama-server.exe" \
-            --model "$model_path" \
-            --host 127.0.0.1 \
-            --port "$SERVER_PORT" \
-            --n-gpu-layers 999 \
-            --ctx-size "$context" \
-            --cache-type-k q8_0 \
-            --cache-type-v q8_0 \
-            --verbose \
-            > logs/llama_server.log 2>&1 &     
-    fi
-
-    local LLAMA_PID=$!
-
-    # Wait for the server to come alive
-    echo -n "Waiting for llama-server to load model..." >&2
-    for i in {1..30}; do
-        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
-            echo " Ready!" >&2
-            break
-        fi
-        echo -n "." >&2
-        sleep 1
-    done
-
-    # TODO: capture and print result row
-    test_call "$use_dflash"  
-
-    ## Stop the server
-    stop_server
-
-    sleep 2
-}
-
 
 # call the model with a pompt that check if the model supports OpenAI tools calling
 test_call() {
+    debug_function "test_call"
+    # TODO... get info from server log and avoid passing this variable
     local use_prediction="$1"
 
     for i in {1..60}; do
@@ -161,179 +44,50 @@ test_call() {
     
     local code_payload=$(cat "$test_code_file")    
 
-    local run_result=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload" "$use_prediction")
+    local run_output=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload" "$use_prediction")
+    return_output_values "$run_output" 1
 
-    # Parse metrics
-
-    local key value
-    while IFS='=' read -r key value; do
-        if [[ -z "$value" ]]; then
-            echo "❌ ERROR: the value for \"$key\" is empty." >&2
-            printf "error=the value for key \"${key}\" is empty\n"
-            return 1
-        fi
-
-        declare "$key=$value"
-
-        # check if it returned an error
-        if [[ -n "${error:-}" ]]; then
-            echo "❌ ERROR: llamacpp_run call failed" >&2
-            #printf "error=%s\n" "$error"
-            return 1
-        fi
-
-        print_value "$key" "$value"
-
-        return_value "$key" "$value"
-        
-    done < <(printf '%s\n' "$run_result")
-
-    ########################################
-    #  Server log insights
-    ########################################
-
-    local log="logs/llama_server.log"
-
-    #0.01.849.268 I llama_model_loader: - kv   6:                       general.quantized_by str              = Unsloth  
-    
-    # Extract context from server log   
-    local ctx=$(grep "llama_context: n_ctx" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
-    if [ "$ctx" -eq "0" ]; then
-        echo "❌ ERROR: Failed to extract context size from server log" >&2
-        printf "error=FAild to extract context size \n"
-        return 1
-    fi
-
-    # Extracts the number after "n_ctx_train"
-    local ctx_train=$(grep "n_ctx_train" "$log" | head -1 | awk -F'=' '{print $2}' | xargs)
-    if [ $ctx -gt $ctx_train ]; then
-        echo "WARNING: Context (${ctx}) is greater than training context (${ctx_train})." >&2
-    fi
-
-    # Extracts graphic card info
-    local gpu_info=$(grep -E "CUDA0.*:" "$log" | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
-    
-    # Extracts layers: GPU_offload/total ("41/41")
-    local layers_info=$(grep -oE "offloaded [0-9]+/[0-9]+" "$log" | awk '{print $2}' | head -1)
-
-    # Calculates offload %
-    local layers_match=$(grep -oE "offloaded\s+[0-9]+/[0-9]+" "$log" | head -1)
-    if [ -n "$layers_match" ]; then
-        layers_info=$(echo "$layers_match" | awk '{print $2}')
-    else
-        # Fallback for explicit layer counting lines
-        local num_offloaded=$(grep -oE "offloading [0-9]+ repeating layers" "$log" | head -1 | awk '{print $2}')
-        local total_layers=$(grep -oE "n_layer = [0-9]+" "$log" | head -1 | awk '{print $3}')
-        if [ -n "$num_offloaded" ] && [ -n "$total_layers" ]; then
-            layers_info="${num_offloaded}/${total_layers}"
-        else
-            layers_info="?"
-        fi
-    fi
-
-    local gpu_pct="?"
-    if [[ "$layers_info" =~ ([0-9]+)/([0-9]+) ]]; then
-        curr="${BASH_REMATCH[1]}"
-        total="${BASH_REMATCH[2]}"
-        if [ "$total" -gt 0 ]; then
-            gpu_pct=$(( curr * 100 / total ))
-        else
-            gpu_pct="0"
-        fi
-    else
-        gpu_pct="?"
-    fi
-
-    #  Extract exact static buffers (Useful to calculate KV cache overhead later)
-    local cuda_vram=$(grep "CUDA0 model buffer size" "$log" | head -1 | awk -F'=' '{print $2}' | awk '{print $1}' )
-    local host_ram=$(grep -E "CUDA_Host (model|compute) buffer size" "$log"  | head -1 | awk -F'=' '{print $2}' | awk '{print $1}')
-    #[[ -z "$cuda_vram" ]] && local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}"); return_value "cuda_vram_gb" "$cuda_vram_gb"    
-    #[[ -z "$host_ram" ]] && local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}"); return_value "host_ram_gb" "$host_ram_gb"   
-
-    return_value "cuda_vram" "$cuda_vram"    
-    return_value "host_ram" "$host_ram"
-
-
-    ### TODO
-    # Extract Batch and UBatch parameters
-    # 0.15.035.996 I llama_context: n_batch       = 2048
-    # 0.15.035.996 I llama_context: n_ubatch      = 1024
-    local batch=$(grep "llama_context: n_batch" "$log" | head -1 | sed -E 's/.*n_batch\s*=\s*([0-9]+).*/\1/')
-    local ubatch=$(grep "llama_context: n_ubatch" "$log" | head -1 | sed -E 's/.*n_ubatch\s*=\s*([0-9]+).*/\1/')
-
-    return_value "batch" "$batch"
-    return_value "ubatch" "$ubatch"
-
-    if [[ "$use_dflash" = "1" ]] ; then
-        return_value "draft_model" "$draft_model"
-    fi
-
-    return_value "ctx_k" "$ctx_k"
-    return_value "layers_info" "$layers_info"
+    local server_output=$(get_info_from_server_log)
+    return_output_values "$server_output" 1
 }
 
 
-
-
 test_call_result_row() {
+    debug_function "test_call_result_row"
 
-    #eval "$(test_call $@)"
     local call_output="$(test_call $@)"
 
-    local key value
-    while IFS='=' read -r key value; do
-        if [[ -z "$value" ]]; then
-            echo "❌ ERROR: the value for \"$key\" is empty." >&2
-            printf "error=the value for key \"${key}\" is empty\n"
-            return 1
-        fi
+    #debug "call_output: $call_output"
 
-        declare "$key=$value"
-
-        # check if it returned an error
-        if [[ -n "${error:-}" ]]; then
-            echo "❌ ERROR: test_call call failed" >&2
-            #printf "error=%s\n" "$error"
-            return 1
-        fi
-
-        print_value "$key" "$value"
-    done < <(printf '%s\n' "$call_output")
-
+    declare_output_values "$call_output" 0
 
     local tool_flag="❌"
     if [[ $has_tools = "1" ]]; then
         tool_flag="✔️"
     fi
 
-    printf "\nOpenAI tools compatibility: $tool_flag \n"
-
+    print_value "OpenAI tools compatibility"  "$tool_flag"
     
-    # TODO  look at these values
-    # generation: xx tok/s
-    # accepted draft tokens: xx%
-
-
-    # fix values
+    # fixed values
     local cache_type="---"
-    local pred_size=0
-    local pred_acc_pct=$accepted_pct
+
+    local vram_used=${vram_usage%%/*}  # %% remove the longhest match from the end of the string, /* matches everything after the first "/"
     local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
-    local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")
+    local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")   
     
-    #       | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |
-    #       | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | ------------------------------ |
-    printf "| %3.0f t/s | %5s | %3s | %3s k | %4.1f GB | %-5s | %6s | %3.0fs | %4i | %6.0f %% | %-12s | %-7s | %30s |" \
+    #       | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type    | Pred info                 | Batch/Ubatch | VRAM/RAM | Note                 |
+    #       | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ------------ | ------------------------- | ------------ | -------- | -------------------- |
+    printf "| %3.0f t/s | %5s | %3s | %3s k | %4.1f GB | %-5s | %6s | %3.0fs | %-12s | %-25s | %-12s | %-8s | %-20s |" \
         "$eval_rate" \
         "$layers_info" \
         "$cpu_moe" \
         "$ctx_k" \
-        "${vram_usage:0:4}" \
+        "$vram_used" \
         "$cache_type" \
         "$eval_count" \
         "$total_duration_s" \
-        "$pred_size" \
-        "$pred_acc_pct" \
+        "$pred_type" \
+        "$pred_info" \
         "$batch/$ubatch" \
         "$cuda_vram_gb/$host_ram_gb" \
         "" 
@@ -496,6 +250,13 @@ llamacpp_run() {
     return_value "has_tools" "$has_tools"    
 
     # extract DFlash values 
+
+
+    # TODO  look at these values
+    # generation: xx tok/s
+    # accepted draft tokens: xx%
+
+
 
     if [[ "$use_prediction" = "1" ]] ; then
 

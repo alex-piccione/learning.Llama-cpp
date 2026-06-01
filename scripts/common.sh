@@ -1,5 +1,9 @@
 ## source "scripts.sh"
 
+## ASCII codes ref: https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
+
+source debug.sh
+
 GGUF_FOLDER="L:\GGUF"
 #LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64"  # b9251 CUDA
 LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9371-bin-win-cuda-12.4-x64"  # b9371 CUDA
@@ -28,6 +32,73 @@ print_value() {
 return_value() {
     printf '%s=%s\n' "$1" "$2"
 }
+
+
+# get_output_values "$(my_function)" [1]]
+declare_output_values() {
+    debug_function "get_output_values"    
+    local values="$1"
+    local print="${2:-false}"
+    #debug "values from '$values'"
+
+    local key value    
+    while IFS='=' read -r key value; do
+        if [[ -z "$value" ]]; then
+            echo "❌ ERROR: the value for \"$key\" is empty." >&2
+            printf "error=the value for key \"${key}\" is empty\n"
+            return 1
+        fi
+
+        # declare global (to make it visible in the caller function scope)
+        declare -g "$key=$value"
+            
+        if [[ -n "${error:-}" ]]; then
+            echo "❌ ERROR: $error" >&2
+            #printf "error=%s\n" "$error"
+            return 1
+        fi
+
+        if [[ "$print" = "1" ]]; then
+            print_value "$key" "$value"
+        fi
+
+    done < <(printf '%s\n' "$values")
+}
+
+
+# return_output_values "$(my_function)" [1]
+return_output_values() {
+    debug_function "return_output_values"    
+    local values="$1"
+    local print="${2:-false}"
+    #debug "values from '$values'"
+
+    local key value    
+    while IFS='=' read -r key value; do
+        if [[ -z "$value" ]]; then
+            echo "❌ ERROR: the value for \"$key\" is empty." >&2
+            printf "error=the value for key \"${key}\" is empty\n"
+            return 1
+        fi
+
+        declare "$key=$value"
+
+        # check if it returned an error
+        if [[ -n "${error:-}" ]]; then
+            echo "❌ ERROR: $error" >&2
+            #printf "error=%s\n" "$error"
+            return 1
+        fi
+
+        return_value "$key" "$value"
+
+        if [[ "$print" = "1" ]]; then
+            print_value "$key" "$value"
+        fi
+
+    done < <(printf '%s\n' "$values")
+}
+
 
 from_nano() {
     # echo $(echo "scale=9; $1 / 1000000000" | bc)  ## requires bc          
@@ -64,6 +135,7 @@ get_memory_info() {
 
 # get_VRAM_ratio h=1 means human readable
 get_VRAM_ratio() {
+    debug_function "get_VRAM_ratio"
     # We use eval to populate the variables 'total' and 'used' in the subshell
     # eval "$(get_memory_info | grep -E 'total|used')"
     eval "$(get_memory_info)"
@@ -73,6 +145,7 @@ get_VRAM_ratio() {
 }
 
 get_readable_VRAM_usage() {
+    debug_function "get_readable_VRAM_usage"
     # Get current memory stats
     eval "$(get_memory_info)"
 
@@ -86,6 +159,8 @@ get_readable_VRAM_usage() {
 
 ### return used/total
 print_used_VRAM_ratio() {
+    debug_function "print_used_VRAM_ratio"
+    echo "#f print_used_VRAM_ratio)" >&2
     local data=get_memory_info
 
     return_value ""
@@ -103,7 +178,7 @@ flag_or() {
 
 
 # https://antofthy.gitlab.io/info/ascii/Spinners.txt
-run_with_spinner() {
+run_with_spinner() {    
     local label="$1"
     shift
 

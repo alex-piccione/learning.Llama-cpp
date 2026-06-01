@@ -65,7 +65,7 @@ jinjia=0
 batch=1024
 ubatch=auto
 
-source start_server_common.sh && \
+source server_common.sh && \
 start_server \
     $model \
     $ctx_k \
