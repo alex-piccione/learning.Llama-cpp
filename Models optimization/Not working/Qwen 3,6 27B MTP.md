@@ -1,16 +1,16 @@
 # Qwen 3.6 27B MTP
 
-- Hu6ggingFace link: 
-- Provider: unsloth
-- ID: unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf
-- MTP: Yes
-- MoE: ?
-- OpenAI Tools capability: ?
+Hu6ggingFace link: 
+Quantized by: Unsloth
+File: unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf
+MTP: Yes
+MoE: ?
+OpenAI Tools capability: ?
 
 
 ## Run tests
 
-Result: 1 tk/s
+Result: 3 tk/s
 
 | GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
 | ---   | --- | ---   | ---     | ---   | --- | ---    | ---  | ---  | ---      | ---                            | 
@@ -24,16 +24,18 @@ Result: 1 tk/s
 cd scripts
 
 model=unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf
-ctx_k=8
-gpu_layers=999
-cpu_moe=15
+ctx_k=4
+gpu_layers=-1
+cpu_moe=0
 dflash=0
 draft_model=none
-predict_token=6
+predict_token=3
 mtp=1
-jinjia=0
+jinjia=1
+batch=2048
+ubatch=512
 
-source start_server_common.sh && \
+source server_common.sh && \
 start_server \
     $model \
     $ctx_k \
@@ -43,7 +45,9 @@ start_server \
     $draft_model \
     $predict_token \
     $mtp \
-    $jinjia
+    $jinjia \
+    $batch \
+    $ubatch
 
 source test_models_common.sh && \
 test_call_result_row $(flag_or $dflash $mtp)
