@@ -66,6 +66,8 @@ test_call_result_row() {
         tool_flag="✔️"
     fi
 
+    printf "------------ ------------ ------------ ------------ ------------ ------------ ------------\n"
+    print_value "Max context"  "$ctx_train_k k"
     print_value "OpenAI tools compatibility"  "$tool_flag"
     
     # fixed values
@@ -75,9 +77,9 @@ test_call_result_row() {
     local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
     local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")   
     
-    #       | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type    | Pred info                 | Batch/Ubatch | VRAM/RAM | Note                 |
-    #       | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ------------ | ------------------------- | ------------ | -------- | -------------------- |
-    printf "| %3.0f t/s | %5s | %3s | %3s k | %4.1f GB | %-5s | %6s | %3.0fs | %-12s | %-25s | %-12s | %-8s | %-20s |" \
+    #       | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM | Note            |
+    #       | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | -------- | --------------- |
+    printf "| %3.0f t/s | %5s | %3s | %3s k | %4.1f GB | %-5s | %6s | %3.0fs | %-16s | %-30s | %-12s | %-8s | %-15s |" \
         "$eval_rate" \
         "$layers_info" \
         "$cpu_moe" \

@@ -358,7 +358,8 @@ get_pred_info() {
 
         # 0.10.658.011 I common_speculative_impl_ngram_simple: adding speculative implementation 'ngram-simple'
         # 0.10.658.018 I common_speculative_impl_ngram_simple: - size_n=10, size_m=4, min_hits=1
-        local spec_line=$(grep -E 'common_speculative_impl_ngram_simple.*size_n=.*size_m=4.*min_hits=1' "$log" | tail -n 1)
+        # 0.06.214.427 I common_speculative_impl_ngram_simple: - size_n=10, size_m=2, min_hits=1
+        local spec_line=$(grep -E 'common_speculative_impl_ngram_simple.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
         if [[ -n $spec_line ]]; then
             read -r size_n size_m min_hits <<< \
                 $(echo "$spec_line" | awk '
@@ -367,7 +368,7 @@ get_pred_info() {
                         print a[2], a[4], a[6]
                     }
                 ')                
-            pred_info=$(printf 'size_n=%s size_m=%s min_hits=%s\n' "$size_n" "$size_m" "$min_hits")
+            pred_info=$(printf 'size_n=%s size_m=%s min_hits=%s' "$size_n" "$size_m" "$min_hits")
 
         else
             return_value "error" "found spec type 'ngram-simple' but failed to find its parameters'"
