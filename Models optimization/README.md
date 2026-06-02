@@ -28,7 +28,7 @@ Note tested yet:
 
 Not working models:  
 - qwen2.5-coder-14b-instruct-q4_k_m.gguf                         : No OpenAI tools capability         
-- ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf                         : No response / Errors
+- ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf                         : No OpenAI tools capability  
 - Qwen3.6-27B-Q4_K_M.gguf                                        : 1 t/s
 - unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf                        : 1 t/s
 - lucy_in_the_sky_deepseek-moe-16b-base-q4_k_m.gguf              : No OpenAI tools capability  

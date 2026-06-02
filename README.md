@@ -247,6 +247,11 @@ https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
                                         reduce pageouts if not using mlock) (default: enabled)
                                         (env: LLAMA_ARG_MMAP)
 
+--skip-chat-parsing                     force a pure content parser, even if a Jinja template is specified;
+                                        model will output everything in the content section, including any
+                                        reasoning and/or tool calls (default: disabled)
+                                        (env: LLAMA_ARG_SKIP_CHAT_PARSING)
+
 
 ## llama-bench
 
