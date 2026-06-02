@@ -1,6 +1,6 @@
 # Erniw 4.5 21B A3B Thinking
 
-``--skip-chat-parsing`` parameter is required
+❌ ``--skip-chat-parsing`` parameter is required to get a OpenAI compatible response, but that kill the possibility of tools call compatibility  
 
 File 1: unsloth_ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf
 HuggingFace: 

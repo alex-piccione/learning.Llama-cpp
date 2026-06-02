@@ -77,13 +77,13 @@ test_call_result_row() {
     local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
     local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")   
     
-    #       | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
-    #       | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
-    printf "| %3.0f t/s | %5s | %3s | %3s k | %4.1f GB | %-5s | %6s | %3.0fs | %-16s | %-30s | %-12s | %-9s | %-15s |" \
+    #       | Speed   | Ctx   | GPU   | MoE | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
+    #       | ------- | ----- | ----- | --- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
+    printf "| %3.0f t/s | %3s k | %5s | %3s | %4.1f GB | %-5s | %6s | %3.0fs | %-16s | %-30s | %-12s | %-9s | %-15s |" \
         "$eval_rate" \
+        "$ctx_k" \
         "$layers_info" \
         "$cpu_moe" \
-        "$ctx_k" \
         "$vram_used" \
         "$cache_type" \
         "$eval_count" \
@@ -157,6 +157,7 @@ llamacpp_run() {
     # UNCOMMENT THE LINE BELOW TO INSPECT API RAW OUTPUT IN TERMINAL:
     #echo "DEBUG RAW OUTPUT: $raw" >&2
     echo "$raw" > logs/llama_api_response.log
+
 
     # last lines in llama_api_response.log
     # data: {"choices":[{"finish_reason":"tool_calls","index":0,"delta":{}}],"created":1779349198,"id":"chatcmpl-nFCxRKKHfmmnVXEHbeKtPcEqHXBZvQCr","model":"Qwen3.5-9B-Q4_K_M.gguf","system_fingerprint":"b9251-e2b129e1b","object":"chat.completion.chunk"}

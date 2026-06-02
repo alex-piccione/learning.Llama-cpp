@@ -2,17 +2,14 @@
 
 ## Current
 
-
-- 3 Correct extraction of DFlash prediction settings
-- 3 Test DFlash models
+- 3 Fifure out how to make Qwen 3.6-27B to work !!
 
 ## Backlog
 
-- 5 proxy bridge to start requested model on llama-server
+
 - 5 Test TurboQuant, use the new llama.cpp version and try to use "tbq4_0" cache type
 
 - 3 Test MTP models (it needs to verify llamacpp_run and test_call functions)
-
 - 3 cleanup run_server.sh
 
 
@@ -36,5 +33,7 @@
 
 ## Done
 
+- 3 Test DFlash models
+- 3 Correct extraction of DFlash prediction settings
 - 5 Test for checking if the model can use open-ai tools
 - 2 start_server_common.sh  does not behave like the run_server function.

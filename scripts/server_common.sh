@@ -154,7 +154,7 @@ start_server() {
             args+=(--spec-draft-type-k "$spec_cache_type_k")
             args+=(--spec-draft-type-v "$spec_cache_type_v")
 
-            print_value "(test note)" "DFlash, draft-simple predict ${predict_token}/1 "
+            print_value "(test note)" "DFlash, draft-simple predict ${predict_token} (min 1)"
         else
             # Case B: Self-speculative decoding (N-Gram) without a draft model            
             print_value "Speculation Type" "N-Gram simple"
@@ -164,11 +164,11 @@ start_server() {
             args+=(--spec-ngram-simple-size-m "$predict_token")  # default is 48
             #args+=(--spec-ngram-simple-size-n "$((predict_token * 2))") # default is 12    
             ### FIXED VALUE
-            local imple_size_n=20
-            args+=(--spec-ngram-simple-size-n $imple_size_n) # default is 12            
+            local simple_size_n=20
+            args+=(--spec-ngram-simple-size-n $simple_size_n) # default is 12            
             args+=(--spec-ngram-simple-min-hits 1)               # default is 1   
 
-            print_value "(test note)" "DFlash, ngram-simple, predict $predict_token ($imple_size_n)"
+            print_value "(test note)" "DFlash, ngram-simple, predict (size_m: $predict_token, size_n: $simple_size_n)"
         fi
     else
         if [ "$mtp" == "1" ]; then
@@ -367,7 +367,7 @@ get_pred_info() {
                         print a[2], a[4], a[6]
                     }
                 ')                
-            pred_info=$(printf 'size_n=%s size_m=%s min_hits=%s' "$size_n" "$size_m" "$min_hits")
+            pred_info=$(printf 'size_M=%s size_N=%s min_hits=%s' "$size_m" "$size_n"  "$min_hits")
 
         else
             return_value "error" "found spec type 'ngram-simple' but failed to find its parameters'"

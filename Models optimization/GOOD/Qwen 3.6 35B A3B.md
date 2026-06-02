@@ -2,25 +2,30 @@
 
 Hu6ggingFace link: ?
 Quantized by: Unsloth
-file: unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
+File: unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 MTP: ?
 MoE: Yes
 Max context: 256 k
 OpenAI tools compatibility : ✔️
 
+Note.  
+- With less than CPU_MOE=13 the speed drops down.  (?!)
+- Using 64k instead of 96k of context gives exactly the same speed. (?!)
 
 
 ## Run tests
 
-| Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM | Note            |
-| ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | -------- | --------------- |
-|  28 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1179 |  41s | DFlash (N-gram)  | size_n=10 size_m=7 min_hits=1  | 2048/384     | 14.2/6.4 |                 |
-|  28 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    647 |  23s | DFlash (N-gram)  | size_n=10 size_m=7 min_hits=1  | 2048/512     | 14.2/6.4 |                 |
-|  27 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    740 |  27s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 2048/512     | 14.2/6.4 |                 |
-|  25 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1085 |  43s | DFlash (N-gram)  | size_n=12 size_m=8 min_hits=1  | 2048/384     | 14.2/6.4 | > size_n        |
-|  25 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1187 |  48s | DFlash (N-gram)  | size_n=10 size_m=6 min_hits=1  | 2048/384     | 14.2/6.4 | < size_m        |
-|  25 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   2048 |  83s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 2048/384     | 14.2/6.4 | > size_m        |
-|  24 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    671 |  27s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 512/256      | 14.2/6.4 |                 |
+| Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
+| ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
+|  28 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1179 |  41s | DFlash (N-gram)  | size_n=10 size_m=7 min_hits=1  | 2048/384     | 14.2/6.4  |                 |
+|  28 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    647 |  23s | DFlash (N-gram)  | size_n=10 size_m=7 min_hits=1  | 2048/512     | 14.2/6.4  |                 |
+|  27 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    740 |  27s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 2048/512     | 14.2/6.4  |                 |
+|  25 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1085 |  43s | DFlash (N-gram)  | size_n=12 size_m=8 min_hits=1  | 2048/384     | 14.2/6.4  | > size_n        |
+|  25 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1187 |  48s | DFlash (N-gram)  | size_n=10 size_m=6 min_hits=1  | 2048/384     | 14.2/6.4  | < size_m        |
+|  25 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   2048 |  83s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 2048/384     | 14.2/6.4  | > size_m        |
+|  24 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    671 |  27s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 512/256      | 14.2/6.4  |                 |
+|  26 t/s | 41/41 |  13 |  64 k | 15.5 GB | ---   |   1106 |  42s | DFlash (N-gram)  | size_M=10 size_N=12 min_hits=1 | 2048/256     | 14.2/6.4  |                 |
+|  26 t/s | 41/41 |  13 |  64 k | 15.5 GB | ---   |   1114 |  43s | DFlash (N-gram)  | size_M=8 size_N=12 min_hits=1  | 2048/256     | 14.2/6.4  |                 |
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                                   |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | -------------------------------------- |
@@ -49,6 +54,8 @@ cd scripts
 
 # for 80k Context : -ngl 999 --n-cpu-moe 17 -c 80000 --no-mmap --mlock --cache-type-k q8_0 --cache-type-v q8_0 -fa on -ub 1024
 
+### Max CTX
+
 model=unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 ctx_k=96
 gpu_layers=-1
@@ -58,8 +65,23 @@ draft_model=none
 predict_token=7
 mtp=0
 jinjia=0
-batch=1512
+batch=2048
 ubatch=384
+
+### Max Speed
+
+model=unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
+ctx_k=64
+gpu_layers=-1
+cpu_moe=13  # to test 14
+dflash=1
+draft_model=none
+predict_token=8
+mtp=0
+jinjia=0
+batch=2048
+ubatch=256
+
 
 source server_common.sh && \
 start_server \

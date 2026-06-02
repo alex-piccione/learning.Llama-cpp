@@ -13,10 +13,12 @@ OpenAI tools compatibility: ✔️
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
+|  73 t/s | 25/25 |   0 | 128 k | 12.6 GB | ---   |   1345 |  18s | DFlash (N-gram)  | size_n=12 size_m=16 min_hits=1 | 2048/256     | 10.6/0.6  | UD-Q6_K_XL      |
 |  72 t/s | 25/25 |   0 | 128 k | 12.6 GB | ---   |    738 |  10s | DFlash (N-gram)  | size_n=20 size_m=16 min_hits=1 | 2048/256     | 10.6/0.6  | UD-Q6_K_XL      |
 |  72 t/s | 25/25 |   0 | 128 k | 12.6 GB | ---   |    734 |  10s | DFlash (N-gram)  | size_n=16 size_m=14 min_hits=1 | 2048/256     | 10.6/0.6  | UD-Q6_K_XL      |
 |  72 t/s | 25/25 |   0 | 128 k | 12.6 GB | ---   |    691 |   9s | DFlash (N-gram)  | size_n=10 size_m=7 min_hits=1  | 2048/256     | 10.6/0.6  | UD-Q6_K_XL      |
 |  72 t/s | 25/25 |   0 | 128 k | 12.6 GB | ---   |    950 |  14s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 2048/256     | 10.6/0.6  | UD-Q6_K_XL      |
+|  71 t/s | 25/25 |   0 | 128 k | 12.6 GB | ---   |   1042 |  14s | DFlash (N-gram)  | size_n=12 size_m=12 min_hits=1 | 512/256      | 10.6/0.6  | UD-Q6_K_XL      |
 |  71 t/s | 25/25 |   0 | 128 k | 12.8 GB | ---   |    708 |  10s | DFlash (N-gram)  | size_n=10 size_m=5 min_hits=1  | 2048/384     | 10.7/0.6  | Q8_0            |
 |  70 t/s | 25/25 |   0 | 128 k | 12.6 GB | ---   |    685 |   9s | DFlash (N-gram)  | size_n=16 size_m=12 min_hits=1 | 2048/256     | 10.6/0.6  | UD-Q6_K_XL      |
 |  70 t/s | 25/25 |   0 | 128 k | 12.7 GB | ---   |    811 |  11s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 2048/256     | 10.7/0.6  | Q8_0            |
@@ -24,27 +26,6 @@ OpenAI tools compatibility: ✔️
 |  70 t/s | 25/25 |   0 | 128 k | 12.9 GB | ---   |    727 |  10s | DFlash (N-gram)  | size_n=10 size_m=4 min_hits=1  | 1024/512     | 10.7/0.6  | Q8_0            |
 |  70 t/s | 25/25 |   0 | 128 k | 12.8 GB | ---   |    678 |  10s | DFlash (N-gram)  | size_n=10 size_m=4 min_hits=1  | 1024/384     | 10.7/0.6  | Q8_0            |
 |  68 t/s | 25/25 |   0 | 128 k | 12.9 GB | ---   |    714 |  10s | DFlash (N-gram)  | size_n=10 size_m=4 min_hits=1  | 2048/512     | 10.7/0.6  | Q8_0            |
-
-
-| Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                                       |
-| ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | ------------------------------------------ |
-|  73 t/s | 25/25 |   0 | 128 k | 12.4 GB | q8_0  |    765 |  10s |    0 |      0 % | 512/256      | 10.4/0.4 |                                            |
-|  73 t/s | 25/25 |   0 | 192 k | 13.6 GB | q8_0  |    600 |   9s |    0 |      0 % | 1024/512     | 10.4/0.4 | CTX training is 128k                       |
-|  75 t/s | 25/25 |   0 | 128 k | 12.7 GB | q8_0  |    906 |  12s |    0 |      0 % | 1024/512     | 10.4/0.4 |                                            |
-|  74 t/s | 25/25 |   0 | 192 k | 13.3 GB | q8_0  |    768 |  10s |    0 |      0 % | 512/256      | 10.4/0.4 |                                            |
-|  70 t/s | 25/25 |   0 | 128 k | 12.6 GB | q8_0  |    927 |  14s |    0 |      0 % | 512/256      | 10.6/0.6 | UD-Q6_K_XL                                 |
-|  71 t/s | 25/25 |   0 | 128 k | 12.9 GB | ---   |    601 |   9s |    0 |      0 % | 1024/512     | 10.7/0.6 | Q8_0, DFlash, ngram-simple, predict 4 (10) |
-|  69 t/s | 25/25 |   0 | 128 k | 12.9 GB | ---   |    621 |   9s |    0 |     -0 % | 1024/512     | 10.7/0.6 | Q8_0                                       |
-|  69 t/s | 25/25 |   0 | 128 k | 12.9 GB | ---   |    680 |  10s |    0 |      0 % | 1024/512     | 10.7/0.6 | Q8_0, DFlash, predict 6                    |
-|  56 t/s | 25/25 |   0 | 192 k | 14.0 GB | q8_0  |    636 |  11s |    0 |      0 % | 2048/1024    | 10.2/0.6 |                                            |
-|  51 t/s | 25/25 |   1 | 128 k | 12.5 GB | ---   |    712 |  14s |    0 |      0 % | 1024/512     | 10.3/1.0 | Q8_0, DFlash, predict 6                    |
-|  43 t/s | 25/25 |   2 | 128 k | 11.9 GB | q8_0  |    724 |  17s |    0 |      0 % | 1024/512     | --       |                                            |
-|  36 t/s | 25/25 |   3 |  64 k | 10.7 GB | q8_0  |    680 |  19s |    0 |      0 % | 1024/512     | --       |                                            |
-|  25 t/s | 25/25 |   5 |  16 k |  9.3 GB | q8_0  |    692 |  27s |    0 |      0 % | 1024/512     | --       |                                            |
-|  25 t/s | 25/25 |   5 |  16 k |  9.3 GB | q8_0  |    950 |  37s |    0 |      0 % | 1024/512     | --       |                                            |
-|  26 t/s | 25/25 |   5 |  64 k |  9.9 GB | q8_0  |    569 |  22s |    0 |      0 % | 1024/512     | --       |                                            |
-|  23 t/s | 25/25 |   3 | 128 k | 11.5 GB | q8_0  |    930 |  40s |    0 |      0 % | 1024/512     | --       |                                            |
-|  63 t/s | 25/25 |   0 | 128 k | 12.9 GB | ---   |    687 |  11s |    0 |      0 % | 1024/512     | 10.7/0.6 | Q8_0, DFlash, ngram-simple, predict 4 (10) |
 
 
 ## Run tests
@@ -60,10 +41,10 @@ gpu_layers=-1
 cpu_moe=0
 dflash=1
 draft_model=none
-predict_token=16
+predict_token=12
 mtp=0
 jinjia=0
-batch=2048
+batch=512
 ubatch=256
 
 source server_common.sh && \
