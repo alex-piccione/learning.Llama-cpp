@@ -9,6 +9,8 @@ MoE: ?
 MTP: ?
 Max context: 198k
 
+| Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM | Note            |
+| ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | -------- | --------------- |
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | ------------------------------ |
@@ -34,8 +36,10 @@ draft_model=none
 predict_token=0
 mtp=0
 jinjia=0
+batch=1024
+ubatch=auto
 
-source start_server_common.sh && \
+source server_common.sh && \
 start_server \
     $model \
     $ctx_k \
@@ -45,7 +49,9 @@ start_server \
     $draft_model \
     $predict_token \
     $mtp \
-    $jinjia
+    $jinjia \
+    $batch \
+    $ubatch
 
 source test_models_common.sh && \
 test_call_result_row $(flag_or $dflash $mtp)

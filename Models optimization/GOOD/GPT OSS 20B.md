@@ -11,6 +11,15 @@ Max context: 128 k
 OpenAI tools compatibility: ✔️
 
 
+| Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM | Note            |
+| ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | -------- | --------------- |
+|  71 t/s | 25/25 |   0 | 128 k | 12.8 GB | ---   |    708 |  10s | DFlash (N-gram)  | size_n=10 size_m=5 min_hits=1  | 2048/384     | 10.7/0.6 | Q8_0            |
+|  70 t/s | 25/25 |   0 | 128 k | 12.7 GB | ---   |    714 |  11s | DFlash (N-gram)  | size_n=10 size_m=6 min_hits=1  | 2048/256     | 10.7/0.6 | Q8_0            |
+|  70 t/s | 25/25 |   0 | 128 k | 12.9 GB | ---   |    727 |  10s | DFlash (N-gram)  | size_n=10 size_m=4 min_hits=1  | 1024/512     | 10.7/0.6 | Q8_0            |
+|  70 t/s | 25/25 |   0 | 128 k | 12.8 GB | ---   |    678 |  10s | DFlash (N-gram)  | size_n=10 size_m=4 min_hits=1  | 1024/384     | 10.7/0.6 | Q8_0            |
+|  68 t/s | 25/25 |   0 | 128 k | 12.9 GB | ---   |    714 |  10s | DFlash (N-gram)  | size_n=10 size_m=4 min_hits=1  | 2048/512     | 10.7/0.6 | Q8_0            |
+
+
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                                       |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | ------------------------------------------ |
 |  73 t/s | 25/25 |   0 | 128 k | 12.4 GB | q8_0  |    765 |  10s |    0 |      0 % | 512/256      | 10.4/0.4 |                                            |
@@ -45,11 +54,11 @@ gpu_layers=-1
 cpu_moe=0
 dflash=1
 draft_model=none
-predict_token=4
+predict_token=6
 mtp=0
 jinjia=0
-batch=1024
-ubatch=auto
+batch=2048
+ubatch=256
 
 source server_common.sh && \
 start_server \

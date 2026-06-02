@@ -66,7 +66,7 @@ test_call_result_row() {
         tool_flag="✔️"
     fi
 
-    printf "------------ ------------ ------------ ------------ ------------ ------------ ------------\n"
+    #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------\n"
     print_value "Max context"  "$ctx_train_k k"
     print_value "OpenAI tools compatibility"  "$tool_flag"
     

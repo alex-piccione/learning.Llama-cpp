@@ -5,10 +5,22 @@ Quantized by: Unsloth
 file: unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 MTP: ?
 MoE: Yes
-OpenAI tools compatibility: ✔️
+Max context: 256 k
+OpenAI tools compatibility : ✔️
+
 
 
 ## Run tests
+
+| Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM | Note            |
+| ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | -------- | --------------- |
+|  28 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1179 |  41s | DFlash (N-gram)  | size_n=10 size_m=7 min_hits=1  | 2048/384     | 14.2/6.4 |                 |
+|  28 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    647 |  23s | DFlash (N-gram)  | size_n=10 size_m=7 min_hits=1  | 2048/512     | 14.2/6.4 |                 |
+|  27 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    740 |  27s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 2048/512     | 14.2/6.4 |                 |
+|  25 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1085 |  43s | DFlash (N-gram)  | size_n=12 size_m=8 min_hits=1  | 2048/384     | 14.2/6.4 | > size_n        |
+|  25 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1187 |  48s | DFlash (N-gram)  | size_n=10 size_m=6 min_hits=1  | 2048/384     | 14.2/6.4 | < size_m        |
+|  25 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   2048 |  83s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 2048/384     | 14.2/6.4 | > size_m        |
+|  24 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    671 |  27s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 512/256      | 14.2/6.4 |                 |
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                                   |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | -------------------------------------- |
@@ -39,17 +51,17 @@ cd scripts
 
 model=unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 ctx_k=96
-gpu_layers=999
+gpu_layers=-1
 cpu_moe=13
 dflash=1
 draft_model=none
-predict_token=8
+predict_token=7
 mtp=0
 jinjia=0
-batch=512
-ubatch=auto
+batch=1512
+ubatch=384
 
-source start_server_common.sh && \
+source server_common.sh && \
 start_server \
     $model \
     $ctx_k \

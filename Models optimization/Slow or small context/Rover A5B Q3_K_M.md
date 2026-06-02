@@ -5,7 +5,7 @@ Model base: Qwen 3
 MTP: No
 Quantized by: mr_radermacher
 File: mr_radermacher_Rover-A5B.Q3_K_M.gguf
-Max context: 40 k
+Max context: 40 k ❌
 OpenAI tools compatibility: ✔️
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |
@@ -25,6 +25,12 @@ OpenAI tools compatibility: ✔️
 |   5 t/s | 29/29 |   3 | 132 k | 15.7 GB | q8_0  |   1111 | 212s |    0 |      0 % | 512/256      | 13.7/1.6 |                                |
 
 
+| Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM | Note            |
+| ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | -------- | --------------- |
+|  16 t/s | 66/66 |   2 |  32 k | 14.2 GB | ---   |   1076 |  67s | DFlash (N-gram)  | size_n=10 size_m=6 min_hits=1  | 2048/512     | 12.4/0.1 |                 |
+|  10 t/s | 29/29 |   2 |  32 k | 15.7 GB | ---   |   1569 | 154s | none             | --                             | 512/256      | 14.3/1.1 |                 |
+
+
 ```bash
 cd scripts
 
@@ -34,13 +40,13 @@ gpu_layers=-1
 cpu_moe=2
 dflash=1
 draft_model=none
-predict_token=8
+predict_token=6
 mtp=0
 jinjia=0
 batch=512
 ubatch=auto
 
-source start_server_common.sh && \
+source server_common.sh && \
 start_server \
     $model \
     $ctx_k \

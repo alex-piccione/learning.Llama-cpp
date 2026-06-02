@@ -16,8 +16,9 @@
 | Nemotron-3-Nano-30B-A3B-Q4_K_M.gguf                     | Unsloth      | 16 t/s |    16 k |                                |
 
 Note tested yet:
-- https://huggingface.co/noctrex/Qwopus3.6-35B-A3B-v1-MTP-MXFP4_MOE-GGUF      <<<<<<<----------
+- https://huggingface.co/DavidAU/Openai_gpt-oss-20b-CODER-NEO-CODE-DI-MATRIX-GGUF
 - https://huggingface.co/noctrex/gemma-4-26B-A4B-it-MXFP4_MOE-GGUF?show_file_info=gemma-4-26B-A4B-it-MXFP4_MOE.gguf       
+- https://huggingface.co/Jackrong/Qwen3.5-9B-DeepSeek-V4-Flash-MTP-GGUF?show_file_info=Qwen3.5-9B-DeepSeek-V4-Flash-MTP-Q8_0.gguf
 - https://huggingface.co/Anbeeld/Qwen3.6-27B-DFlash-GGUF   draft model for  Qwen 3.6 27B
   With llama.cpp latest version (B9371 28/05/2026) it is not supported:
   > 0.16.418.984 E llama_model_load: error loading model: unknown model architecture: 'dflash-draft'

@@ -165,6 +165,7 @@ start_server() {
 
             args+=(--spec-ngram-simple-size-m "$predict_token")  # default is 48
             #args+=(--spec-ngram-simple-size-n "$((predict_token * 2))") # default is 12    
+            ### FIXED VALUE
             local imple_size_n=10
             args+=(--spec-ngram-simple-size-n $imple_size_n) # default is 12            
             args+=(--spec-ngram-simple-min-hits 1)               # default is 1   
