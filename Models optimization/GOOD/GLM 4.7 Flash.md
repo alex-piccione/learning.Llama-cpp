@@ -33,6 +33,17 @@ OpenAI tools compatibility : ✔️
 |  17 t/s |  48 k | 48/48 |  11 | 15.2 GB | ---   |   1070 |  64s | DFlash (N-gram)  | size_M=32 size_N=32 min_hits=1 | 1024/256     | 13.4/3.5  |                 |
 |  15 t/s |  48 k | 48/48 |   9 | 15.7 GB | ---   |   1079 |  69s | none             | --                             | 1024/256     | 14.1/2.8  |                 |
 
+| unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
+|  34 t/s | 128 k | 48/48 |   7 | 15.4 GB | ---   |   1026 |  30s | DFlash (N-gram)  | size_M=30 size_N=30 min_hits=1 | 2048/256     | 11.4/1.6  |                 |
+|  33 t/s | 128 k | 48/48 |   8 | 15.2 GB | ---   |    971 |  30s | DFlash (N-gram)  | size_M=30 size_N=30 min_hits=1 | 2048/256     | 11.1/1.8  |                 |
+|  33 t/s | 128 k | 48/48 |   8 | 15.2 GB | ---   |   1159 |  35s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 2048/256     | 11.1/1.8  |                 |
+|  32 t/s | 128 k | 48/48 |   8 | 15.2 GB | ---   |    942 |  29s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 11.1/1.8  |                 |
+|  33 t/s |  96 k | 48/48 |   8 | 14.3 GB | ---   |    951 |  28s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 11.1/1.8  |                 |
+|  31 t/s |  96 k | 48/48 |   9 | 14.0 GB | ---   |   1008 |  32s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 10.9/2.1  |                 |
+|  27 t/s |  96 k | 48/48 |  11 | 13.5 GB | ---   |    726 |  27s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 10.4/2.6  |                 |
+|  27 t/s |  64 k | 48/48 |  11 | 12.6 GB | ---   |    917 |  34s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 10.4/2.6  |                 |
+|  26 t/s |  48 k | 48/48 |  11 | 12.1 GB | ---   |   1042 |  39s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 10.4/2.6  |                 |
+
 
 
 ## Run tests
@@ -40,16 +51,17 @@ OpenAI tools compatibility : ✔️
 ```bash
 cd scripts
 
-model=unsloth_GLM-4.7-Flash-Q4_K_M.gguf
-ctx_k=48
+#model=unsloth_GLM-4.7-Flash-Q4_K_M.gguf
+model=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
+ctx_k=128
 gpu_layers=-1
-cpu_moe=11
+cpu_moe=7
 dflash=1
 draft_model=none
-predict_token=20
+predict_token=30
 mtp=0
 jinjia=0
-batch=1024
+batch=2048
 ubatch=256
 
 source server_common.sh && \

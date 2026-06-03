@@ -1,15 +1,18 @@
 # Models
 
-| Model                                                   | Quantized by | Speed  | Context | Moe | Note                           |
-| ------------------------------------------------------- | ------------ | ------ | ------- | --- | ------------------------------ |
-| gpt-oss-20b-Q4_K_M.gguf                                 | Unsloth      | 75 t/s |   128 k |     |                                |
-| Qwen 3.5 9B                                             | Unsloth      | 39 t/s |   256 k |     |                                |
-| gemma-4-26B-A4B-it-MXFP4_MOE.gguf                       | noctrex      | 36 t/s |   128 k |     |                                |
-| gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                       | Unsloth      | 28 t/s |    64 k |     |                                |
-| gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                       | Unsloth      | 25 t/s |   128 k |     |                                |
-| Qwen3.6-35B-A3B-UD-Q4_K_M.gguf                          | Unsloth      | 25 t/s |    96 k |     |                                |
-| Qwen3-14B-Q4_K_M.gguf                                   | Unsloth      | 27 t/s |    64 k |     |                                |
-| GLM 4.7 Flash                                           | Unsloth      | 32 t/s |    32 k |     |                                |
+| Model                        | Quantized by   | File                                            | Speed  | Context | Moe | Note                           |
+| ---------------------------- |--------------- | ----------------------------------------------- | ------ | ------- | --- | ------------------------------ |
+| GPT OSS 20B                  | Unsloth        | gpt-oss-20b-Q4_K_M.gguf                         | 75 t/s |   128 k |     |                                |
+| Qwen 3.5 9B                  | Unsloth        |                                                 | 39 t/s |   256 k |     |                                |
+| Qwen 3.6 27B (not-MTP)       | bezorp         | barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf       | 42 t/s |   128 k |     |                                |
+| Gemma 4 26B                  | noctrex        | gemma-4-26B-A4B-it-MXFP4_MOE.gguf               | 36 t/s |   128 k |     |                                |
+| GLM 4.7 Flash 23B            | Unsloth        | unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf  | 32 t/s |   128 k |     |                                |
+| Gemma 4 26B                  | Unsloth        | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf               | 28 t/s |    64 k |     |                                |
+| Gemma 4 26B                  | Unsloth        | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf               | 25 t/s |   128 k |     |                                |
+| Qwen 3.6 35B-A3B             | Unsloth        | unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf          | 25 t/s |    96 k |     |                                |
+| Qwen 3 14B                   | Unsloth        | unsloth_Qwen3-14B-Q4_K_M.gguf                   | 27 t/s |    64 k |     |                                |
+| GLM 4.7 Flash                | Unsloth        | unsloth_GLM-4.7-Flash-Q4_K_M.gguf               | 32 t/s |    32 k |     |                                |
+
 
 
 | Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf         |              | 18 t/s |    16 k | No  |                                |
@@ -30,7 +33,7 @@ Not working models:
 - qwen2.5-coder-14b-instruct-q4_k_m.gguf                         : No OpenAI tools capability         
 - ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf                         : No OpenAI tools capability  
 - Mistral Small 3.2 24B.md                                       : No MoE, no MTP, no predictive, not possible to optimize (18 t/s at 24K context)
-- unsloth_Qwen3.6-27B-Q4_K_M.gguf                                        : 1 t/s
+- unsloth_Qwen3.6-27B-Q4_K_M.gguf                                : 1 t/s
 - unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf                        : 1 t/s
 - lucy_in_the_sky_deepseek-moe-16b-base-q4_k_m.gguf              : No OpenAI tools capability  
 - mammoth-coder-13b.Q4_K_M.gguf                                  : Response contains 1 token. That's it.

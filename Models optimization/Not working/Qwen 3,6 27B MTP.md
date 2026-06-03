@@ -19,6 +19,7 @@ File 2: unsloth_Qwen3.6-27B-Q4_K_M_MTP.gguf  (16.705KB)
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
+| mr_radermacher_Qwen3.6-27B-Esper3.1.Q4_K_M.gguf
 
 
 | GPU   | MoE | Ctx   | VRAM    | Cache | t/s | tokens | Time | pred | pred acc | Note                           |
@@ -33,18 +34,20 @@ File 2: unsloth_Qwen3.6-27B-Q4_K_M_MTP.gguf  (16.705KB)
 cd scripts
 
 #model=unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf
-model=unsloth_Qwen3.6-27B-Q4_K_M_MTP.gguf
+#model=unsloth_Qwen3.6-27B-Q4_K_M_MTP.gguf
+
+
 ctx_k=8
 gpu_layers=-1
-# nothing worked... from 2 to 12 !!!
-cpu_moe=2
+# nothing worked... from 2 to 14 !!!
+cpu_moe=10
 dflash=0
 draft_model=none
-predict_token=5
+predict_token=20
 mtp=1
 jinjia=0
-batch=2048
-ubatch=512
+batch=1024
+ubatch=256
 
 source server_common.sh && \
 start_server \
