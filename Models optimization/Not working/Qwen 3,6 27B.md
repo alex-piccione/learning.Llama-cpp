@@ -1,28 +1,24 @@
 # Qwen 3.6 27B
 
 
-## 1. Qwen3.6-27B-Q4_K_M.gguf 
+## 1. Qwen 3.6 27B Q4_K_M
 
-Hu6ggingFace link: 
-Provider: unsloth
+Hu6ggingFace: 
+Quantized by: Unsloth
 File: unsloth_Qwen3.6-27B-Q4_K_M.gguf
 MTP: No
 MoE: Yes
 OpenAI tools compatibility: ✔️
 
 
-## 2. Qwen3.6-27B-Q3_K_M.gguf 
+## 2. Qwen 3.6 27B Q3_K_M
 
 File: unsloth_Qwen3.6-27B-Q3_K_M.gguf
 Max context: 256 k
 OpenAI tools compatibility : ✔️
 
 
-|  16 t/s | 66/66 |   3 |  32 k | 14.2 GB | ---   |   1243 |  76s | DFlash (N-gram)  | size_n=10 size_m=6 min_hits=1  | 2048/512     | 12.4/0.1 |                 |
-|  16 t/s | 66/66 |   2 |  16 k | 13.7 GB | ---   |   1167 |  72s | DFlash (N-gram)  | size_n=10 size_m=4 min_hits=1  | 1024/512     | 12.4/0.1 |                 |
-|  16 t/s | 66/66 |   3 |  16 k | 13.7 GB | ---   |   1337 |  82s | DFlash (N-gram)  | size_n=10 size_m=6 min_hits=1  | 1024/512     | 12.4/0.1 |                 |
-
-## 3. mr_radermacher Qwen 3.6 27B Esper 3.1 (by mr radermacher)
+## 3. Qwen 3.6 27B Esper 3.1 (by mr radermacher)
 
 File: mr_radermacher_Qwen3.6-27B-Esper3.1.Q4_K_M.gguf
 MTP: No
@@ -30,8 +26,9 @@ Max context: 256 k
 OpenAI tools compatibility : ✔️
 
 
-## 4. barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf   
+## 4. Qwen 3.6 28B-REAP20-A3B (by barozp)
 
+HuggingFace: https://huggingface.co/barozp/Qwen3.6-28B-REAP20-A3B-GGUF
 File: barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf 
 MTP: No
 ax context          : 256 k
@@ -57,6 +54,7 @@ Draft models for DFlash:
 |  14 t/s |  16 k | 65/65 |   2 | 15.7 GB | ---   |   2048 | 144s | DFlash (N-gram)  | size_M=6 size_N=20 min_hits=1  | 1024/256     | 14.7/0.0  |                 |
 | barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf 
 |  43 t/s | 128 k | 41/41 |   5 | 15.7 GB | ---   |    946 |  22s | DFlash (N-gram)  | size_M=6 size_N=8 min_hits=1   | 2048/256     | 13.9/1.9  |                 |
+|  41 t/s | 128 k | 41/41 |   5 | 15.7 GB | ---   |   1245 |  30s | DFlash (N-gram)  | size_M=6 size_N=8 min_hits=1   | 2048/256     | 13.9/1.9  |                 |
 |  43 t/s |  96 k | 41/41 |   5 | 15.4 GB | ---   |   1307 |  30s | DFlash (N-gram)  | size_M=6 size_N=8 min_hits=1   | 2048/256     | 13.9/1.9  |                 |
 |  43 t/s |  64 k | 41/41 |   5 | 15.1 GB | ---   |   1653 |  39s | DFlash (N-gram)  | size_M=6 size_N=8 min_hits=1   | 2048/256     | 13.9/1.9  |                 |
 |  40 t/s |  64 k | 41/41 |   6 | 14.8 GB | ---   |    866 |  21s | DFlash (N-gram)  | size_M=6 size_N=8 min_hits=1   | 2048/256     | 13.5/2.3  |                 |
@@ -76,7 +74,7 @@ Draft models for DFlash:
 | unsloth_Qwen3.6-27B-Q4_K_M.gguf
 |   1 t/s 
 | unsloth_Qwen3.6-27B-Q3_K_M.gguf
-|  16 t/s 
+|  16 t/s with 32 k context
 
 
 
@@ -87,7 +85,7 @@ cd scripts
 #model=unsloth_Qwen3.6-27B-Q3_K_M.gguf  # file 2
 #model=mr_radermacher_Qwen3.6-27B-Esper3.1.Q4_K_M.gguf  # file 3
 model=barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf     # file 4
-ctx_k=16
+ctx_k=128
 gpu_layers=999
 cpu_moe=5
 dflash=1
@@ -117,3 +115,5 @@ source test_models_common.sh && \
 test_call_result_row $(flag_or $dflash $mtp)
 
 ```
+
+
