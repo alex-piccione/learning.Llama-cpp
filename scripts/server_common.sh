@@ -17,9 +17,9 @@ source common.sh
 #   ctx_k: context size (8 for 8k, 16 for 16k...) 
 #   gpu_layers: max. number of layers to store in VRAM, either an exact number, 'auto', or 'all'
 #   cpu_moe: expert layer to offload to the CPU, the lower the better (ignored for non-MOE models)  
-#   dflash: 0 = Dflash off, 1 = DFlash on 
-#   draft_model: draft model, required if DFlash is on
-#   predict_token: number of token to predict, required if DFlash is on
+#   spec: Speculative draft. 0=off, 1=on 
+#   draft_model: draft model, required if Speculative draft is on
+#   predict_token: number of token to predict, min/max (5/10)
 #   mtp: 1 = model support MTP (will set --spec-type draft-mtp) 0 otherwise 
 #   jinja: not used... (possibly required by some models)
 #   batch: batch size... 1024 is the usual value
@@ -29,7 +29,7 @@ start_server() {
     local ctx_k="$2"
     local gpu_layers="$3"
     local cpu_moe="$4"    
-    local dflash="$5"
+    local spec="$5"
     local draft_model="$6"
     local predict_token="$7"
     local mtp="$8"
@@ -83,9 +83,10 @@ start_server() {
 
     #--defrag-thold 0.1
     #--draft-min 1            # min tokens to draft before verifying
-    #--draft-p-min 0.6 \        # stop drafting if token probability drops below this
+    #--draft-p-min 0.6 \        # stop drafting if token probability drops below this   (default: 0.75)
 
-    local cache_reuse=256        # reuse KV cache chunks across requests (big win for similar prompts)
+    #local cache_reuse=256        # reuse KV cache chunks across requests (big win for similar prompts)
+    local cache_reuse=0        # 0 to have clean benchmark
 
     args=(
         --host 127.0.0.1 \
@@ -112,7 +113,8 @@ start_server() {
         --min-p 0.05 \
         --repeat-penalty 1.05 \
         --repeat-last-n 256 \
-        --cache-reuse 256
+
+        --cache-reuse $cache_reuse
     )
 
     # Logging settings
@@ -125,65 +127,55 @@ start_server() {
 
     local pred_type="none" # initial value
 
-    if [[ "$dflash" = "1" ]] ; then
+    local pred_min
+    local pred_max
+    # Split the string by '/'
+    IFS='/' read -r pred_min pred_max <<< "$predict_token"
+    if [[ -z "$pred_min" || -z "$pred_max" ]]; then
+        echo "‼️ start_server was called with predict_token that does not follow the format 'min/max'" >&2
+        exit 1
+    fi
 
-        print_value "DFlash" "on"
-        
-        if [ -z "$predict_token" ]; then
-            echo "‼️ start_server was called with empty predict_token" >&2
-            exit 1
-        fi
-
-        # For speculative type:
-        # (none, draft-simple, draft-eagle3, draft-mtp, ngram-simple, ngram-map-k, ngram-map-k4v, ngram-mod, ngram-cache)
-        # use "draft-simple" when ther is a small draft model
-        # use ngram-simple
+    if [[ "$spec" = "1" ]]; then
+        # Case A or B: Speculation enabled
 
         if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
-            # Case A: Speculative decoding using a secondary model
+            # Case A: External Draft Model
             local draft_model_path="$GGUF_FOLDER/$draft_model"
-            print_value "Speculation Type" "Draft Model ($draft_model)"
-            print_value "Predict token" "$predict_token"            
+            
             args+=(--spec-type "draft-simple")
             args+=(--spec-draft-model "$draft_model_path")
-            
-            args+=(--spec-draft-n-max "$predict_token")
-            args+=(--spec-draft-n-min 1)
+            args+=(--spec-draft-n-min "$pred_min")
+            args+=(--spec-draft-n-max "$pred_max")
 
             # Configure KV cache type specifically for the draft model
             args+=(--spec-draft-type-k "$spec_cache_type_k")
             args+=(--spec-draft-type-v "$spec_cache_type_v")
 
-            print_value "(test note)" "DFlash, draft-simple predict ${predict_token} (min 1)"
+            print_value "Speculative type" "Draft model, draft-simple (min: $pred_min, max: $pred_max)"
+            print_value "Draft Model" "$draft_model"
         else
-            # Case B: Self-speculative decoding (N-Gram) without a draft model            
-            print_value "Speculation Type" "N-Gram simple"
-            print_value "Predict token" "$predict_token"
-            args+=(--spec-type ngram-simple)
+            # Case B: Self-speculative decoding (N-Gram)
+            args+=(--spec-type "ngram-simple")
 
-            args+=(--spec-ngram-simple-size-m "$predict_token")  # default is 48
-            #args+=(--spec-ngram-simple-size-n "$((predict_token * 2))") # default is 12    
-            
-            ### FIXED VALUE
-            local simple_size_n=8
-            args+=(--spec-ngram-simple-size-n $simple_size_n) # default is 12            
-            args+=(--spec-ngram-simple-min-hits 1)               # default is 1   
+            # N (lookup size) = pred_min
+            # M (draft size) = pred_max
+            args+=(--spec-ngram-simple-size-n "$pred_min")
+            args+=(--spec-ngram-simple-size-m "$pred_max")
+            args+=(--spec-ngram-simple-min-hits 1)
 
-            print_value "(test note)" "DFlash, ngram-simple, predict (size_m: $predict_token, size_n: $simple_size_n)"
+            print_value "Speculative type" "Internal N-Gram, ngram-simple (size_N: $pred_min, size_M: $pred_max)"
         fi
-    else
-        if [ "$mtp" == "1" ]; then
-            # Case B: Self-speculative decoding (MTP)
-            print_value "MTP" "on"
-            print_value "Speculation Type" "MTP"
-            print_value "Predict token" "$predict_token"            
-            args+=(--spec-type draft-mtp)
 
-            args+=(--spec-draft-n-max $predict_token)
-            args+=(--spec-draft-n-min 1)
+    elif [[ "$mtp" == "1" ]]; then
+        # Case C: MTP (Only if spec=0)
+        
+        args+=(--spec-type "draft-mtp")
+        args+=(--spec-draft-n-min "$pred_min")
+        # ✅ FIXED: Changed $ered_max to $pred_max
+        args+=(--spec-draft-n-max "$pred_max")
 
-            print_value "(test note)" "DFlash, draft-mtp, predict ${predict_token}/1"
-        fi
+        print_value "Speculative type" "MTP, draft-mtp (min: $pred_min, max: $pred_max)"
     fi
 
     # Start the server and suppress the initial PID notificatoion 

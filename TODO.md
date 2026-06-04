@@ -2,7 +2,6 @@
 
 ## Current
 
-- 3 Fifure out how to make Qwen 3.6-27B to work !!
 
 ## Backlog
 

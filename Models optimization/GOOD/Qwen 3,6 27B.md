@@ -3,12 +3,12 @@
 
 ## 1. Qwen 3.6 27B Q4_K_M
 
-Hu6ggingFace: 
-Quantized by: Unsloth
-File: unsloth_Qwen3.6-27B-Q4_K_M.gguf
-MTP: No
-MoE: Yes
-OpenAI tools compatibility: ✔️
+Hu6ggingFace:  
+Quantized by: Unsloth  
+File: unsloth_Qwen3.6-27B-Q4_K_M.gguf  
+MTP: No  
+MoE: Yes  
+OpenAI tools compatibility: ✔️  
 
 
 ## 2. Qwen 3.6 27B Q3_K_M
@@ -20,19 +20,20 @@ OpenAI tools compatibility : ✔️
 
 ## 3. Qwen 3.6 27B Esper 3.1 (by mr radermacher)
 
-File: mr_radermacher_Qwen3.6-27B-Esper3.1.Q4_K_M.gguf
-MTP: No
-Max context: 256 k
-OpenAI tools compatibility : ✔️
+HuggingFace: https://huggingface.co/mradermacher/Qwen3.6-27B-Esper3.1-GGUF  
+File: mr_radermacher_Qwen3.6-27B-Esper3.1.Q4_K_M.gguf  
+MTP: No  
+Max context: 256 k  
+OpenAI tools compatibility : ✔️  
 
 
 ## 4. Qwen 3.6 28B-REAP20-A3B (by barozp)
 
-HuggingFace: https://huggingface.co/barozp/Qwen3.6-28B-REAP20-A3B-GGUF
-File: barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf 
-MTP: No
-ax context          : 256 k
-OpenAI tools compatibility : ✔️
+HuggingFace: https://huggingface.co/barozp/Qwen3.6-28B-REAP20-A3B-GGUF  
+File: barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf  
+MTP: No  
+ax context: 256 k  
+OpenAI tools compatibility : ✔️  
 
 
 ## Draft model
@@ -115,5 +116,3 @@ source test_models_common.sh && \
 test_call_result_row $(flag_or $dflash $mtp)
 
 ```
-
-

@@ -20,7 +20,7 @@ cache_type_v="q8_0" # q8_0, tbq4_0, tbq3_0
 test_call() {
     debug_function "test_call"
     # TODO... get info from server log and avoid passing this variable
-    local use_prediction="$1"
+    #local use_prediction="$1"
 
     for i in {1..60}; do
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
@@ -44,7 +44,7 @@ test_call() {
     
     local code_payload=$(cat "$test_code_file")    
 
-    local run_output=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload" "$use_prediction")
+    local run_output=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload")
     return_output_values "$run_output" 1
 
     local server_output=$(get_info_from_server_log)
@@ -66,9 +66,10 @@ test_call_result_row() {
         tool_flag="✔️"
     fi
 
-    #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------\n"
+    #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------" >&2    
     print_value "Max context"  "$ctx_train_k k"
     print_value "OpenAI tools compatibility"  "$tool_flag"
+    print_value "Accepted prediction %" "$accepted_pct"
     
     # fixed values
     local cache_type="---"
@@ -77,8 +78,8 @@ test_call_result_row() {
     local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
     local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")   
     
-    #       | Speed   | Ctx   | GPU   | MoE | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
-    #       | ------- | ----- | ----- | --- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
+    printf "| Speed   | Ctx   | GPU   | MoE | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |\n"
+    printf "| ------- | ----- | ----- | --- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |\n"
     printf "| %3.0f t/s | %3s k | %5s | %3s | %4.1f GB | %-5s | %6s | %3.0fs | %-16s | %-30s | %-12s | %-9s | %-15s |" \
         "$eval_rate" \
         "$ctx_k" \
@@ -100,7 +101,6 @@ test_call_result_row() {
 # return "error=... total_duration=... eval_duration=... eval_count=... eval_rate=... has_tools=..."
 llamacpp_run() {
     local prompt="$1"
-    local use_prediction="$2"
 
     if [ -z "$prompt" ]; then
         echo "‼️ llamacpp_run_full called with empty prompt" >&2
@@ -109,7 +109,7 @@ llamacpp_run() {
 
     # 1. Build the payload with your exact parameters (OpenAI compatible schema)
     local temperature=0.1
-    local max_tokens=2048
+    local max_tokens=4096
 
     json_payload=$(jq -n \
         --arg code "$prompt" \
@@ -252,47 +252,36 @@ llamacpp_run() {
     return_value "eval_rate" "$eval_rate"
     return_value "has_tools" "$has_tools"    
 
-    # extract DFlash values 
+    #data: {"choices":[],"created":1780561441,"id":"chatcmpl-tQCE8GXcHvGYWTBwLbPqLpyuCYh7rEU0","model":"unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf","system_fingerprint":"b9371-f12cc6d0f","object":"chat.completion.chunk","usage":{"completion_tokens":2048,"prompt_tokens":666,"total_tokens":2714,"prompt_tokens_details":{"cached_tokens":0}},"timings":{"cache_n":0,"prompt_n":666,"prompt_ms":4471.659,"prompt_per_token_ms":6.7142027027027025,"prompt_per_second":148.93801159703816,"predicted_n":2048,"predicted_ms":59833.466,"predicted_per_token_ms":29.2155595703125,  "predicted_per_second":34.22833636279737,"draft_n":176,"draft_n_accepted":92}}
+    #data: {"choices":[],"created":1780562537,"id":"chatcmpl-AfHMaYacIwtKpzgubMMZ5MbURozImBIV","model":"unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf","system_fingerprint":"b9371-f12cc6d0f","object":"chat.completion.chunk","usage":{"completion_tokens":971 ,"prompt_tokens":666,"total_tokens":1637,"prompt_tokens_details":{"cached_tokens":0}},"timings":{"cache_n":0,"prompt_n":666,"prompt_ms":3928.869,"prompt_per_token_ms":5.899202702702703, "prompt_per_second":169.51443277950983,"predicted_n":971, "predicted_ms":27352.182,"predicted_per_token_ms":28.169085478887745,"predicted_per_second":35.49991002545976}}
 
+    local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk" 2>/dev/null)
+    local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk" 2>/dev/null)
 
-    # TODO  look at these values
-    # generation: xx tok/s
-    # accepted draft tokens: xx%
+    if [[ "$draft_n" != "null" && "$draft_n_accepted" != "null" ]]; then
+    #if [[ "${draft_n:null}" != "null" && "${draft_n_accepted:null}" != "null" ]]; then
 
+        #if [ -z "$draft_n" ] || [ "$draft_n" = "null" ]; then
+        #    echo "❌ ERROR: Failed to extract .timings.draft_n from API response" >&2
+        #    printf "error=Failed to extract .timings.draft_n \n"
+        #    return 1
+        #fi
 
-
-    if [[ "$use_prediction" = "1" ]] ; then
-
-        local draft_n=$(jq -r '.timings.draft_n' <<< "$final_usage_chunk" 2>/dev/null)
-        local draft_n_accepted=$(jq -r '.timings.draft_n_accepted' <<< "$final_usage_chunk" 2>/dev/null)
-
-        if [[ "$draft_n" != "null" && "$draft_n_accepted" != "null" ]]; then
-        #if [[ "${draft_n:null}" != "null" && "${draft_n_accepted:null}" != "null" ]]; then
-
-            #if [ -z "$draft_n" ] || [ "$draft_n" = "null" ]; then
-            #    echo "❌ ERROR: Failed to extract .timings.draft_n from API response" >&2
-            #    printf "error=Failed to extract .timings.draft_n \n"
-            #    return 1
-            #fi
-
-            if [ -z "$draft_n_accepted" ] || [ "$draft_n_accepted" = "null" ]; then
-                echo "❌ ERROR: Failed to extract .timings.draft_n_accepted from API response" >&2
-                printf "error=Failed to extract .timings.draft_n_accepted \n"
-                return 1
-            fi
-
-            local accepted_pct=$(awk -v a="$draft_n_accepted" -v n="$draft_n" 'BEGIN {
-                if (n > 0) printf "%.1f\n", (a / n) * 100
-                else printf "0.0\n"
-            }')
-
-            #return_value "predicted_s" "$predicted_s"
-            #return_value "predicted_tps" "$predicted_tps"
-            return_value "accepted_pct" "$accepted_pct"
-        else 
-            return_value "accepted_pct" "n.a."   
+        if [ -z "$draft_n_accepted" ] || [ "$draft_n_accepted" = "null" ]; then
+            echo "❌ ERROR: Failed to extract .timings.draft_n_accepted from API response" >&2
+            printf "error=Failed to extract .timings.draft_n_accepted \n"
+            return 1
         fi
-    else
-        return_value "accepted_pct" "--"        
+
+        local accepted_pct=$(awk -v a="$draft_n_accepted" -v n="$draft_n" 'BEGIN {
+            if (n > 0) printf "%.1f\n", (a / n) * 100
+            else printf "0.0\n"
+        }')
+
+        #return_value "predicted_s" "$predicted_s"
+        #return_value "predicted_tps" "$predicted_tps"
+        return_value "accepted_pct" "$accepted_pct"
+    else 
+        return_value "accepted_pct" "n.a."   
     fi
 }

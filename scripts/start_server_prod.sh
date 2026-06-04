@@ -3,6 +3,8 @@ source server_common.sh
 
 ## This script is for start serving specific models for production (minimal log, no monitoring)
 
+# --samplers "top_k;min_p;temperature"   this should avoid the values sent by Agent code tool
+
 args=(
     --host 127.0.0.1 \
     --port "$SERVER_PORT" \
@@ -21,7 +23,9 @@ args=(
 
     # TODO: minimal ?
     # default is 3, we need this level to print out the GPU layers
-    --log-verbosity 2 \
+    --log-verbosity 3 \
+
+    --samplers "top_k;min_p;temperature"
 
     --temperature 0.1 \
     --top-k 20 \
@@ -46,25 +50,85 @@ start_server() {
     local ubatch
     local spec_type
 
+    # defaults
+    local spec_draft_n_max="3"
+    local spec_draft_n_min="1"
+    local spec_cache_type_k="q8_0"
+    local spec_cache_type_v="q8_0"
+
     local spec_ngram_simple_size_m=48
     local spec_ngram_simple_size_n=12
     local spec_ngram_simple_min_hits=1
 
-    local model_file    
+    local model_file  
+
+    # Qwen 3.6 28B  
     if [[ "$model" = "barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf" ]]; then
         model_file=barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf
-        ctx_k=128
+        ctx_k=64
         gpu_layers=-1
         cpu_moe=6
         batch=2048
         ubatch=256
 
         spec_type="ngram-simple"
-
+       
         spec_ngram_simple_size_m=5
         spec_ngram_simple_size_n=8
         spec_ngram_simple_min_hits=1
     fi
+
+    # GLM 4.7 Flash   (Rubbish and loop !!!)
+    if [[ "$model" = "unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf" ]]; then 
+        model_file=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
+        ctx_k=64
+        gpu_layers=-1
+        cpu_moe=7
+        batch=2048
+        ubatch=256
+
+        spec_type="ngram-simple"
+
+        spec_ngram_simple_size_m=30
+        spec_ngram_simple_size_n=30
+        spec_ngram_simple_min_hits=1
+    fi
+
+    # GPT OSS 20B
+    if [[ "$model" = "unsloth_gpt-oss-20b-Q8_K_M.gguf" ]]; then 
+        model_file=unsloth_gpt-oss-20b-Q8_K_M.gguf
+        ctx_k=64
+        gpu_layers=-1
+        cpu_moe=0
+        batch=2048
+        ubatch=256
+
+        spec_type="ngram-simple"
+
+        spec_ngram_simple_size_m=5
+        spec_ngram_simple_size_n=10
+        spec_ngram_simple_min_hits=1
+
+        #spec_type="draft-simple"
+
+        #spec_draft_n_max=12
+        #spec_draft_n_min=1
+    fi  
+
+    if [[ "$model" = "unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf" ]]; then 
+        model_file=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
+        ctx_k=64
+        gpu_layers=-1
+        cpu_moe=0
+        batch=2048
+        ubatch=256
+
+        spec_type="draft-simple"
+
+        spec_draft_n_max=12
+        spec_draft_n_min=1
+    fi   
+
 
     args+=(--model "$GGUF_FOLDER/$model_file")
     args+=(--ctx-size "$(($ctx_k * 1024))")
@@ -76,6 +140,13 @@ start_server() {
 
     args+=(--spec-type "$spec_type" )
 
+    # for DFlash
+    args+=(--spec-draft-n-max "$spec_draft_n_max")
+    args+=(--spec-draft-n-min "$spec_draft_n_min")
+    args+=(--spec-draft-type-k "$spec_cache_type_k")
+    args+=(--spec-draft-type-v "$spec_cache_type_v")
+    
+    # for N-Gram
     args+=(--spec-ngram-simple-size-m "$spec_ngram_simple_size_m")
     args+=(--spec-ngram-simple-size-n "$spec_ngram_simple_size_n")
     args+=(--spec-ngram-simple-min-hits "$spec_ngram_simple_min_hits")

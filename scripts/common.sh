@@ -45,8 +45,8 @@ declare_output_values() {
     local key value    
     while IFS='=' read -r key value; do
         if [[ -z "$value" ]]; then
-            echo "❌ ERROR: the value for \"$key\" is empty." >&2
-            printf "error=the value for key \"${key}\" is empty\n"
+            echo "❌ ERROR: the value for \"$key\" is empty. (provided values: $values)" >&2
+            printf "error=the value for key \"${key}\" is empty (#declare_output_values)\n"
             return 1
         fi
 
@@ -77,8 +77,8 @@ return_output_values() {
     local key value    
     while IFS='=' read -r key value; do
         if [[ -z "$value" ]]; then
-            echo "❌ ERROR: the value for \"$key\" is empty." >&2
-            printf "error=the value for key \"${key}\" is empty\n"
+            echo "❌ ERROR: the value for \"$key\" is empty. (provided values: $values)." >&2
+            printf "error=the value for key \"${key}\" is empty (#return_output_values)\n"
             return 1
         fi
 
