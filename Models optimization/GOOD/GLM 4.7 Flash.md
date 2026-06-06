@@ -9,6 +9,8 @@ MTP: ?
 Max context: 198 k
 OpenAI tools compatibility : ✔️
 
+
+
 | Speed   | Ctx   | GPU   | MoE | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
 | ------- | ----- | ----- | --- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
 |  36 t/s |  32 k | 48/48 |  10 | 15.1 GB | ---   |   1123 |  32s | DFlash (N-gram)  | size_M=24 size_N=24 min_hits=1 | 1024/256     | 13.8/3.1  |                 |
@@ -44,6 +46,20 @@ OpenAI tools compatibility : ✔️
 |  27 t/s |  64 k | 48/48 |  11 | 12.6 GB | ---   |    917 |  34s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 10.4/2.6  |                 |
 |  26 t/s |  48 k | 48/48 |  11 | 12.1 GB | ---   |   1042 |  39s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 10.4/2.6  |                 |
 
+| unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf
+|  44 t/s |  96 k | 48/48 |   4 | 15.5 GB | ---   |    969 |  22s | none             | --                             | 1024/384     | 12.3/0.8  |                 |
+|  44 t/s |  96 k | 48/48 |   4 | 15.3 GB | ---   |    931 |  22s | none             | --                             | 1024/128     | 12.3/0.8  |                 |
+|  44 t/s |  96 k | 48/48 |   4 | 15.4 GB | ---   |    989 |  23s | none             | --                             | 2048/256     | 12.3/0.8  |                 |
+|  40 t/s |  96 k | 48/48 |   5 | 15.1 GB | ---   |   1145 |  29s | none             | --                             | 2048/256     | 12.0/1.1  |                 |
+
+|  41 t/s |  64 k | 48/48 |   5 | 14.2 GB | ---   |   1035 |  25s | none             | --                             | 2048/256     | 12.0/1.1  |                 |
+|  36 t/s |  64 k | 48/48 |   7 | 13.7 GB | ---   |    967 |  27s | DFlash (N-gram)  | size_M=6 size_N=10 min_hits=1  | 2048/256     | 11.5/1.6  |                 |
+|  35 t/s |  64 k | 48/48 |   7 | 13.7 GB | ---   |   1038 |  29s | DFlash (N-gram)  | size_M=6 size_N=10 min_hits=1  | 2048/256     | 11.5/1.6  |                 |
+|  34 t/s |  64 k | 48/48 |   7 | 13.7 GB | ---   |   2048 |  60s | DFlash (N-gram)  | size_M=8 size_N=8 min_hits=1   | 2048/256     | 11.5/1.6  |                 |
+|  36 t/s |  64 k | 48/48 |   7 | 13.7 GB | ---   |    974 |  28s | DFlash (N-gram)  | size_M=6 size_N=8 min_hits=1   | 2048/256     | 11.5/1.6  |                 |
+|  31 t/s |  64 k | 48/48 |   7 | 13.7 GB | ---   |   1096 |  35s | DFlash (N-gram)  | size_M=8 size_N=8 min_hits=1   | 2048/256     | 11.5/1.6  |                 |
+|  28 t/s |  64 k | 48/48 |   7 | 13.7 GB | ---   |   1045 |  37s | DFlash (N-gram)  | size_M=10 size_N=6 min_hits=1  | 2048/256     | 11.5/1.6  |                 |
+
 
 
 ## Run tests
@@ -52,17 +68,18 @@ OpenAI tools compatibility : ✔️
 cd scripts
 
 #model=unsloth_GLM-4.7-Flash-Q4_K_M.gguf
-model=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
-ctx_k=128
+#model=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
+model=unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf
+ctx_k=96
 gpu_layers=-1
-cpu_moe=7
-dflash=1
+cpu_moe=4
+spec=0
 draft_model=none
-predict_token=30
+predict_token=4/2  # N lookup /M predict
 mtp=0
 jinjia=0
-batch=2048
-ubatch=256
+batch=1024
+ubatch=384
 
 source server_common.sh && \
 start_server \
@@ -70,7 +87,7 @@ start_server \
     $ctx_k \
     $gpu_layers \
     $cpu_moe \
-    $dflash \
+    $spec \
     $draft_model \
     $predict_token \
     $mtp \
@@ -78,7 +95,6 @@ start_server \
     $batch \
     $ubatch
 
-source test_models_common.sh && \
-test_call_result_row $(flag_or $dflash $mtp)
+source test_models_common.sh && test_call_result_row
 
 ```

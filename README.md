@@ -3,13 +3,12 @@
 What I was doing ?  [TODO](TODO.md)  
   
 Llama.cpp Website: https://llama-cpp.com  
-Documentation: ???  
 GitHub: https://github.com/ggml-org/llama.cpp
 
 
 ## Goal
 
-Test `llama.cpp` to get better performance than Ollama for a personal, single-user coding assistant running on a consumer graphic card (16GB-24GB).  
+Test `llama.cpp` to get better performance than Ollama for a personal, single-user coding assistant running on a consumer graphic card (16GB).  
 Focus is not "largest model possible", but **quality × tokens/sec × usable context**.  
 
 
@@ -69,7 +68,7 @@ Models that have MTP can be started with `--spec-type draft-mtp`
 
 ---
 
-### ✔️ Speculative decoding
+### ❔ Speculative decoding
 
 In practice, a small model generates a predefined number of tokens (2-12) and the real model can accept ot re-generate them itself.  
 So, an important parameter is the acceptance percentage: 90% means that most of the **predicted** tokens are ok and used.  
@@ -78,29 +77,31 @@ A small number of predicted tokens are more prone to have a higher acceptance pe
 I tried a 0.8B and a 2B model for prediction... not sure what is the best, needs more test.  
 Some AI says that the affinity of draft model and actual model increase teh acceptance percentage. Is it true?  
   
-To improve the performance the draft model has its own cache-types and its own 
+To improve the performance, the draft model has its own cache-types.
 
 + faster generation using draft predictions
 - some VRAM goes to the draft model
 - the total duration for getting the answer is the sum of draft tokens and final tokens generation.
 
-I got a very high amount of predicted token accepted (10-12) but the performace (final tk/s) was worst.  
+I got high amount of predicted token accepted (10-12) but the performace (final tok/s) was worst.   
+
+⚠️ If the speculative type (__--spec-type__) is set to "ngram-simple", llama.cpp will use the same model to predict tokens, with very bad outcome/consequences for coding assistant purpose.  
+Look here: [NGram-Speculation](doc/N-Gram%20Speculation.md).
 
 ---
 
 ## Tests
 
 I need to test if the model supports "OpenAI tool calling"  
-To do that I have a precise prompt and a est on the output.  
+To do that I have a precise prompt and a test on the output.  
 
 Metrics:
 * tokens/sec
-* prompt tokens/sec
+* context size
+* GPU offload (X/Y layers)
 * VRAM usage
 * RAM usage
 * CPU usage
-* context size
-* GPU offload (X/Y layers)
 
 Suggested comparison:
 1. Ollama baseline
@@ -116,13 +117,11 @@ Investigate:
 * best context size
 * best settings for RTX 4060 Ti 16GB
 
-I have 2 main scripts:
-- **run_server.sh** : used for experimenting like test new models or test new features
-- **test_model.sh** : here 
 
 ## llama-bench
 
-[TODO] Describe and test
+Not used.  
+Not investigated neither.
 
 
 ## Videos
@@ -156,25 +155,8 @@ Which CUDA version is my graphic card ?
 - copy hte libraries in hte unzipped CUDA folder in the same folder of llama.cpp
 - Add (or update) the PATH variable to point to the folder.
 
-### Ubuntu
-[TODO]
 
-
-## Running
-
-```bash
-llama-server 
-
-- -m path to the GGUF file
-- --port: 8001
-- --no-warmup to avoid the server to pre-load the model with an empty message (to have it available immediately)
-- --ctx-size: N * 1024  DEPENDS FROM MODEL
-- --n-gpu-layers 999  offload (practically) all possible layers to the GPU
-
-
-```
-
-### llama-server
+## llama-server common arguments
 
 https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
 

@@ -26,7 +26,7 @@ reset=$'\033[0m'
 
 # print_key_value "AAA" 123
 print_value() {
-    printf '%s%-20s : %s%s%s\n' \
+    printf '%s%-30s: %s%s%s\n' \
         "$gray_light" "$1" "$yellow" "$2" "$reset" >&2
 }
 

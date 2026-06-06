@@ -196,7 +196,7 @@ start_server() {
     echo -n "Waiting for llama-server to load model..." >&2
     for i in {1..60}; do
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
-            echo " Ready!" >&2
+            echo "🚀 Ready!" >&2
 
             #local vram_usage=$(get_readable_VRAM_usage)
             #echo "VRAM used/total: $vram_usage" >&2

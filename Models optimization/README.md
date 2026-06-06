@@ -6,12 +6,12 @@
 | Qwen 3.5 9B             | Unsloth      |                                                 | 39 t/s |   256 k |                       |                                  |
 | Qwen 3.6 27B (not-MTP)  | bezorp       | barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf       | 42 t/s |   128 k | ✔️ 64k 35 t/s  OK     |                                  |
 | Gemma 4 26B             | noctrex      | gemma-4-26B-A4B-it-MXFP4_MOE.gguf               | 36 t/s |   128 k |                       |                                  |
-| GLM 4.7 Flash 23B       | Unsloth      | unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf  | 32 t/s |   128 k | ❌ 64k 25 t/s  FAIL   | Rubbish after just few questions |
+| GLM 4.7 Flash 23B       | Unsloth      | unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf  | 32 t/s |   128 k | ❌ 64k 35 t/s  FAIL   | Rubbish after a few questions    |
 | Gemma 4 26B             | Unsloth      | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf               | 28 t/s |    64 k |                       |                                  |
 | Gemma 4 26B             | Unsloth      | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf               | 25 t/s |   128 k |                       |                                  |
 | Qwen 3.6 35B-A3B        | Unsloth      | unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf          | 25 t/s |    96 k |                       |                                  |
 | Qwen 3 14B              | Unsloth      | unsloth_Qwen3-14B-Q4_K_M.gguf                   | 27 t/s |    64 k |                       |                                  |
-| GLM 4.7 Flash           | Unsloth      | unsloth_GLM-4.7-Flash-Q4_K_M.gguf               | 32 t/s |    32 k |                       |                                  |
+| GLM 4.7 Flash           | Unsloth      | unsloth_GLM-4.7-Flash-Q4_K_M.gguf               | 32 t/s |    32 k | ❌ 64k 5 t/s          | Too slow                         |
 
 
 

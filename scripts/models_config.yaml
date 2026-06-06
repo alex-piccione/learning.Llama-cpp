@@ -1,0 +1,128 @@
+# usage
+
+# model=qwen_3.6_28b_reap_20
+# model=glm_4.7_flash_reap
+# source start_server_prod.sh && start_server $model
+
+models:
+  # Qwen 3.6 28B 
+  qwen_3.6_28b_reap_20:
+    file: barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 6
+    batch: 2048
+    ubatch: 256
+    spec_type: none 
+    #spec_type: ngram-simple
+    #spec_ngram_simple_size_m: 5
+    #spec_ngram_simple_size_n: 8
+    #spec_ngram_simple_min_hits: 1
+    pi_agent_model: >
+      { 
+         "_test": "Really good",
+          "id": "barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf",
+          "name": "Qwen 3.6 28B REAP20",
+          "contextWindow": 65536,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  
+  # GLM 4.7 Flash
+  glm_4.7_flash_reap:
+    file: unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 6
+    batch: 2048
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "???",
+          "id": "unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf",
+          "name": "GLM 4.7 Flash 23B",
+          "contextWindow": 65536,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+
+  glm_4.7_flash_reap_UD:
+    file: unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 6
+    batch: 2048
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "???",
+          "id": "unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf",
+          "name": "GLM 4.7 Flash 23B REAP UD",
+          "contextWindow": 65536,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+      
+
+  glm_4.7_flash:
+    file: unsloth_GLM-4.7-Flash-Q4_K_M.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 6
+    batch: 2048
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+        { 
+            "_test": "XXXX Too slow",
+            "id": "unsloth_GLM-4.7-Flash-Q4_K_M.gguf",
+            "name": "GLM 4.7 Flash",
+            "contextWindow": 65536,
+            "maxTokens": 2048,
+            "reasoning": true
+        },
+
+
+  # GPT OSS 20B
+  gpt_oss-20b_Q8_K_M:
+    file: unsloth_gpt-oss-20b-Q8_K_M.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 256
+    spec_type: none      
+
+    #spec_type="ngram-simple"
+    #spec_ngram_simple_size_m=5
+    #spec_ngram_simple_size_n=10
+    #spec_ngram_simple_min_hits=1
+
+    pi_agent_model: >
+        { 
+            "_test": "OK",
+            "id": "unsloth_gpt-oss-20b-Q8_0.gguf",
+            "name": "GPT OSS 20B",            
+            "contextWindow": 65536,
+            "maxTokens": 4096,
+            "reasoning": true
+        },
+
+
+  GLM-4.7-Flash-REAP-23B-A3B: 
+    file: unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 256
+    spec_type: none
+
+    #spec_type="draft-simple"
+    #spec_draft_n_max=12
+    #spec_draft_n_min=1
+       

@@ -3,6 +3,8 @@ source server_common.sh
 
 ## This script is for start serving specific models for production (minimal log, no monitoring)
 
+models_config_file="models_config.yaml"
+
 # --samplers "top_k;min_p;temperature"   this should avoid the values sent by Agent code tool
 
 args=(
@@ -38,11 +40,74 @@ args=(
 
 
 start_server() {
+    local model_id="${1:-}"
+
+    # 1. If no model ID provided, show a selection menu
+    if [[ -z "$model_id" ]]; then
+        echo "No model specified. Available models:"
+        
+        # Extract keys from YAML
+        local models_list
+        models_list=$(yq '.models | keys | .[]' "$models_config_file")
+        
+        # Check if list is empty
+        if [[ -z "$models_list" ]]; then
+            echo "Error: No models found in $models_config_file"
+            exit 1
+        fi
+
+        # Create an array for the select loop
+        local -a choices
+        while IFS= read -r m; do
+            choices+=("$m")
+        done <<< "$models_list"
+
+        # Show the menu
+        PS3="Please enter the model number to start (or Ctrl+C to quit): "
+        select choice in "${choices[@]}"; do
+            if [[ -n "$choice" ]]; then
+                model_id="$choice"
+                break
+            else
+                echo "Invalid selection. Please try again."
+            fi
+        done
+        
+        # If user pressed Ctrl+C during select, $model_id will be empty
+        if [[ -z "$model_id" ]]; then
+            echo "Aborted by user."
+            exit 0
+        fi
+    fi
+
+
+    if ! yq -e ".models[\"$model_id\"]" "$models_config_file" > /dev/null 2>&1; then
+        echo "Error: Model '$model_id' not found in $models_config_file"
+        echo "Available models: $(yq '.models | keys | .[]' $models_config_file | tr '\n' ' ')"
+        #exit 1
+    fi
+
+    debug "Loading configuration for '$model_id'"
+
+    # Dynamically load variables
+    # This loop reads every key from the YAML and creates a bash variable with that name
+    for key in $(yq ".models[\"$model_id\"] | keys | .[]" $models_config_file); do
+        # Get the value (yq outputs strings with quotes, we strip them)
+        val=$(yq ".models[\"$model_id\"].$key" $models_config_file)
+        
+        print_value "$key" "$val"
+
+        #eval "$key=$val"
+        declare "$key=$val"
+
+        # (Alternative): Using printf to avoid quoting issues if val has spaces
+        # declare "$(printf '%s=%s' "$key" "$val")"
+    done
+
 
     # stop running server
-    stop_server >&2
-   
-    local model=$1
+    stop_server >&2   
+
     local ctx_k
     local gpu_layers
     local cpu_moe
@@ -60,75 +125,7 @@ start_server() {
     local spec_ngram_simple_size_n=12
     local spec_ngram_simple_min_hits=1
 
-    local model_file  
-
-    # Qwen 3.6 28B  
-    if [[ "$model" = "barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf" ]]; then
-        model_file=barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf
-        ctx_k=64
-        gpu_layers=-1
-        cpu_moe=6
-        batch=2048
-        ubatch=256
-
-        spec_type="ngram-simple"
-       
-        spec_ngram_simple_size_m=5
-        spec_ngram_simple_size_n=8
-        spec_ngram_simple_min_hits=1
-    fi
-
-    # GLM 4.7 Flash   (Rubbish and loop !!!)
-    if [[ "$model" = "unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf" ]]; then 
-        model_file=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
-        ctx_k=64
-        gpu_layers=-1
-        cpu_moe=7
-        batch=2048
-        ubatch=256
-
-        spec_type="ngram-simple"
-
-        spec_ngram_simple_size_m=30
-        spec_ngram_simple_size_n=30
-        spec_ngram_simple_min_hits=1
-    fi
-
-    # GPT OSS 20B
-    if [[ "$model" = "unsloth_gpt-oss-20b-Q8_K_M.gguf" ]]; then 
-        model_file=unsloth_gpt-oss-20b-Q8_K_M.gguf
-        ctx_k=64
-        gpu_layers=-1
-        cpu_moe=0
-        batch=2048
-        ubatch=256
-
-        spec_type="ngram-simple"
-
-        spec_ngram_simple_size_m=5
-        spec_ngram_simple_size_n=10
-        spec_ngram_simple_min_hits=1
-
-        #spec_type="draft-simple"
-
-        #spec_draft_n_max=12
-        #spec_draft_n_min=1
-    fi  
-
-    if [[ "$model" = "unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf" ]]; then 
-        model_file=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
-        ctx_k=64
-        gpu_layers=-1
-        cpu_moe=0
-        batch=2048
-        ubatch=256
-
-        spec_type="draft-simple"
-
-        spec_draft_n_max=12
-        spec_draft_n_min=1
-    fi   
-
+    local model_file=$file  
 
     args+=(--model "$GGUF_FOLDER/$model_file")
     args+=(--ctx-size "$(($ctx_k * 1024))")
@@ -154,20 +151,18 @@ start_server() {
     
     echo >&2
     echo "=========================================================" >&2
-    echo "START SERVER: ${yellow}$model${reset} with ${yellow}$ctx_k K${reset} context" >&2
-    echo "=========================================================" >&2
-    
+    echo "START SERVER: ${yellow}$model_file${reset} with ${yellow}$ctx_k K${reset} context" >&2
+    echo "=========================================================" >&2    
 
     ("$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \
         > $SERVER_LOG 2>&1 & ) >/dev/null
-
 
 
     # Wait for the server to come alive (up to 30 seconds)
     echo -n "Waiting for llama-server to load model..." >&2
     for i in {1..60}; do
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${SERVER_PORT}/health" | grep -q "200"; then
-            echo " Ready!" >&2
+            echo " Ready! 🚀" >&2
 
             #local vram_usage=$(get_readable_VRAM_usage)
             #echo "VRAM used/total: $vram_usage" >&2
