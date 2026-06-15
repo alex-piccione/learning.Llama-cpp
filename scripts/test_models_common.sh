@@ -72,7 +72,8 @@ test_call_result_row() {
     print_value "Accepted prediction %" "$accepted_pct"
     
     # fixed values
-    local cache_type="---"
+    local cpu_moe="--"
+    local cache_type="--"    
 
     local vram_used=${vram_usage%%/*}  # %% remove the longhest match from the end of the string, /* matches everything after the first "/"
     local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")

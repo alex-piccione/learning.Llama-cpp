@@ -1,6 +1,6 @@
 # Qwen 3.6 35B A3B
 
-Hu6ggingFace link: ?
+HuggingFace: ?
 Quantized by: Unsloth
 File: unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 MTP: ?
@@ -11,12 +11,18 @@ OpenAI tools compatibility : ✔️
 Note.  
 - With less than CPU_MOE=13 the speed drops down.  (?!)
 - Using 64k instead of 96k of context gives exactly the same speed. (?!)
+- Switching 
 
 
 ## Run tests
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
+|  15 t/s |  96 k | 41/41 |  -- | 15.7 GB | --    |    680 |  45s | DFlash (N-gram)  | size_M=10 size_N=7 min_hits=1  | 2048/384     | 14.2/6.4  |                 |
+|  15 t/s |  96 k | 41/41 |  -- | 15.7 GB | --    |    674 |  44s | DFlash (N-gram)  | size_M=10 size_N=6 min_hits=1  | 2048/384     | 14.2/6.4  |                 |
+
+
+| old values thta I'm not able to replicate ! (I tried also with the same llama.cpp version)
 |  28 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |   1179 |  41s | DFlash (N-gram)  | size_n=10 size_m=7 min_hits=1  | 2048/384     | 14.2/6.4  |                 |
 |  28 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    647 |  23s | DFlash (N-gram)  | size_n=10 size_m=7 min_hits=1  | 2048/512     | 14.2/6.4  |                 |
 |  27 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    740 |  27s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 2048/512     | 14.2/6.4  |                 |
@@ -26,6 +32,7 @@ Note.
 |  24 t/s | 41/41 |  13 |  96 k | 15.7 GB | ---   |    671 |  27s | DFlash (N-gram)  | size_n=10 size_m=8 min_hits=1  | 512/256      | 14.2/6.4  |                 |
 |  26 t/s | 41/41 |  13 |  64 k | 15.5 GB | ---   |   1106 |  42s | DFlash (N-gram)  | size_M=10 size_N=12 min_hits=1 | 2048/256     | 14.2/6.4  |                 |
 |  26 t/s | 41/41 |  13 |  64 k | 15.5 GB | ---   |   1114 |  43s | DFlash (N-gram)  | size_M=8 size_N=12 min_hits=1  | 2048/256     | 14.2/6.4  |                 |
+
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                                   |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | -------------------------------------- |
@@ -59,24 +66,24 @@ cd scripts
 model=unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 ctx_k=96
 gpu_layers=-1
-cpu_moe=13
-dflash=1
+cpu_moe=0
+spec=1
 draft_model=none
-predict_token=7
+predict_token=8/12
 mtp=0
 jinjia=0
 batch=2048
-ubatch=384
+ubatch=256
 
 ### Max Speed
 
 model=unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 ctx_k=64
 gpu_layers=-1
-cpu_moe=13  # to test 14
-dflash=1
+cpu_moe=0
+spec=1
 draft_model=none
-predict_token=8
+predict_token=8/12
 mtp=0
 jinjia=0
 batch=2048
@@ -89,7 +96,7 @@ start_server \
     $ctx_k \
     $gpu_layers \
     $cpu_moe \
-    $dflash \
+    $spec \
     $draft_model \
     $predict_token \
     $mtp \
@@ -97,7 +104,6 @@ start_server \
     $batch \
     $ubatch
 
-source test_models_common.sh && \
-test_call_result_row $(flag_or $dflash $mtp)
+source test_models_common.sh && test_call_result_row
 
 ```

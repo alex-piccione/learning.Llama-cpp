@@ -42,22 +42,22 @@ start_server() {
 
     if [ -z "$model" ]; then
         echo "‼️ start_server was called with empty model" >&2
-        exit 1
+        return 1
     fi
 
     if [ -z "$ctx_k" ]; then
         echo "‼️ start_server was called with empty ctx_k" >&2
-        exit 1
+        return 1
     fi
 
     if [ -z "$gpu_layers" ]; then
         echo "‼️ start_server was called with empty gpu_layers" >&2
-        exit 1
+        return 1
     fi
 
-    if [ -z "$dflash" ]; then
-        echo "‼️ start_server was called with empty dflash" >&2
-        exit 1
+    if [ -z "$spec" ]; then
+        echo "‼️ start_server was called with empty spec" >&2
+        return 1
     fi
 
     echo >&2
@@ -120,20 +120,23 @@ start_server() {
     # Logging settings
     args+=(--log-verbosity 4) # default is 3, we need this level to print out the GPU layers
 
-    if [[ "$mtp" = "1" && "$dflash" = "1" ]] ; then
-        echo "‼️ You can't used both DFlash and MTP" >&2
-        exit 1
+    if [[ "$spec" = "1" && "$mtp" = "1" ]] ; then
+        echo "‼️ You can't used both Speculation and MTP" >&2
+        return 1
     fi
 
-    local pred_type="none" # initial value
+    local pred_type="none" # default value
 
-    local pred_min
-    local pred_max
-    # Split the string by '/'
-    IFS='/' read -r pred_min pred_max <<< "$predict_token"
-    if [[ -z "$pred_min" || -z "$pred_max" ]]; then
-        echo "‼️ start_server was called with predict_token that does not follow the format 'min/max'" >&2
-        exit 1
+
+    if [[ "$spec" = "1" || "$mtp" = "1"  ]]; then
+        local pred_min
+        local pred_max
+        # Split the string by '/'
+        IFS='/' read -r pred_min pred_max <<< "$predict_token"
+        if [[ -z "$pred_min" || -z "$pred_max" ]]; then
+            echo "‼️ start_server was called with predict_token that does not follow the format 'min/max'" >&2
+            return 1
+        fi
     fi
 
     if [[ "$spec" = "1" ]]; then
@@ -169,14 +172,22 @@ start_server() {
 
     elif [[ "$mtp" == "1" ]]; then
         # Case C: MTP (Only if spec=0)
+
+        if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
+            # Case A: External Draft Model
+            local draft_model_path="$GGUF_FOLDER/$draft_model"
+            print_value "Draft Model" "$draft_model"
+        fi
         
         args+=(--spec-type "draft-mtp")
         args+=(--spec-draft-n-min "$pred_min")
-        # ✅ FIXED: Changed $ered_max to $pred_max
         args+=(--spec-draft-n-max "$pred_max")
 
         print_value "Speculative type" "MTP, draft-mtp (min: $pred_min, max: $pred_max)"
     fi
+
+    # clean log
+    echo "" > $SERVER_LOG
 
     # Start the server and suppress the initial PID notificatoion 
     #{ "$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \
@@ -203,6 +214,8 @@ start_server() {
 
             break
         fi
+
+        #check_load_model_fail
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
@@ -242,6 +255,11 @@ stop_server() {
 }
 
 
+## TODO
+#check_load_model_fail() {
+#        ## TODO: capture this error in the server log
+#        ## 0.09.054.775 W llama_init_from_model: context type MTP requested but model doesn't contain MTP layers
+#}
 
 get_info_from_server_log() {
     debug_function "get_info_from_server_log"
@@ -323,9 +341,9 @@ get_info_from_server_log() {
     return_value "batch" "$batch"
     return_value "ubatch" "$ubatch"
 
-    if [[ "$use_dflash" = "1" ]] ; then
-        return_value "draft_model" "$draft_model"
-    fi
+    #if [[ "$spec" = "1" ]] ; then
+    #    return_value "draft_model" "$draft_model"
+    #fi
 
 
     #return_value "ctx_k" "$ctx_k"

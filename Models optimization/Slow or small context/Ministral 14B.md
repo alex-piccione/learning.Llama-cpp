@@ -1,4 +1,4 @@
-#
+# Ministral 14B
 
 File: mistralai_Ministral-3-14B-Reasoning-2512-Q4_K_M.gguf
 Quantized by: Ministral AI
@@ -44,7 +44,6 @@ start_server \
     $batch \
     $ubatch
 
-source test_models_common.sh && \
-test_call_result_row $(flag_or $dflash $mtp)
+source test_models_common.sh && test_call_result_row 
 
 ```

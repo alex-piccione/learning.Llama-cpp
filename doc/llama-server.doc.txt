@@ -1,8 +1,8 @@
+$ llama-server --help
 ----- common params -----
 
 -h,    --help, --usage                  print usage and exit
 --version                               show version and build info
---license                               show source code license and dependencies
 -cl,   --cache-list                     show list of models in cache
 --completion-bash                       print source-able bash completion script for llama.cpp
 -t,    --threads N                      number of CPU threads to use during generation (default: -1)
@@ -191,24 +191,25 @@
                                         (env: HF_TOKEN)
 --log-disable                           Log disable
 --log-file FNAME                        Log to file
-                                        (env: LLAMA_LOG_FILE)
+                                        (env: LLAMA_ARG_LOG_FILE)
 --log-colors [on|off|auto]              Set colored logging ('on', 'off', or 'auto', default: 'auto')
                                         'auto' enables colors when output is to a terminal
-                                        (env: LLAMA_LOG_COLORS)
+                                        (env: LLAMA_ARG_LOG_COLORS)
 -v,    --verbose, --log-verbose         Set verbosity level to infinity (i.e. log all messages, useful for
                                         debugging)
 --offline                               Offline mode: forces use of cache, prevents network access
-                                        (env: LLAMA_OFFLINE)
+                                        (env: LLAMA_ARG_OFFLINE)
 -lv,   --verbosity, --log-verbosity N   Set the verbosity threshold. Messages with a higher verbosity will be
                                         ignored. Values:
                                          - 0: generic output
                                          - 1: error
                                          - 2: warning
                                          - 3: info
-                                         - 4: debug
+                                         - 4: trace (more info)
+                                         - 5: debug
                                         (default: 3)
-                                        
-                                        (env: LLAMA_LOG_VERBOSITY)
+
+                                        (env: LLAMA_ARG_LOG_VERBOSITY)
 --log-prefix, --no-log-prefix           Enable prefix in log messages
                                         (env: LLAMA_ARG_LOG_PREFIX)
 --log-timestamps, --no-log-timestamps   Enable timestamps in log messages
@@ -332,7 +333,7 @@
                                         keep the Mixture of Experts (MoE) weights of the first N layers in the
                                         CPU for the draft model
                                         (env: LLAMA_ARG_SPEC_DRAFT_N_CPU_MOE)
---spec-draft-n-max N                    number of tokens to draft for speculative decoding (default: 16)
+--spec-draft-n-max N                    number of tokens to draft for speculative decoding (default: 3)
                                         (env: LLAMA_ARG_SPEC_DRAFT_N_MAX)
 --spec-draft-n-min N                    minimum number of draft tokens to use for speculative decoding
                                         (default: 0)
@@ -340,8 +341,11 @@
 --spec-draft-p-split, --draft-p-split P
                                         speculative decoding split probability (default: 0.10)
                                         (env: LLAMA_ARG_SPEC_DRAFT_P_SPLIT)
---spec-draft-p-min, --draft-p-min P     minimum speculative decoding probability (greedy) (default: 0.75)
+--spec-draft-p-min, --draft-p-min P     minimum speculative decoding probability (greedy) (default: 0.00)
                                         (env: LLAMA_ARG_SPEC_DRAFT_P_MIN)
+--spec-draft-backend-sampling, --no-spec-draft-backend-sampling
+                                        offload draft sampling to the backend (default: enabled)
+                                        (env: LLAMA_ARG_SPEC_DRAFT_BACKEND_SAMPLING)
 --spec-draft-device, -devd, --device-draft <dev1,dev2,..>
                                         comma-separated list of devices to use for offloading the draft model
                                         (none = don't offload)
@@ -356,7 +360,7 @@
 --spec-type none,draft-simple,draft-eagle3,draft-mtp,ngram-simple,ngram-map-k,ngram-map-k4v,ngram-mod,ngram-cache
                                         comma-separated list of types of speculative decoding to use (default:
                                         none)
-                                        
+
                                         (env: LLAMA_ARG_SPEC_TYPE)
 --spec-ngram-mod-n-min N                minimum number of ngram tokens to use for ngram-based speculative
                                         decoding (default: 48)
@@ -402,9 +406,9 @@
                                         max number of context checkpoints to create per slot (default:
                                         32)[(more info)](https://github.com/ggml-org/llama.cpp/pull/15293)
                                         (env: LLAMA_ARG_CTX_CHECKPOINTS)
--cpent, --checkpoint-every-n-tokens N   create a checkpoint every n tokens during prefill (processing), -1 to
-                                        disable (default: 8192)
-                                        (env: LLAMA_ARG_CHECKPOINT_EVERY_NT)
+-cms,  --checkpoint-min-step N          minimum spacing between context checkpoints in tokens (default: 256, 0
+                                        = no minimum)
+                                        (env: LLAMA_ARG_CHECKPOINT_MIN_SPACING_NT)
 -cram, --cache-ram N                    set the maximum cache size in MiB (default: 8192, -1 - no limit, 0 -
                                         disable)[(more
                                         info)](https://github.com/ggml-org/llama.cpp/pull/16391)
@@ -414,8 +418,8 @@
                                         enabled if number of slots is auto)
                                         (env: LLAMA_ARG_KV_UNIFIED)
 --cache-idle-slots, --no-cache-idle-slots
-                                        save and clear idle slots on new task (default: enabled, requires
-                                        unified KV and cache-ram)
+                                        save idle slots to the prompt cache on new task, and clear them when
+                                        using unified KV (default: enabled, requires cache-ram)
                                         (env: LLAMA_ARG_CACHE_IDLE_SLOTS)
 --context-shift, --no-context-shift     whether to use context shift on infinite text generation (default:
                                         disabled)
@@ -451,6 +455,9 @@
 --image-max-tokens N                    maximum number of tokens each image can take, only used by vision
                                         models with dynamic resolution (default: read from model)
                                         (env: LLAMA_ARG_IMAGE_MAX_TOKENS)
+--mtmd-batch-max-tokens N               maximum number of image tokens per batch when encoding images
+                                        (default: 1024)
+                                        (env: LLAMA_ARG_MTMD_BATCH_MAX_TOKENS)
 -a,    --alias STRING                   set model name aliases, comma-separated (to be used by API)
                                         (env: LLAMA_ARG_ALIAS)
 --tags STRING                           set model tags, comma-separated (informational, not used for routing)
@@ -505,15 +512,18 @@
                                         comma-separated list (default: none)
                                         (env: LLAMA_API_KEY)
 --api-key-file FNAME                    path to file containing API keys (default: none)
+                                        (env: LLAMA_ARG_API_KEY_FILE)
 --ssl-key-file FNAME                    path to file a PEM-encoded SSL private key
                                         (env: LLAMA_ARG_SSL_KEY_FILE)
 --ssl-cert-file FNAME                   path to file a PEM-encoded SSL certificate
                                         (env: LLAMA_ARG_SSL_CERT_FILE)
 --chat-template-kwargs STRING           sets additional params for the json template parser, must be a valid
                                         json object string, e.g. '{"key1":"value1","key2":"value2"}'
-                                        (env: LLAMA_CHAT_TEMPLATE_KWARGS)
--to,   --timeout N                      server read/write timeout in seconds (default: 600)
+                                        (env: LLAMA_ARG_CHAT_TEMPLATE_KWARGS)
+-to,   --timeout N                      server read/write timeout in seconds (default: 3600)
                                         (env: LLAMA_ARG_TIMEOUT)
+--sse-ping-interval N                   server SSE ping interval in seconds (-1 = disabled, default: 30)
+                                        (env: LLAMA_ARG_SSE_PING_INTERVAL)
 --threads-http N                        number of threads used to process HTTP requests (default: -1)
                                         (env: LLAMA_ARG_THREADS_HTTP)
 --cache-prompt, --no-cache-prompt       whether to enable prompt caching (default: enabled)
@@ -571,12 +581,12 @@
                                         bailing, bailing-think, bailing2, chatglm3, chatglm4, chatml,
                                         command-r, deepseek, deepseek-ocr, deepseek2, deepseek3, exaone-moe,
                                         exaone3, exaone4, falcon3, gemma, gigachat, glmedge, gpt-oss, granite,
-                                        granite-4.0, grok-2, hunyuan-dense, hunyuan-moe, hunyuan-ocr, kimi-k2,
-                                        llama2, llama2-sys, llama2-sys-bos, llama2-sys-strip, llama3, llama4,
-                                        megrez, minicpm, mistral-v1, mistral-v3, mistral-v3-tekken,
-                                        mistral-v7, mistral-v7-tekken, monarch, openchat, orion,
-                                        pangu-embedded, phi3, phi4, rwkv-world, seed_oss, smolvlm, solar-open,
-                                        vicuna, vicuna-orca, yandex, zephyr
+                                        granite-4.0, granite-4.1, grok-2, hunyuan-dense, hunyuan-moe,
+                                        hunyuan-vl, kimi-k2, llama2, llama2-sys, llama2-sys-bos,
+                                        llama2-sys-strip, llama3, llama4, megrez, minicpm, mistral-v1,
+                                        mistral-v3, mistral-v3-tekken, mistral-v7, mistral-v7-tekken, monarch,
+                                        openchat, orion, pangu-embedded, phi3, phi4, rwkv-world, seed_oss,
+                                        smolvlm, solar-open, vicuna, vicuna-orca, yandex, zephyr
                                         (env: LLAMA_ARG_CHAT_TEMPLATE)
 --chat-template-file JINJA_TEMPLATE_FILE
                                         set custom jinja chat template file (default: template taken from
@@ -588,12 +598,12 @@
                                         bailing, bailing-think, bailing2, chatglm3, chatglm4, chatml,
                                         command-r, deepseek, deepseek-ocr, deepseek2, deepseek3, exaone-moe,
                                         exaone3, exaone4, falcon3, gemma, gigachat, glmedge, gpt-oss, granite,
-                                        granite-4.0, grok-2, hunyuan-dense, hunyuan-moe, hunyuan-ocr, kimi-k2,
-                                        llama2, llama2-sys, llama2-sys-bos, llama2-sys-strip, llama3, llama4,
-                                        megrez, minicpm, mistral-v1, mistral-v3, mistral-v3-tekken,
-                                        mistral-v7, mistral-v7-tekken, monarch, openchat, orion,
-                                        pangu-embedded, phi3, phi4, rwkv-world, seed_oss, smolvlm, solar-open,
-                                        vicuna, vicuna-orca, yandex, zephyr
+                                        granite-4.0, granite-4.1, grok-2, hunyuan-dense, hunyuan-moe,
+                                        hunyuan-vl, kimi-k2, llama2, llama2-sys, llama2-sys-bos,
+                                        llama2-sys-strip, llama3, llama4, megrez, minicpm, mistral-v1,
+                                        mistral-v3, mistral-v3-tekken, mistral-v7, mistral-v7-tekken, monarch,
+                                        openchat, orion, pangu-embedded, phi3, phi4, rwkv-world, seed_oss,
+                                        smolvlm, solar-open, vicuna, vicuna-orca, yandex, zephyr
                                         (env: LLAMA_ARG_CHAT_TEMPLATE_FILE)
 --skip-chat-parsing, --no-skip-chat-parsing
                                         force a pure content parser, even if a Jinja template is specified;
@@ -605,7 +615,7 @@
                                         assistant message (default: prefill enabled)
                                         when this flag is set, if the last message is an assistant message
                                         then it will be treated as a full message and not prefilled
-                                        
+
                                         (env: LLAMA_ARG_PREFILL_ASSISTANT)
 -sps,  --slot-prompt-similarity SIMILARITY
                                         how much the prompt of a request must match the prompt of a slot in
@@ -614,6 +624,7 @@
                                         /lora-adapters) (default: disabled)
 --sleep-idle-seconds SECONDS            number of seconds of idleness after which the server will sleep
                                         (default: -1; -1 = disabled)
+--log-prompts-dir PATH                  Log prompts to directory (only used for debugging, default: disabled)
 -mv,   --model-vocoder FNAME            vocoder model for audio generation (default: unused)
 --tts-use-guide-tokens                  Use guide tokens to improve TTS word recall
 --embd-gemma-default                    use default EmbeddingGemma model (note: can download weights from the
