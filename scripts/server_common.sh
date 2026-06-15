@@ -341,15 +341,9 @@ get_info_from_server_log() {
     return_value "batch" "$batch"
     return_value "ubatch" "$ubatch"
 
-    #if [[ "$spec" = "1" ]] ; then
-    #    return_value "draft_model" "$draft_model"
-    #fi
-
-
-    #return_value "ctx_k" "$ctx_k"
     return_value "layers_info" "$layers_info"
 
-    # is this call enough ?
+    # is calling "get_pred_info" enough without "return_output_values" ?
     #get_pred_info
     return_output_values "$(get_pred_info)" 1
 }
@@ -369,7 +363,7 @@ get_pred_info() {
         # 0.10.658.011 I common_speculative_impl_ngram_simple: adding speculative implementation 'ngram-simple'
         # 0.10.658.018 I common_speculative_impl_ngram_simple: - size_n=10, size_m=4, min_hits=1
         # 0.06.214.427 I common_speculative_impl_ngram_simple: - size_n=10, size_m=2, min_hits=1
-        local spec_line=$(grep -E 'common_speculative_impl_ngram_simple.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
+        local spec_line=$(grep -E 'common_speculative_impl_ngram_simple.*s_n=.*s_m=.*min=.*' "$log" | tail -n 1)
         if [[ -n $spec_line ]]; then
             read -r size_n size_m min_hits <<< \
                 $(echo "$spec_line" | awk '

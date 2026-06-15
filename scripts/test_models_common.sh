@@ -4,11 +4,11 @@ source server_common.sh
 test_code_file="test_code_1.fs"
 
 ### Enable DFlash (draft model to predict tokens)
-use_dflash=0
+
 draft_model="Qwen3.5-2B-Q4_K_M.gguf"
 #draft_model="Qwen3.5-0.8B-Base-Q4_0.gguf" ## BETTER than instruct model
 #draft_model="qwen3.5-0.8b-instruct.gguf"
-predict_token=12
+
 #spec-draft-type="f16"  # "q8_0"
 #--spec-draft-type-v f16,
 
@@ -52,8 +52,8 @@ test_call() {
 }
 
 
-test_call_result_row() {
-    debug_function "test_call_result_row"
+print_test_call() {
+    debug_function "print_test_call"
 
     local call_output="$(test_call $@)"
 
@@ -67,33 +67,37 @@ test_call_result_row() {
     fi
 
     #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------" >&2    
+    #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------\n"   
     print_value "Max context"  "$ctx_train_k k"
     print_value "OpenAI tools compatibility"  "$tool_flag"
-    print_value "Accepted prediction %" "$accepted_pct"
+    
     
     # fixed values
-    local cpu_moe="--"
     local cache_type="--"    
 
     local vram_used=${vram_usage%%/*}  # %% remove the longhest match from the end of the string, /* matches everything after the first "/"
     local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
     local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")   
+
+    if [[ "$accepted_pct" != "" && "$accepted_pct" != "--" && "$accepted_pct" != "n.a." ]]; then
+        print_value "Accepted prediction %" "$accepted_pct"
+        pred_info+=" ($(printf "%.0f" "$accepted_pct")%)"
+    fi
     
-    printf "| Speed   | Ctx   | GPU   | MoE | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |\n"
-    printf "| ------- | ----- | ----- | --- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |\n"
-    printf "| %3.0f t/s | %3s k | %5s | %3s | %4.1f GB | %-5s | %6s | %3.0fs | %-16s | %-30s | %-12s | %-9s | %-15s |" \
+    printf "| Speed   | Ctx   | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |\n"
+    printf "| ------- | ----- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |\n"
+    printf "| %3.0f t/s | %3s k | %5s  | %4.1f GB | %-9s | %-5s | %6s | %3.0fs | %-16s | %-30s | %-12s | %-15s |\n" \
         "$eval_rate" \
         "$ctx_k" \
         "$layers_info" \
-        "$cpu_moe" \
         "$vram_used" \
+        "$cuda_vram_gb/$host_ram_gb" \
         "$cache_type" \
         "$eval_count" \
         "$total_duration_s" \
         "$pred_type" \
         "$pred_info" \
         "$batch/$ubatch" \
-        "$cuda_vram_gb/$host_ram_gb" \
         "" 
 }
 

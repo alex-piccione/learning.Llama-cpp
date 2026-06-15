@@ -1,7 +1,9 @@
 source common.sh
 source server_common.sh
 
-## This script is for start serving specific models for production (minimal log, no monitoring)
+## This script starts serving specific models for production (minimal log, no monitoring)
+
+# usage: source start_server_prod.sh && start_server 
 
 models_config_file="models_config.yaml"
 

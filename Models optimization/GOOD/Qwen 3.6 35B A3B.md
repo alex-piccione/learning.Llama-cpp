@@ -16,6 +16,13 @@ Note.
 
 ## Run tests
 
+| Speed   | Ctx   | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
+| ------- | ----- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |
+|  24 t/s |  64 k | 41/41  | 14.0 GB | 12.7/7.9  | --    |    796 |  34s | none             | --                             | 2048/256     |                 |
+|  23 t/s |  64 k | 41/41  | 14.0 GB | 12.7/7.9  | --    |   1058 |  45s | none             | --                             | 2048/256     |                 |
+|  19 t/s |  64 k | 41/41  | 14.0 GB | 12.7/7.9  | --    |    691 |  37s | DFlash (N-gram)  | M=24 N=12 min=1 (17%)          | 2048/256     |                 |
+
+
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
 |  15 t/s |  96 k | 41/41 |  -- | 15.7 GB | --    |    680 |  45s | DFlash (N-gram)  | size_M=10 size_N=7 min_hits=1  | 2048/384     | 14.2/6.4  |                 |
@@ -78,12 +85,12 @@ ubatch=256
 ### Max Speed
 
 model=unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
-ctx_k=64
+ctx_k=96
 gpu_layers=-1
 cpu_moe=0
-spec=1
+spec=0
 draft_model=none
-predict_token=8/12
+predict_token=6/12
 mtp=0
 jinjia=0
 batch=2048
@@ -104,6 +111,6 @@ start_server \
     $batch \
     $ubatch
 
-source test_models_common.sh && test_call_result_row
+source test_models_common.sh && print_test_call
 
 ```

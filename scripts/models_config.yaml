@@ -29,6 +29,24 @@ models:
           "input": [ "text", "image" ]
       },
 
+  # Qwen 3.6 35B A3B
+  qwen_3.6_35B_A3B_UD-Q4_K_M:
+    file: unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 0
+    batch : 2048
+    ubatch: 512
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "OK",
+          "id": "unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+          "name": "QWEN 3.6 35B A3B - UD Q4_K_M",
+          "contextWindow": 65536,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
   
   # GLM 4.7 Flash
   GLM-4.7-Flash-REAP-23B-A3B_UD-Q4_K_X: 
