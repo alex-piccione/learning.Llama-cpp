@@ -5,9 +5,8 @@ source server_common.sh
 
 # usage: source start_server_prod.sh && start_server 
 
+#models_config_file="$(dirname $0)/models_config.yaml"
 models_config_file="models_config.yaml"
-
-# --samplers "top_k;min_p;temperature"   this should avoid the values sent by Agent code tool
 
 args=(
     --host 127.0.0.1 \
@@ -29,6 +28,7 @@ args=(
     # default is 3, we need this level to print out the GPU layers
     --log-verbosity 3 \
 
+    # this should avoid the values sent by Agent code tool
     --samplers "top_k;min_p;temperature"
 
     --temperature 0.1 \
@@ -46,16 +46,17 @@ start_server() {
 
     # 1. If no model ID provided, show a selection menu
     if [[ -z "$model_id" ]]; then
-        echo "No model specified. Available models:"
+        echo "Available models:"
         
         # Extract keys from YAML
         local models_list
         models_list=$(yq '.models | keys | .[]' "$models_config_file")
+
         
         # Check if list is empty
         if [[ -z "$models_list" ]]; then
             echo "Error: No models found in $models_config_file"
-            exit 1
+            return 1
         fi
 
         # Create an array for the select loop
@@ -78,7 +79,7 @@ start_server() {
         # If user pressed Ctrl+C during select, $model_id will be empty
         if [[ -z "$model_id" ]]; then
             echo "Aborted by user."
-            exit 0
+            return 0
         fi
     fi
 
@@ -86,7 +87,7 @@ start_server() {
     if ! yq -e ".models[\"$model_id\"]" "$models_config_file" > /dev/null 2>&1; then
         echo "Error: Model '$model_id' not found in $models_config_file"
         echo "Available models: $(yq '.models | keys | .[]' $models_config_file | tr '\n' ' ')"
-        #exit 1
+        return 1
     fi
 
     debug "Loading configuration for '$model_id'"
@@ -105,7 +106,6 @@ start_server() {
         # (Alternative): Using printf to avoid quoting issues if val has spaces
         # declare "$(printf '%s=%s' "$key" "$val")"
     done
-
 
     # stop running server
     stop_server >&2   
@@ -128,6 +128,11 @@ start_server() {
     local spec_ngram_simple_min_hits=1
 
     local model_file=$file  
+
+    #if [[ ! -f "$model_file" ]]; then
+    #    echo -e "File '$model_file' not found!"
+    #    return 1
+    #fi
 
     args+=(--model "$GGUF_FOLDER/$model_file")
     args+=(--ctx-size "$(($ctx_k * 1024))")
@@ -179,64 +184,4 @@ start_server() {
             sleep 3
         fi
     done
-}
-
-
-
-__to_be-copied() {
-
-  if [[ "$dflash" = "1" ]] ; then
-
-        # For speculative type:
-        # (none, draft-simple, draft-eagle3, draft-mtp, ngram-simple, ngram-map-k, ngram-map-k4v, ngram-mod, ngram-cache)
-        # use "draft-simple" when ther is a small draft model
-        # use ngram-simple
-
-        if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
-            # Case A: Speculative decoding using a secondary model
-            local draft_model_path="$GGUF_FOLDER/$draft_model"
-            print_value "Speculation Type" "Draft Model ($draft_model)"
-            print_value "Predict token" "$predict_token"            
-            args+=(--spec-type "draft-simple")
-            args+=(--spec-draft-model "$draft_model_path")
-            
-            args+=(--spec-draft-n-max "$predict_token")
-            args+=(--spec-draft-n-min 1)
-
-            # Configure KV cache type specifically for the draft model
-            args+=(--spec-draft-type-k "$spec_cache_type_k")
-            args+=(--spec-draft-type-v "$spec_cache_type_v")
-
-            print_value "(test note)" "DFlash, draft-simple predict ${predict_token} (min 1)"
-        else
-            # Case B: Self-speculative decoding (N-Gram) without a draft model            
-            print_value "Speculation Type" "N-Gram simple"
-            print_value "Predict token" "$predict_token"
-            args+=(--spec-type ngram-simple)
-
-            args+=(--spec-ngram-simple-size-m "$predict_token")  # default is 48
-            #args+=(--spec-ngram-simple-size-n "$((predict_token * 2))") # default is 12    
-            
-            ### FIXED VALUE
-            local simple_size_n=8
-            args+=(--spec-ngram-simple-size-n $simple_size_n) # default is 12            
-            args+=(--spec-ngram-simple-min-hits 1)               # default is 1   
-
-            print_value "(test note)" "DFlash, ngram-simple, predict (size_m: $predict_token, size_n: $simple_size_n)"
-        fi
-    else
-        if [ "$mtp" == "1" ]; then
-            # Case B: Self-speculative decoding (MTP)
-            print_value "MTP" "on"
-            print_value "Speculation Type" "MTP"
-            print_value "Predict token" "$predict_token"            
-            args+=(--spec-type draft-mtp)
-
-            args+=(--spec-draft-n-max $predict_token)
-            args+=(--spec-draft-n-min 1)
-
-            print_value "(test note)" "DFlash, draft-mtp, predict ${predict_token}/1"
-        fi
-    fi
-
 }
