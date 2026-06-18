@@ -3,10 +3,20 @@ source server_common.sh
 
 ## This script starts serving specific models for production (minimal log, no monitoring)
 
-# usage: source start_server_prod.sh && start_server 
+# Usage: 
+# use subshell to temporary use source file (avoiding override functions)
+# (source "$LLAMACPP_SCRIPTS_DIRECTORY/start_server_prod.sh"; start_server)
 
 #models_config_file="$(dirname $0)/models_config.yaml"
 models_config_file="models_config.yaml"
+#path="$(dirname $BASH_SOURCE[1])"  # this works but we need to be in this folder anyway because of the previous sourcing (common.sh)
+#models_config_file="$path/models_config.yaml"
+
+if [[ ! -f "$models_config_file" ]]; then
+    echo "File \"$models_config_file\" not found"
+    exit 1
+fi
+
 
 args=(
     --host 127.0.0.1 \
@@ -46,30 +56,45 @@ start_server() {
 
     # 1. If no model ID provided, show a selection menu
     if [[ -z "$model_id" ]]; then
-        echo "Available models:"
-        
+        echo "Select a model:"      
         # Extract keys from YAML
         local models_list
-        models_list=$(yq '.models | keys | .[]' "$models_config_file")
-
-        
+        local win_path=$(cygpath -w "$models_config_file") # yq is a .exe
+        models_list=$(yq '.models | keys | .[]' "$win_path")
+       
         # Check if list is empty
         if [[ -z "$models_list" ]]; then
             echo "Error: No models found in $models_config_file"
-            return 1
+            exit 1
         fi
+
+        # Create a dictionary indicating if file exists
+        #declare files
+        local -A file_exists
+        files=$(yq '.models[].file' "$win_path")
+        for file in "$files"; do
+            if [[ -f "$file" ]]; then
+                file_exists["$file"]=1
+            else
+                file_exists["$file"]=0
+            fi
+        done
 
         # Create an array for the select loop
         local -a choices
-        while IFS= read -r m; do
-            choices+=("$m")
+        while IFS= read -r model_id; do
+            local file=$(yq -e ".models[\"$model_id\"].file" "$models_config_file")
+            if [[ -f  "$GGUF_FOLDER/$file" ]]; then exist="🟢"; else exist="🔴"; fi
+            choices+=("$model_id $exist")  # concatenate
         done <<< "$models_list"
 
         # Show the menu
         PS3="Please enter the model number to start (or Ctrl+C to quit): "
         select choice in "${choices[@]}"; do
             if [[ -n "$choice" ]]; then
-                model_id="$choice"
+                #model_id="$choice"
+                model_id=${choice%% *} # remove suffix (exists)
+                echo "$model_id"
                 break
             else
                 echo "Invalid selection. Please try again."
@@ -127,14 +152,14 @@ start_server() {
     local spec_ngram_simple_size_n=12
     local spec_ngram_simple_min_hits=1
 
-    local model_file=$file  
+    local model_file=$GGUF_FOLDER/$file  
 
-    #if [[ ! -f "$model_file" ]]; then
-    #    echo -e "File '$model_file' not found!"
-    #    return 1
-    #fi
+    if [[ ! -f "$model_file" ]]; then
+        echo -e "❌ File \"$model_file\" not found!"
+        return 1
+    fi
 
-    args+=(--model "$GGUF_FOLDER/$model_file")
+    args+=(--model "$model_file")
     args+=(--ctx-size "$(($ctx_k * 1024))")
     args+=(--n-gpu-layers "$gpu_layers")
     args+=(--n-cpu-moe "$cpu_moe")
