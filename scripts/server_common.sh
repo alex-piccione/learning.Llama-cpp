@@ -68,6 +68,12 @@ start_server() {
     echo "=========================================================" >&2
     
     local model_path="$GGUF_FOLDER/$model"
+
+    if [ ! -f "$model_path" ]; then
+        echo "‼️ File not found: \"$model_path\"" >&2
+        return 1
+    fi
+
     local context=$(($ctx_k * 1024))
 
     ### Set common parameters
@@ -91,6 +97,7 @@ start_server() {
     args=(
         --host 127.0.0.1 \
         --port "$SERVER_PORT" \
+        --seed "1" \
         --model "$model_path" \
         --ctx-size "$context" \
         --parallel 1 \
@@ -215,17 +222,24 @@ start_server() {
             break
         fi
 
-        #check_load_model_fail
+        # check for error
+        #local load_failure=$(grep "failed to load model " "$log") # | head -1 | awk -F'=' '{print $2}' | xargs)
+        #if [ -n "$load_failure" ]; then
+        if grep -q "failed to load model" "$SERVER_LOG"; then
+            echo "❌ ERROR: Failed to load model" >&2
+            printf "error=Failed to load the model"
+            return 1
+        fi
 
         if [[ $i -eq 60 ]] ; then
             echo " not ready after 180 seconds" >&2
+            #return 1
         else
             echo -n "." >&2
             sleep 3
         fi
     done
 }
-
 
 
 stop_server() {
@@ -384,3 +398,8 @@ get_pred_info() {
     return_value "pred_type" "$pred_type"  
     return_value "pred_info" "$pred_info"      
 }
+
+
+#get_running_model_info() {
+#    
+#}

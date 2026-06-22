@@ -9,9 +9,9 @@ models:
   # Gemma 4 E26B  
   Gemma-4_E26B_MXFP4_MOE:
     file: gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
-    ctx_k: 64
+    ctx_k: 128
     gpu_layers: -1
-    cpu_moe: 0
+    cpu_moe: 1
     batch: 2048
     ubatch: 256
     spec_type: none 
@@ -19,8 +19,64 @@ models:
        { 
             "_test": "Good",
             "id": "Gmma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
-            "name": "Gemma4 e26b 64K (by noctrex)",  
+            "name": "Gemma4 e26b 128K (by noctrex)",  
             "description": "Gemma 4 e26b 128K (by noctrex)",          
+            "contextWindow": 131072,
+            "maxTokens": 2048,
+            "reasoning": true
+        },
+
+  Gemma-4_E26B_MXFP4_MOE_64k_1:
+    file: gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 1
+    batch: 1024
+    ubatch: 256
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "Good",
+            "id": "Gmma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
+            "name": "Gemma4 e26b 64K (by noctrex)",  
+            "description": "Gemma 4 e26b 64K (by noctrex)",          
+            "contextWindow": 65536,
+            "maxTokens": 2048,
+            "reasoning": true
+        },
+
+  Gemma-4_E26B_MXFP4_MOE_64k_2:
+    file: gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 2
+    batch: 1024
+    ubatch: 256
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "Good",
+            "id": "Gmma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
+            "name": "Gemma4 e26b 64K (by noctrex)",  
+            "description": "Gemma 4 e26b 64K (by noctrex)",          
+            "contextWindow": 65536,
+            "maxTokens": 2048,
+            "reasoning": true
+        },
+
+  Gemma-4-26B-A4B-it-UD-IQ4_NL_64k:
+    file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "???",
+            "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
+            "name": "Gemma4 e26b UD-IQ4_NL 64K (by noctrex)",        
             "contextWindow": 65536,
             "maxTokens": 2048,
             "reasoning": true

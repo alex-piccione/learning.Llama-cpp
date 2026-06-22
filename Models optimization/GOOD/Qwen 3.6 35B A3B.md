@@ -13,6 +13,13 @@ Note.
 - Using 64k instead of 96k of context gives exactly the same speed. (?!)
 - Switching 
 
+## Thetom-ai
+Use Config-I quantization instead of Q4_K_M
+Huggingface: https://huggingface.co/thetom-ai/Qwen3.6-35B-A3B-ConfigI-GGUF
+Quantizer: thetom_ai
+File: 
+
+
 
 ## Run tests
 

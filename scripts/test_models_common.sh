@@ -55,6 +55,13 @@ test_call() {
 print_test_call() {
     debug_function "print_test_call"
 
+    ### !!! Rely on the cpu_moe parameter passed to start_server()
+    if [[ ! -v cpu_moe ]]; then
+        echo "❌ ERROR: cpu_moe variable not found" >&2
+        #printf "error=Server is not ready\n"
+        return 1
+    fi
+    
     local call_output="$(test_call $@)"
 
     #debug "call_output: $call_output"
@@ -84,11 +91,12 @@ print_test_call() {
         pred_info+=" ($(printf "%.0f" "$accepted_pct")%)"
     fi
     
-    printf "| Speed   | Ctx   | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |\n"
-    printf "| ------- | ----- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |\n"
-    printf "| %3.0f t/s | %3s k | %5s  | %4.1f GB | %-9s | %-5s | %6s | %3.0fs | %-16s | %-30s | %-12s | %-15s |\n" \
+    printf "| Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |\n"
+    printf "| ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |\n"
+    printf "| %3.0f t/s | %3s k | %3s | %5s  | %4.1f GB | %-9s | %-5s | %6s | %3.0fs | %-16s | %-30s | %-12s | %-15s |\n" \
         "$eval_rate" \
         "$ctx_k" \
+        "$cpu_moe" \
         "$layers_info" \
         "$vram_used" \
         "$cuda_vram_gb/$host_ram_gb" \
