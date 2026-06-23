@@ -3,13 +3,7 @@ source server_common.sh
 
 test_code_file="test_code_1.fs"
 
-### Enable DFlash (draft model to predict tokens)
-
-draft_model="Qwen3.5-2B-Q4_K_M.gguf"
-#draft_model="Qwen3.5-0.8B-Base-Q4_0.gguf" ## BETTER than instruct model
-#draft_model="qwen3.5-0.8b-instruct.gguf"
-
-#spec-draft-type="f16"  # "q8_0"
+#--spec-draft-type="f16"  # "q8_0"
 #--spec-draft-type-v f16,
 
 cache_type_k="q8_0" # q8_0, tbq4_0, tbq3_0 

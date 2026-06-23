@@ -17,7 +17,6 @@ if [[ ! -f "$models_config_file" ]]; then
     exit 1
 fi
 
-
 args=(
     --host 127.0.0.1 \
     --port "$SERVER_PORT" \
@@ -28,27 +27,59 @@ args=(
     --no-mmap \
     --mlock \
 
+    --cache-reuse 256 \
+
     --draft-p-min 0.6 \
 
     #--defrag-thold 0.1
     #--draft-min 1            # min tokens to draft before verifying
-    #--draft-p-min 0.6 \        # stop drafting if token probability drops below this   
+    #--draft-p-min 0.6        # stop drafting if token probability drops below this   
 
     # TODO: minimal ?
     # default is 3, we need this level to print out the GPU layers
     --log-verbosity 3 \
 
     # this should avoid the values sent by Agent code tool
-    --samplers "top_k;min_p;temperature"
+    --samplers "top_k;min_p;temperature" \
 
-    --temperature 0.1 \
-    --top-k 20 \
-    --top-p 0.8 \
+    ## super strict for large capable models
+    #--temperature 0.1 \
+    #--top-k 20 \
+    #--top-p 0.8 \
+    #--min-p 0.05 \
+    #--repeat-penalty 1.05 \
+    #--repeat-last-n 256 \
+
+    --temperature 0.3 \
+    --top-k 40 \
+    --top-p 0.9 \
     --min-p 0.05 \
-    --repeat-penalty 1.05 \
+    --repeat-penalty 1.10 \
     --repeat-last-n 256 \
-    --cache-reuse 256
-    )
+
+    --dry-multiplier 0.8 \
+    --dry-base 1.75 \
+    --dry-allowed-length 2 \
+    --dry-penalty-last-n -1 \
+)
+
+require_arg() {
+    local var_name="$1"
+    local arg_name="$2"
+
+    if [[ ! -v "$var_name" ]]; then
+        echo -e "❌ Argument \"$var_name\" is missing!" >&2
+        return 1
+    fi
+
+    local var_value="${!var_name}"
+    # declare global (to make it visible in the caller function scope)
+    declare -g "$var_name=$var_value"
+    debug "$arg_name=$var_value"
+
+    #args+=("$arg_name" "${!var_name}")
+    args+=("$arg_name" "$var_value")
+}
 
 
 start_server() {
@@ -148,9 +179,9 @@ start_server() {
     local spec_cache_type_k="q8_0"
     local spec_cache_type_v="q8_0"
 
-    local spec_ngram_simple_size_m=48
-    local spec_ngram_simple_size_n=12
-    local spec_ngram_simple_min_hits=1
+    #local spec_ngram_simple_size_m=48
+    #local spec_ngram_simple_size_n=12
+    #local spec_ngram_simple_min_hits=1
 
     local model_file=$GGUF_FOLDER/$file  
 
@@ -175,12 +206,16 @@ start_server() {
     args+=(--spec-draft-type-k "$spec_cache_type_k")
     args+=(--spec-draft-type-v "$spec_cache_type_v")
     
-    # for N-Gram
-    args+=(--spec-ngram-simple-size-m "$spec_ngram_simple_size_m")
-    args+=(--spec-ngram-simple-size-n "$spec_ngram_simple_size_n")
-    args+=(--spec-ngram-simple-min-hits "$spec_ngram_simple_min_hits")
-                
-    
+
+    # for N-Gram   
+    if [[ "$spec_type" == "ngram-simple" ]]; then        
+        require_arg spec_ngram_simple_size_m     --spec-ngram-simple-size-m || return 1
+        require_arg spec_ngram_simple_size_n     --spec-ngram-simple-size-n || return 1
+        require_arg spec_ngram_simple_min_hits   --spec-ngram-simple-min-hits || return 1
+        echo "Speculative type: ngram-simple (size_M: $spec_ngram_simple_size_m size_N: $spec_ngram_simple_size_n min_hits: $spec_ngram_simple_min_hits)"
+    fi
+
+   
     echo >&2
     echo "=========================================================" >&2
     echo "START SERVER: ${yellow}$model_file${reset} with ${yellow}$ctx_k K${reset} context" >&2

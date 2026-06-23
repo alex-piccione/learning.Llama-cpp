@@ -1,0 +1,24 @@
+  Gemma-4-12B-v2-Q4_K_M_yuxinlu1:
+    file: Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    _spec_type: none 
+    spec_type: ngram-simple
+    spec_ngram_simple_size_m: 4
+    spec_ngram_simple_size_n: 10
+    spec_ngram_simple_min_hits: 1
+
+    pi_agent_model: >
+      { 
+         "_test": "❌ Hallucinate, Loop, Liar. Slow",
+          "id": "Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf",
+          "name": "Gemma4 12B v2-Q4_K_M_yuxinlu1",
+          "_contextWindow": 262144,
+          "contextWindow": 131072,
+          "maxTokens": 2048,
+          "reasoning": true,
+          "input": [ "text" ]
+      },

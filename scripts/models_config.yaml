@@ -111,11 +111,34 @@ models:
     cpu_moe: 6
     batch: 2048
     ubatch: 256
-    spec_type: none 
-    #spec_type: ngram-simple
-    #spec_ngram_simple_size_m: 5
-    #spec_ngram_simple_size_n: 8
-    #spec_ngram_simple_min_hits: 1
+    _spec_type: none 
+    spec_type: ngram-simple
+    spec_ngram_simple_size_m: 5
+    spec_ngram_simple_size_n: 8
+    spec_ngram_simple_min_hits: 1
+    pi_agent_model: >
+      { 
+         "_test": "Really good",
+          "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
+          "name": "Qwen 3.6 28B REAP20",
+          "contextWindow": 65536,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  qwen_3.6_28b_reap_20_v2:
+    file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 6
+    batch: 2048
+    ubatch: 256
+    _spec_type: none 
+    spec_type: ngram-simple
+    spec_ngram_simple_size_m: 4
+    spec_ngram_simple_size_n: 8
+    spec_ngram_simple_min_hits: 1
     pi_agent_model: >
       { 
          "_test": "Really good",
