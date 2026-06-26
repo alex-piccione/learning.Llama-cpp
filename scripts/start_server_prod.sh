@@ -4,7 +4,7 @@ source server_common.sh
 ## This script starts serving specific models for production (minimal log, no monitoring)
 
 # Usage: 
-# use subshell to temporary use source file (avoiding override functions)
+# Use a subshell to temporary access source file (avoiding override functions)
 # (source "$LLAMACPP_SCRIPTS_DIRECTORY/start_server_prod.sh"; start_server)
 
 #models_config_file="$(dirname $0)/models_config.yaml"
@@ -100,7 +100,6 @@ start_server() {
         fi
 
         # Create a dictionary indicating if file exists
-        #declare files
         local -A file_exists
         files=$(yq '.models[].file' "$win_path")
         for file in "$files"; do
@@ -191,6 +190,7 @@ start_server() {
     fi
 
     args+=(--model "$model_file")
+    args+=(--alias "$model_id")
     args+=(--ctx-size "$(($ctx_k * 1024))")
     args+=(--n-gpu-layers "$gpu_layers")
     args+=(--n-cpu-moe "$cpu_moe")

@@ -49,7 +49,7 @@ test_call() {
 print_test_call() {
     debug_function "print_test_call"
 
-    ### !!! Rely on the cpu_moe parameter passed to start_server()
+    ### !!! Rely on the cpu_moe parameter passed to start_server(), because this input is not present in the log
     if [[ ! -v cpu_moe ]]; then
         echo "❌ ERROR: cpu_moe variable not found" >&2
         #printf "error=Server is not ready\n"
@@ -57,9 +57,7 @@ print_test_call() {
     fi
     
     local call_output="$(test_call $@)"
-
     #debug "call_output: $call_output"
-
     declare_output_values "$call_output" 0
 
     local tool_flag="❌"

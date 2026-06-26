@@ -1,10 +1,9 @@
 ## source "scripts.sh"
 
-## ASCII codes ref: https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
-
 source debug.sh
 
-GGUF_FOLDER="M:\GGUF"
+### Folder with the .gguf files
+GGUF_FOLDER="L:\GGUF"
 #LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64"  # b9251 CUDA
 #LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9371-bin-win-cuda-12.4-x64"  # b9371 CUDA
 #LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9724-bin-win-cuda-12.4-x64"  # b9724 CUDA
@@ -38,9 +37,12 @@ return_value() {
 }
 
 
-# get_output_values "$(my_function)" [1]]
+# Declare global variable from the returned values of a function
+# Usage: 
+# local result="$(my_function ... ...)"
+# declare_output_values "$result" 0
 declare_output_values() {
-    debug_function "get_output_values"    
+    debug_function "declare_output_values"    
     local values="$1"
     local print="${2:-false}"
     #debug "values from '$values'"
