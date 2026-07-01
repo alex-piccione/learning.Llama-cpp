@@ -23,19 +23,25 @@ Quantizer: Unsloth
 File: Gemma-4-26B-A4B-it-qat-UD-Q4_K_XL_unsloth.gguf
 Draft_file_1:
 
-
-
-
 ## Noctrex
 HuggingFace: https://huggingface.co/noctrex/gemma-4-26B-A4B-it-MXFP4_MOE-GGUF
 Provider: noctrex
 File: Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
+
+## Google Q4_0
+File: Gemma-4-26B_q4_0-it_google.gguf
+Quantized by: Google
+
 
 
 ## Run tests
 
 | Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
 | ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |
+| Gemma-4-26B_q4_0-it_google.gguf
+|  46 t/s | 160 k |   1 | 31/31  | 15.7 GB | 13.0/0.4  | --    |   1320 |  28s | none             | --                             | 1024/256     |                 |
+|  48 t/s | 128 k |   1 | 31/31  | 15.4 GB | 13.0/0.4  | --    |   1320 |  27s | none             | --                             | 1024/256     |                 |
+|  49 t/s |  96 k |   1 | 31/31  | 14.9 GB | 13.0/0.4  | --    |   1320 |  27s | none             | --                             | 1024/256     |                 |
 | Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
 |  38 t/s | 128 k |   1 | 31/31  | 15.7 GB | 14.0/1.8  | --    |   1525 |  40s | none             | --                             | 1024/256     |                 |
 |  33 t/s | 128 k |   2 | 31/31  | 15.7 GB | 13.6/2.1  | --    |   1344 |  41s | none             | --                             | 1024/256     |                 |
@@ -55,7 +61,7 @@ File: Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---- | -------- | ------------ | -------- | ------------------------------ |
-| unsloth_gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                                                                                                    |
+| Gemma-4-26B-A4B-it-UD-Q4_K_M_unsloth.gguf                                                                                                    |
 |  33 t/s | 31/31 |   3 |  64 k | 15.7 GB | q8_0  |    997 |  30s |    0 |      0 % | 512/256      | 14.4/2.1 |                                |
 |  28 t/s | 31/31 |   5 |  64 k | 15.1 GB | q8_0  |   1600 |  56s |    0 |      0 % | 1024/512     | 13.6/2.9 |                                |
 |   4 t/s | 31/31 |   1 | 128 k |         | q8_0  |   1600 |  56s |    0 |      0 % | 1024/512     |          |                                |
@@ -121,8 +127,9 @@ File: Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
 cd scripts
 
 #model=unsloth_gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
-model=Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
-ctx_k=128
+#model=Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
+model=Gemma-4-26B_q4_0-it_google.gguf
+ctx_k=160
 cpu_moe=1
 gpu_layers=-1
 spec=0

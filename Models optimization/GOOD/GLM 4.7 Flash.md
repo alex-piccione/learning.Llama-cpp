@@ -1,6 +1,7 @@
 # GLM 4.7 Flash
 
-Model: GLM 4.7 Flash
+
+## 1
 HuggingFace: https://huggingface.co/unsloth/GLM-4.7-Flash-GGUF
 Quantized by: Unsloth
 File: unsloth_GLM-4.7-Flash-Q4_K_M.gguf
@@ -9,6 +10,18 @@ MTP: ?
 Max context: 198 k
 OpenAI tools compatibility : ✔️
 
+## 2
+HuggingFace: https://huggingface.co/unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF
+Quantized by: Unsloth
+File: GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
+
+
+
+## REAP-19.Q4_K_M (by akicou)
+HuggingFace: 
+File: GLM-4.7-Flash-REAP-19.Q4_K_M_akicou.gguf
+Quantized by: Akicou
+Size: 13.9 GB
 
 
 | Speed   | Ctx   | GPU   | MoE | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
@@ -69,7 +82,8 @@ cd scripts
 
 #model=unsloth_GLM-4.7-Flash-Q4_K_M.gguf
 #model=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
-model=unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf
+#model=GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
+model=GLM-4.7-Flash-REAP-19.Q4_K_M_akicou.gguf
 ctx_k=96
 gpu_layers=-1
 cpu_moe=4
@@ -79,7 +93,7 @@ predict_token=4/2  # N lookup /M predict
 mtp=0
 jinjia=0
 batch=1024
-ubatch=384
+ubatch=256
 
 source server_common.sh && \
 start_server \
@@ -94,7 +108,7 @@ start_server \
     $jinjia \
     $batch \
     $ubatch
-
-source test_models_common.sh && test_call_result_row
+    
+source test_models_common.sh && print_test_call
 
 ```

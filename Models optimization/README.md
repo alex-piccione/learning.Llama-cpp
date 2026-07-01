@@ -18,10 +18,12 @@
 |   unsloth_gpt-oss-20b-UD-Q8_K_XL.gguf
 
 
+| 
 | Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf         |              | 18 t/s |    16 k | No  |                                |
 | Nemotron-3-Nano-30B-A3B-Q4_K_M.gguf                     | Unsloth      | 16 t/s |    16 k |     |                                |
 
-Note tested yet:
+Not tested yet:
+- https://huggingface.co/Akicou/GLM-4.7-Flash-REAP-09-GGUF?show_file_info=GLM-4.7-Flash-REAP-09.Q3_K_L.gguf
 - https://huggingface.co/JZC973/Qwen3.6-35B-REAP-MTP-UD-GGUF-Collection
 - https://huggingface.co/Akicou/GLM-4.7-Flash-REAP-09-GGUF
 - https://huggingface.co/Akicou/GLM-4.7-Flash-REAP-19-GGUF

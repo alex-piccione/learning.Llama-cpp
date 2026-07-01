@@ -26,9 +26,9 @@ models:
             "reasoning": true
         },
 
-  Gemma-4_E26B_MXFP4_MOE_64k_1:
+  Gemma-4_E26B_MXFP4_MOE_2:
     file: gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
-    ctx_k: 64
+    ctx_k: 128
     gpu_layers: -1
     cpu_moe: 1
     batch: 1024
@@ -38,9 +38,9 @@ models:
        { 
             "_test": "Good",
             "id": "Gmma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
-            "name": "Gemma4 e26b 64K (by noctrex)",  
-            "description": "Gemma 4 e26b 64K (by noctrex)",          
-            "contextWindow": 65536,
+            "name": "Gemma4 e26b 128K (by noctrex)",  
+            "description": "Gemma 4 e26b 128K (by noctrex)",          
+            "contextWindow": 131072,
             "maxTokens": 2048,
             "reasoning": true
         },
@@ -76,7 +76,7 @@ models:
        { 
             "_test": "???",
             "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
-            "name": "Gemma4 e26b UD-IQ4_NL 64K (by noctrex)",        
+            "name": "Gemma4 e26b UD-IQ4_NL 64K (by Unsloth)",        
             "contextWindow": 65536,
             "maxTokens": 2048,
             "reasoning": true
@@ -104,7 +104,7 @@ models:
 
 
   # Qwen 3.6 28B 
-  qwen_3.6_28b_reap_20:
+  Qwen_3.6_28b_reap_20:
     file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
     ctx_k: 64
     gpu_layers: -1
@@ -127,7 +127,7 @@ models:
           "input": [ "text", "image" ]
       },
 
-  qwen_3.6_28b_reap_20_v2:
+  Qwen_3.6_28b_reap_20_v2:
     file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
     ctx_k: 64
     gpu_layers: -1
@@ -151,7 +151,7 @@ models:
       },
 
   # Qwen 3.6 35B A3B
-  qwen_3.6_35B_A3B_UD-Q4_K_M:
+  Qwen_3.6_35B_A3B_UD-Q4_K_M:
     file: Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf
     ctx_k: 64
     gpu_layers: -1

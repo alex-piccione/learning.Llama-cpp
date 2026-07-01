@@ -27,7 +27,7 @@ args=(
     --no-mmap \
     --mlock \
 
-    --cache-reuse 256 \
+    #--cache-reuse 256 \
 
     --draft-p-min 0.6 \
 
@@ -40,27 +40,39 @@ args=(
     --log-verbosity 3 \
 
     # this should avoid the values sent by Agent code tool
-    --samplers "top_k;min_p;temperature" \
+    #--samplers "top_k;min_p;dry;rep_pen;temperature" \
+    # Order is important!
+    # (By putting temperature last, you ensure that min_p cuts out the garbage tokens first, preventing the model from picking wrong numbers.)
+    --samplers "penalties;dry;top_k;top_p;min_p;temperature"
 
-    ## super strict for large capable models
-    #--temperature 0.1 \
-    #--top-k 20 \
-    #--top-p 0.8 \
-    #--min-p 0.05 \
-    #--repeat-penalty 1.05 \
-    #--repeat-last-n 256 \
-
-    --temperature 0.3 \
-    --top-k 40 \
-    --top-p 0.9 \
+    ## strict for large capable models
+    --temperature 0.2 \
+    --top-k 20 \
+    --top-p 0.8 \
     --min-p 0.05 \
-    --repeat-penalty 1.10 \
-    --repeat-last-n 256 \
+    --repeat-penalty 1.05 \
+    --repeat-last-n 2048 \
 
-    --dry-multiplier 0.8 \
-    --dry-base 1.75 \
-    --dry-allowed-length 2 \
-    --dry-penalty-last-n -1 \
+    # I have the impression this one cause loops also on model that never loop before (Gemma-4-26B)
+    #--temperature 0.3 \
+    #--top-k 40 \
+    #--top-p 0.9 \
+    #--min-p 0.05 \
+    #--repeat-penalty 1.10 \
+    #--repeat-last-n 1024 \
+
+    ## !!! This is cathastrophic for models that try to correct themselves like Gemma-4, Qwen 3.6 ... !!!
+    ## With these parameters the model is INCAPABLE to write the string "26". Literally!
+    #--dry-multiplier 0.8 \
+    #--dry-base 1.75 \
+    #--dry-allowed-length 4 \     
+    #--dry-penalty-last-n -1 \
+
+    ## Relax DRY so it doesn't break code syntax/paths
+    #--dry-multiplier 0.5 \
+    #--dry-base 1.75 \
+    #--dry-allowed-length 12 \
+    #--dry-penalty-last-n -1 \
 )
 
 require_arg() {
