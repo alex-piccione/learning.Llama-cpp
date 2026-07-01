@@ -400,7 +400,3 @@ get_pred_info() {
     return_value "pred_info" "$pred_info"      
 }
 
-
-#get_running_model_info() {
-#    
-#}
