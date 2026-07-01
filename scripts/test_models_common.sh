@@ -1,14 +1,12 @@
 source common.sh
 source server_common.sh
 
-test_code_file="test_code_1.fs"
+test_code_file="test_code.fs"
 
+cache_type_k="q8_0" # f16 q8_0, tbq4_0, tbq3_0 
+cache_type_v="q8_0" # f16 q8_0, tbq4_0, tbq3_0 
 #--spec-draft-type="f16"  # "q8_0"
 #--spec-draft-type-v f16,
-
-cache_type_k="q8_0" # q8_0, tbq4_0, tbq3_0 
-cache_type_v="q8_0" # q8_0, tbq4_0, tbq3_0 
-
 
 # call the model with a pompt that check if the model supports OpenAI tools calling
 test_call() {
@@ -39,10 +37,13 @@ test_call() {
     local code_payload=$(cat "$test_code_file")    
 
     local run_output=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload")
+    #debug "run_output: $run_output"
     return_output_values "$run_output" 1
+    if_error && return 1
 
     local server_output=$(get_info_from_server_log)
-    return_output_values "$server_output" 1
+    debug "server_output: $server_output"
+    return_output_values "$server_output" 1    
 }
 
 
@@ -52,13 +53,13 @@ print_test_call() {
     ### !!! Rely on the cpu_moe parameter passed to start_server(), because this input is not present in the log
     if [[ ! -v cpu_moe ]]; then
         echo "❌ ERROR: cpu_moe variable not found" >&2
-        #printf "error=Server is not ready\n"
         return 1
     fi
     
     local call_output="$(test_call $@)"
-    #debug "call_output: $call_output"
+
     declare_output_values "$call_output" 0
+    if_error && return 1
 
     local tool_flag="❌"
     if [[ $has_tools = "1" ]]; then
@@ -69,7 +70,6 @@ print_test_call() {
     #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------\n"   
     print_value "Max context"  "$ctx_train_k k"
     print_value "OpenAI tools compatibility"  "$tool_flag"
-    
     
     # fixed values
     local cache_type="--"    
@@ -102,7 +102,6 @@ print_test_call() {
 }
 
 
-
 # return "error=... total_duration=... eval_duration=... eval_count=... eval_rate=... has_tools=..."
 llamacpp_run() {
     local prompt="$1"
@@ -114,7 +113,7 @@ llamacpp_run() {
 
     # 1. Build the payload with your exact parameters (OpenAI compatible schema)
     local temperature=0.1
-    local max_tokens=4096
+    local max_tokens=2048
 
     json_payload=$(jq -n \
         --arg code "$prompt" \
@@ -155,13 +154,74 @@ llamacpp_run() {
   ]
 }')
 
-    # 2. Query the endpoint with client-side clock tracking
-    local raw
-    raw=$(curl -s http://localhost:$SERVER_PORT/v1/chat/completions -d "$json_payload")
+    # 2 (simple). Query the endpoint with client-side clock tracking
+    #local raw
+    #raw=$(curl -s http://localhost:$SERVER_PORT/v1/chat/completions -d "$json_payload")
+
+
+    # 2. Query the endpoint with real-time speed monitoring
+    local threshold="10.0"  # minimum allowable tokens/sec threshold here
+    local response_log="logs/llama_api_response.log"
+
+    # Run curl in the background so we can monitor logs simultaneously
+    #echo "" > $SERVER_LOG
+    echo "" > logs/llama_api_response.log
+    curl -s http://localhost:$SERVER_PORT/v1/chat/completions -d "$json_payload" > "$response_log"  &
+    local curl_pid=$!
+
+    # monitor the log for lines like this, to capture the t/s at the end:
+    # 5.27.807.417 I slot print_timing: id  0 | task 0 | n_decoded =    735, tg =   3.79 t/s, tg_3s =   3.33 t/s
+    (
+        # tail -n 0 ensures we only look at new log entries generated during this run
+        tail -n 0 -f "$SERVER_LOG" 2>/dev/null | while read -r line; do
+            if [[ "$line" == *"print_timing"* ]]; then
+                if [[ "$line" =~ tg_3s[[:space:]]*=[[:space:]]*([0-9.]+) ]]; then
+                    local speed="${BASH_REMATCH[1]}"
+                    
+                    # Float comparison using awk
+                    local is_slow=$(awk -v s="$speed" -v t="$threshold" 'BEGIN {print (s < t) ? 1 : 0}')
+                    if [[ "$is_slow" -eq 1 ]]; then
+                        echo -e "\n🛑 [ABORT] Generation speed dropped to ${speed} t/s (Threshold: ${threshold} t/s)." >&2
+                        # Write a flag file to drop a persistent signal
+                        #echo "$speed" > logs/speed_abort.flag
+                        kill -15 "$curl_pid" 2>/dev/null
+                        break
+                    fi
+                fi
+            fi
+        done
+    ) &
+    local monitor_pid=$!
+
+    # Wait for curl and catch its exit status
+    wait "$curl_pid" 2>/dev/null
+    local curl_status=$?
+
+    # Immediately kill the background monitor loop
+    # Give the monitor a brief moment to register exit status if it tripped
+    sleep 0.2
+    kill "$monitor_pid" 2>/dev/null
+    wait "$monitor_pid" 2>/dev/null
+
+
+    # If curl_status is 143, it means it was terminated by our monitor code
+    if [[ "$curl_status" -eq 143 ]]; then
+        local slow_speed=$(grep -a -oE "tg_3s\s*=\s*[0-9.]+" "$SERVER_LOG" | tail -n 1 | awk '{print $3}')
+        [[ -z "$slow_speed" ]] && slow_speed="<${threshold}"
+        
+        local vram_usage=$(get_readable_VRAM_usage)
+        return_value "vram_usage" "$vram_usage"
+        return_value "eval_rate" "$slow_speed"
+        return_value "error" "Aborted_Low_Speed_Detected_${slow_speed}_ts"
+        return 1
+    fi
+
 
     # UNCOMMENT THE LINE BELOW TO INSPECT API RAW OUTPUT IN TERMINAL:
     #echo "DEBUG RAW OUTPUT: $raw" >&2
-    echo "$raw" > logs/llama_api_response.log
+    #echo "$raw" > logs/llama_api_response.log
+    local raw
+    raw=$(cat "$response_log")
 
 
     # last lines in llama_api_response.log
@@ -179,16 +239,19 @@ llamacpp_run() {
 
     # Stream Extraction (Handles both normal content and Qwen reasoning_content safely)
     local text_response=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.content // .choices[0].delta.reasoning_content // empty' 2>/dev/null)
-           
+    
     # last line, containing timings/metrics
-    local final_usage_chunk=$(jq -c 'select(.usage.completion_tokens != null)' <<< "$json_stream" | tail -1)
+    #local final_usage_chunk=$(jq -c 'select(.usage.completion_tokens != null)' <<< "$json_stream" | tail -1)
+    local final_usage_chunk=$(jq -cs '[.[] | select(.usage.completion_tokens != null)][-1]' <<< "$json_stream")
+
     if [[ -z "$final_usage_chunk" ]]; then
          echo "❌ ERROR: Failed to extract .usage.completion_tokens from json_stream" >&2
          printf 'error=Failed to extract .usage.completion_tokens n'
          return 1
     fi
 
-    local first_created=$(jq -r 'select(.created != null) | .created' <<< "$json_stream" | head -1)
+    #local first_created=$(jq -r 'select(.created != null) | .created' <<< "$json_stream" | head -1)
+    local first_created=$(jq -rs '[.[] | select(.created != null) | .created][0]' <<< "$json_stream")
     local last_created=$(jq -r '.created' <<< "$final_usage_chunk")
     if [[ -z "$first_created" || -z "$last_created" ]]; then
          echo "❌ ERROR: Failed to extract .created from json_stream" >&2

@@ -36,30 +36,55 @@ return_value() {
     printf '%s=%s\n' "$1" "$2"
 }
 
+return_error() { 
+    printf 'error=%s\n' "${1:-undefined}"
+}
+
+# Print the error and pass it as output to the caller
+if_error() {
+    debug_function "if_error"
+    if [[ -n "${error:-}" ]]; then
+        echo "❌ ERROR: $error" >&2
+        return_error "$error"
+        return 0
+    else
+        return 1
+    fi
+}
+
 
 # Declare global variable from the returned values of a function
 # Usage: 
 # local result="$(my_function ... ...)"
 # declare_output_values "$result" 0
 declare_output_values() {
-    debug_function "declare_output_values"    
+    debug_function "declare_output_values"
     local values="$1"
     local print="${2:-false}"
     #debug "values from '$values'"
 
+    if [[ -z "$values" ]]; then
+        echo "❌ ERROR: the values passed to declare_output_values is empty." >&2
+        return 1
+    fi
+
+    # reset error
+    local error=""
+
     local key value    
     while IFS='=' read -r key value; do
         if [[ -z "$value" ]]; then
-            echo "❌ ERROR: the value for \"$key\" is empty. (provided values: $values)" >&2
-            printf "error=the value for key \"${key}\" is empty (#declare_output_values)\n"
+            echo -e "❌ ERROR: the value for \"$key\" is empty. (#declare_output_values) (provided values: $values)" >&2
+            printf "error=the value for key \"${key}\" is empty (#declare_output_values) (provided values: $values)\n"
             return 1
         fi
 
         # declare global (to make it visible in the caller function scope)
         declare -g "$key=$value"
-            
-        if [[ -n "${error:-}" ]]; then
-            echo "❌ ERROR: $error" >&2
+
+        #if_error && return 1
+        if [[ -n "${error}" ]]; then
+            echo "❌ ERROR: ${error:-aaa}" >&2
             #printf "error=%s\n" "$error"
             return 1
         fi
@@ -74,23 +99,37 @@ declare_output_values() {
 
 # return_output_values "$(my_function)" [1]
 return_output_values() {
-    debug_function "return_output_values"    
+    debug_function "return_output_values"
     local values="$1"
     local print="${2:-false}"
     #debug "values from '$values'"
 
-    local key value    
+    if [[ -z "$values" ]]; then
+        echo "❌ ERROR: the values passed to return_output_values is empty." >&2
+        return 1
+    fi
+
+    # reset error
+    local error=""
+
+    local key value
     while IFS='=' read -r key value; do
         if [[ -z "$value" ]]; then
-            echo "❌ ERROR: the value for \"$key\" is empty. (provided values: $values)." >&2
-            printf "error=the value for key \"${key}\" is empty (#return_output_values)\n"
+            echo -e "❌ ERROR: the value for \"$key\" is empty. (#return_output_values) (provided values: $values)." >&2
+            printf "error=the value for key \"${key}\" is empty (#return_output_values) (provided values: $values)\n"
             return 1
         fi
 
-        declare "$key=$value"
+        if [[ "$key" == "error" ]]; then
+            # global, so is_error can see it
+            declare -g "$key=$value"
+        else
+            # local variables
+            declare "$key=$value"
+        fi
 
         # check if it returned an error
-        if [[ -n "${error:-}" ]]; then
+        if [[ -n "$error" ]]; then
             echo "❌ ERROR: $error" >&2
             #printf "error=%s\n" "$error"
             return 1
@@ -107,7 +146,7 @@ return_output_values() {
 
 
 from_nano() {
-    # echo $(echo "scale=9; $1 / 1000000000" | bc)  ## requires bc          
+    # echo $(echo "scale=9; $1 / 1000000000" | bc)  ## requires bc
     local seconds=$(($1/ 1000000000))
     local nanoseconds=$(($1 % 1000000000))
     printf "%.9f\n" $((seconds)).$(printf "%09d" $((nanoseconds)))

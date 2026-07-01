@@ -22,6 +22,17 @@ HuggingFace:
 File: GLM-4.7-Flash-REAP-19.Q4_K_M_akicou.gguf
 Quantized by: Akicou
 Size: 13.9 GB
+Max context                   : 198 k
+OpenAI tools compatibility    : ❌
+More that 64
+
+
+| Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
+| ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |
+| GLM-4.7-Flash-REAP-19.Q4_K_M_akicou.gguf
+|  42 t/s |  64 k |   5 | 48/48  | 14.7 GB | 12.6/1.2  | --    |   2048 |  49s | DFlash (N-gram)  | s_M=2 s_N=4 min=1              | 1024/256     |                 |
+|  44 t/s |  64 k |   4 | 48/48  | 15.0 GB | 12.9/0.9  | --    |   2048 |  47s | none             | --                             | 1024/256     |                 |
+|  41 t/s |  80 k |   5 | 48/48  | 15.2 GB | 12.6/1.2  | --    |   2048 |  50s | DFlash (N-gram)  | s_M=4 s_N=12 min=1             | 1024/256     |                 |
 
 
 | Speed   | Ctx   | GPU   | MoE | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
@@ -82,14 +93,26 @@ cd scripts
 
 #model=unsloth_GLM-4.7-Flash-Q4_K_M.gguf
 #model=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
-#model=GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
-model=GLM-4.7-Flash-REAP-19.Q4_K_M_akicou.gguf
+model=GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
 ctx_k=96
 gpu_layers=-1
 cpu_moe=4
 spec=0
 draft_model=none
 predict_token=4/2  # N lookup /M predict
+mtp=0
+jinjia=0
+batch=1024
+ubatch=384
+
+
+model=GLM-4.7-Flash-REAP-19.Q4_K_M_akicou.gguf
+ctx_k=80
+gpu_layers=-1
+cpu_moe=5
+spec=0
+draft_model=none
+predict_token=12/4  # N lookup /M predict
 mtp=0
 jinjia=0
 batch=1024
@@ -112,3 +135,4 @@ start_server \
 source test_models_common.sh && print_test_call
 
 ```
+
