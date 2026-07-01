@@ -49,6 +49,7 @@ test_call() {
 
 print_test_call() {
     debug_function "print_test_call"
+    declare -g error=""
 
     ### !!! Rely on the cpu_moe parameter passed to start_server(), because this input is not present in the log
     if [[ ! -v cpu_moe ]]; then

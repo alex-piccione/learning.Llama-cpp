@@ -110,6 +110,7 @@ return_output_values() {
     fi
 
     # reset error
+    declare -g "error="
     local error=""
 
     local key value
@@ -122,7 +123,7 @@ return_output_values() {
 
         if [[ "$key" == "error" ]]; then
             # global, so is_error can see it
-            declare -g "$key=$value"
+            declare -g "error=$value"
         else
             # local variables
             declare "$key=$value"

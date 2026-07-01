@@ -23,10 +23,10 @@
 | Nemotron-3-Nano-30B-A3B-Q4_K_M.gguf                     | Unsloth      | 16 t/s |    16 k |     |                                |
 
 Not tested yet:
-- https://huggingface.co/Akicou/GLM-4.7-Flash-REAP-09-GGUF?show_file_info=GLM-4.7-Flash-REAP-09.Q3_K_L.gguf
+
+- https://huggingface.co/chatqaq/Qwen3.6-27B-Claude-Mythos-Distilled-MTP-GGUF
+
 - https://huggingface.co/JZC973/Qwen3.6-35B-REAP-MTP-UD-GGUF-Collection
-- https://huggingface.co/Akicou/GLM-4.7-Flash-REAP-09-GGUF
-- https://huggingface.co/Akicou/GLM-4.7-Flash-REAP-19-GGUF
 - https://huggingface.co/mradermacher/gemma-4-19b-a4b-it-REAP-GGUF
 - https://huggingface.co/DavidAU/Openai_gpt-oss-20b-CODER-NEO-CODE-DI-MATRIX-GGUF
 - https://huggingface.co/noctrex/gemma-4-26B-A4B-it-MXFP4_MOE-GGUF?show_file_info=gemma-4-26B-A4B-it-MXFP4_MOE.gguf       
