@@ -1,7 +1,15 @@
 # Qwythos 9B Claude Mythos 5
 
+❌ Rubbish. Mistakes and incohomprehensions. Not able to format a Markdown table.
+The MTP version is very fast but  jsut stop the output, failes to call tool and a lot of mistakes.
+
+
 Max context                   : 1024 k
 OpenAI tools compatibility    : ✔️
+
+
+
+
 
 | Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
 | ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |

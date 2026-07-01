@@ -22,3 +22,43 @@
           "reasoning": true,
           "input": [ "text" ]
       },
+
+  Qwythos:
+    file: Qwythos-9B-Claude-Mythos-5-1M-Q4_K_M_emperoai.gguf
+    ctx_k: 256
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "❌ a lot of mistakes",
+          "id": "Qwythos-9B-Claude-Mythos-5-1M-Q4_K_M_emperoai.gguf",
+          "name": "Qwythos 9B Claude Mythos 5 (emperor-ai)",
+          "contextWindow": 262144,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+      
+
+  Qwythos_MTP:
+    file: Qwythos-9B-Claude-Mythos-5-1M-MTP-Q4_K_M_emperoai.gguf
+    ctx_k: 256
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    spec_type: draft-mtp
+    spec_draft_n_min: 2
+    spec_draft_n_max: 8
+    pi_agent_model: >
+      { 
+          "_test": "❌ a lot of mistakes",
+          "id": "Qwythos-9B-Claude-Mythos-5-1M-MTP-Q4_K_M_emperoai.gguf",
+          "name": "Qwythos 9B Claude Mythos 5 - MTP (emperor-ai)",
+          "contextWindow": 262144,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+      
