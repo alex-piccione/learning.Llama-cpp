@@ -190,9 +190,6 @@ start_server() {
     local spec_cache_type_k="q8_0"
     local spec_cache_type_v="q8_0"
 
-    #local spec_ngram_simple_size_m=48
-    #local spec_ngram_simple_size_n=12
-    #local spec_ngram_simple_min_hits=1
 
     local model_file=$GGUF_FOLDER/$file  
 
@@ -217,21 +214,26 @@ start_server() {
     args+=(--spec-draft-n-min "$spec_draft_n_min")
     args+=(--spec-draft-type-k "$spec_cache_type_k")
     args+=(--spec-draft-type-v "$spec_cache_type_v")
-    
 
     # for N-Gram   
-    if [[ "$spec_type" == "ngram-simple" ]]; then        
+    if [[ "$spec_type" == "ngram-simple" ]]; then
         require_arg spec_ngram_simple_size_m     --spec-ngram-simple-size-m || return 1
         require_arg spec_ngram_simple_size_n     --spec-ngram-simple-size-n || return 1
         require_arg spec_ngram_simple_min_hits   --spec-ngram-simple-min-hits || return 1
         echo "Speculative type: ngram-simple (size_M: $spec_ngram_simple_size_m size_N: $spec_ngram_simple_size_n min_hits: $spec_ngram_simple_min_hits)"
     fi
 
-   
+    # for MTP  
+    if [[ "$spec_type" == "draft-mtp" ]]; then
+        require_arg spec_draft_n_min     --spec-draft-n-min || return 1
+        require_arg spec_draft_n_max     --spec-draft-n-max || return 1
+        echo "Speculative type: MTP (min: $spec_draft_n_min max: $spec_draft_n_max)"
+    fi
+
     echo >&2
     echo "=========================================================" >&2
     echo "START SERVER: ${yellow}$model_file${reset} with ${yellow}$ctx_k K${reset} context" >&2
-    echo "=========================================================" >&2    
+    echo "=========================================================" >&2
 
     ("$LLAMA_BINS_FOLDER/llama-server.exe" "${args[@]}" \
         > $SERVER_LOG 2>&1 & ) >/dev/null
