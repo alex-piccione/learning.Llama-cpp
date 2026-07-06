@@ -2,9 +2,14 @@
 
 ## Current
 
+- check logic to extract speculative info in server_common.sh, nmaybe it is changed with new version
++ for both draft-simple and draft-model
+
+- verify what change in log for gpu-layer -1 and 999 (noted on GLM or Qwen 3.6 moidels)
 
 ## Backlog
 
+- add --reasoning-preserve flag
 
 - 5 Test TurboQuant, use the new llama.cpp version and try to use "tbq4_0" cache type
 

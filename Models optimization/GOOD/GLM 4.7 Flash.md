@@ -20,12 +20,16 @@ MTP: ?
 Max context: 198 k
 OpenAI tools compatibility : ✔️
 
+## Q4_K_M (by gaionaus)
+HuggingFace: https://huggingface.co/gaionaus/GLM-4.7-Flash-REAP-50_Q4_K_M_GGUF
+File: GLM-4.7-flash-Q4_K_M_gaionaus.gguf
+Size: 9.1 GB
+
 ## REAP-23B-A3B-GGUF UD-Q4_K_XL (by Unsloth)
 HuggingFace: https://huggingface.co/unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF
 File: GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
 Size: 13.2 GB
 For llama.cpp, use --jinja
-
 OpenAI tools compatibility    : ✔️
 
 ## REAP-09.Q3_K_L (by akicou)
@@ -103,6 +107,19 @@ cd scripts
 #model=unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
 
 model=GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
+ctx_k=64
+gpu_layers=-1
+cpu_moe=4
+spec=0
+draft_model=none
+predict_token=12/6  # N lookup /M predict
+mtp=0
+jinjia=1
+batch=1024
+ubatch=256
+
+
+model=GLM-4.7-flash-Q4_K_M_gaionaus.gguf
 ctx_k=64
 gpu_layers=-1
 cpu_moe=4

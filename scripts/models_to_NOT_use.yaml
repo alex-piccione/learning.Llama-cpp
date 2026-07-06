@@ -1,28 +1,28 @@
-  Gemma-4-12B-v2-Q4_K_M_yuxinlu1:
-    file: Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf
-    ctx_k: 128
+  # 8 t/s !!!
+  Qwen3.6-27B-Esper3.1:
+    file: Qwen3.6-27B-Esper3.1.Q4_K_M_mr_radermacher.gguf
+    ctx_k: 16
     gpu_layers: -1
-    cpu_moe: 0
+    cpu_moe: 6
     batch: 1024
     ubatch: 256
     _spec_type: none 
     spec_type: ngram-simple
-    spec_ngram_simple_size_m: 4
-    spec_ngram_simple_size_n: 10
+    spec_ngram_simple_size_m: 12
+    spec_ngram_simple_size_n: 24
     spec_ngram_simple_min_hits: 1
-
     pi_agent_model: >
       { 
-         "_test": "❌ Hallucinate, Loop, Liar. Slow",
-          "id": "Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf",
-          "name": "Gemma4 12B v2-Q4_K_M_yuxinlu1",
-          "_contextWindow": 262144,
-          "contextWindow": 131072,
-          "maxTokens": 2048,
+         "_test": ",
+          "id": "Qwen3.6-27B-Esper3.1.Q4_K_M_mr_radermacher.gguf",
+          "name": "Qwen 3.6 27B Exper3.1",
+          "contextWindow": 32000,
+          "maxTokens": 4096,
           "reasoning": true,
-          "input": [ "text" ]
-      },
-
+          "input": [ "text", "image" ]
+      },  
+  
+  
   Qwythos:
     file: Qwythos-9B-Claude-Mythos-5-1M-Q4_K_M_emperoai.gguf
     ctx_k: 256
@@ -62,3 +62,85 @@
           "reasoning": true
       },
       
+
+# ERNIE-4.5-A3B-Thinking
+  ERNIE-4.5-A3B-Thinking_unsloth:
+    file: ERNIE-4.5-21B-A3B-Thinking-Q4_K_M_unsloth.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 3
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "?",
+          "id": "ERNIE-4.5-21B-A3B-Thinking-Q4_K_M_unsloth.gguf",
+          "name": "ERNIE-4.5-A3B-Thinking by Unsloth",
+          "contextWindow": 131072,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+
+  ERNIE-4.5-A3B-Thinking_noctrex:
+    file: ERNIE-4.5-21B-A3B-Thinking-MXFP4_MOE_noctrex.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 3
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "?",
+          "id": "ERNIE-4.5-21B-A3B-Thinking-MXFP4_MOE_noctrex.gguf",
+          "name": "ERNIE-4.5-A3B-Thinking by noctrex",
+          "contextWindow": 131072,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+
+# Gemma 4 12B
+  Gemma-4-12B_IQ4_NL:
+    file: Gemma-4-12b-it-IQ4_NL_unsloth.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 256
+    spec_type: none 
+    pi_agent_model: >
+      { 
+         "_test": "???",
+          "id": "Gemma-4-12b-it-IQ4_NL_unsloth.gguf",
+          "name": "Gemma4 12B IQ4_NL",
+          "contextWindow": 131072,
+          "maxTokens": 2048,
+          "reasoning": true,
+          "input": [ "text" ]
+      },
+
+  Gemma-4-12B-v2-Q4_K_M_yuxinlu1:
+    file: Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    _spec_type: none 
+    spec_type: ngram-simple
+    spec_ngram_simple_size_m: 4
+    spec_ngram_simple_size_n: 10
+    spec_ngram_simple_min_hits: 1
+
+    pi_agent_model: >
+      { 
+         "_test": "❌ Hallucinate, Loop, Liar. Slow",
+          "id": "Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf",
+          "name": "Gemma4 12B v2-Q4_K_M_yuxinlu1",
+          "_contextWindow": 262144,
+          "contextWindow": 131072,
+          "maxTokens": 2048,
+          "reasoning": true,
+          "input": [ "text" ]
+      },

@@ -6,6 +6,7 @@
 | GPT OSS 20B           | David AU     | davidau_OpenAI-20B-NEO-CODE2-Plus-Uncensored-IQ4_NL.gguf | 80 t/s |   128 k | ✔️ 128k 60/70 t/s     | ❌ wrong reasoning , Loop       |
 | Gemma 4 12B           | Unsloth      | unsloth_gemma-4-12b-it-IQ4_NL.gguf                       | 52 t/s |   256 k |                       |                                  |
 | Qwen 3.5 9B           | Unsloth      |                                                          | 39 t/s |   256 k |                       |                                  |
+| Qwen 3.6 35B A3B      | tipe         | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf           |        |    64 k | ✔️ 40 t/s             |                                  |
 | Qwen 3.6 27B (no-MTP) | bezorp       | barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf                | 42 t/s |   128 k | ✔️ 64k 35 t/s  OK     |                                  |
 | Gemma 4 26B           | noctrex      | gemma-4-26B-A4B-it-MXFP4_MOE.gguf                        | 36 t/s |   128 k |                       |                                  |
 | GLM 4.7 Flash 23B     | Unsloth      | unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf           | 32 t/s |   128 k | ❌ 64k 35 t/s  FAIL   | Rubbish after a few questions    |
@@ -23,6 +24,17 @@
 | Nemotron-3-Nano-30B-A3B-Q4_K_M.gguf                     | Unsloth      | 16 t/s |    16 k |     |                                |
 
 Not tested yet:
+
+- https://huggingface.co/lennyhans/Qwen3.6-35B-REAP-Pruned-ratio-0.5-Q4_K_M-GGUF
+
+- https://huggingface.co/amazeble/Qwen3.6-35B-REAP-Pruned-ratio-0.3-Q4_K_M-GGUF
+  qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf
+
+- https://huggingface.co/HauhauCS/Gemma4-26B-A4B-QAT-Uncensored-HauhauCS-Balanced-MTP
+  READ INTRUCYION to use MTP properly
+
+  https://huggingface.co/t1pe/Qwen3.6-35B-A3B-MoE384-pruned-Q4_K_M-GGUF
+       
 
 - https://huggingface.co/chatqaq/Qwen3.6-27B-Claude-Mythos-Distilled-MTP-GGUF
 

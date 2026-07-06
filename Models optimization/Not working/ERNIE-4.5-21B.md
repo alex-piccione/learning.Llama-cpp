@@ -1,18 +1,20 @@
-# Erniw 4.5 21B A3B Thinking
+# Ernie 4.5 21B A3B Thinking
+
+MTP: No
 
 ❌ ``--skip-chat-parsing`` parameter is required to get a OpenAI compatible response, but that kill the possibility of tools call compatibility  
 
-File 1: unsloth_ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf
-HuggingFace: 
-Quantized by: Unsloth
-MTP: No
+❌ PiAgent:  Error: The model produced output that does not match the expected peg-native format
+
+
+## Q4_K_M (by Unsloth)
+File: ERNIE-4.5-21B-A3B-Thinking-Q4_K_M_unsloth.gguf
 MoE: 
 Max context: 128 k
 OpenAI tools compatibility: ❌
 
-
-File 2: noctrex_ERNIE-4.5-21B-A3B-Thinking-MXFP4_MOE.gguf
-Quantized by: noctrex
+## MXFP4_MOE (by noctrex)
+File: ERNIE-4.5-21B-A3B-Thinking-MXFP4_MOE_noctrex.gguf
 Max context: 1024 k  !!!
 OpenAI tools compatibility : ❌
 
@@ -31,17 +33,42 @@ OpenAI tools compatibility : ❌
 cd scripts
 
 #model=unsloth_ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf
-moedl=noctrex_ERNIE-4.5-21B-A3B-Thinking-MXFP4_MOE.gguf
-ctx_k=64
+model=ERNIE-4.5-21B-A3B-Thinking-Q4_K_M_unsloth.gguf
+ctx_k=128
 gpu_layers=-1
 cpu_moe=3
-dflash=1
+spec=0
 draft_model=none
-predict_token=11
+predict_token=0/0
 mtp=0
 jinjia=0
-batch=2048
-ubatch=512
+batch=1024
+ubatch=256
+
+model=ERNIE-4.5-21B-A3B-Thinking-MXFP4_MOE_noctrex.gguf
+ctx_k=128
+gpu_layers=-1
+cpu_moe=3
+spec=0
+draft_model=none
+predict_token=0/0
+mtp=0
+jinjia=0
+batch=1024
+ubatch=256
+
+
+model=ERNIE-4.5-21B-A3B-Thinking.i1-Q4_K_M_mr_redermacher.gguf
+ctx_k=128
+gpu_layers=-1
+cpu_moe=3
+spec=0
+draft_model=none
+predict_token=0/0
+mtp=0
+jinjia=0
+batch=1024
+ubatch=256
 
 source server_common.sh && \
 start_server \
@@ -49,15 +76,14 @@ start_server \
     $ctx_k \
     $gpu_layers \
     $cpu_moe \
-    $dflash \
+    $spec \
     $draft_model \
     $predict_token \
     $mtp \
     $jinjia \
     $batch \
     $ubatch
-
-source test_models_common.sh && \
-test_call_result_row $(flag_or $dflash $mtp)
+    
+source test_models_common.sh && print_test_call
 
 ```

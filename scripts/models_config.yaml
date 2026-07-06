@@ -6,27 +6,9 @@
 
 models:
 
-  # Gemma 4 E26B  
-  Gemma-4_E26B_MXFP4_MOE:
-    file: gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
-    ctx_k: 128
-    gpu_layers: -1
-    cpu_moe: 1
-    batch: 2048
-    ubatch: 256
-    spec_type: none 
-    pi_agent_model: >
-       { 
-            "_test": "Good",
-            "id": "Gmma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
-            "name": "Gemma4 e26b 128K (by noctrex)",  
-            "description": "Gemma 4 e26b 128K (by noctrex)",          
-            "contextWindow": 131072,
-            "maxTokens": 2048,
-            "reasoning": true
-        },
-
-  Gemma-4_E26B_MXFP4_MOE_2:
+# Gemma 4 26B  
+  Gemma-4_26B_MXFP4_MOE_128k:
+    speed: 33 t/s
     file: gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
     ctx_k: 128
     gpu_layers: -1
@@ -38,33 +20,14 @@ models:
        { 
             "_test": "Good",
             "id": "Gmma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
-            "name": "Gemma4 e26b 128K (by noctrex)",  
-            "description": "Gemma 4 e26b 128K (by noctrex)",          
+            "name": "Gemma4 26B 128K - MXFP4 MOE (by noctrex)",
             "contextWindow": 131072,
-            "maxTokens": 2048,
-            "reasoning": true
-        },
-
-  Gemma-4_E26B_MXFP4_MOE_64k_2:
-    file: gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
-    ctx_k: 64
-    gpu_layers: -1
-    cpu_moe: 2
-    batch: 1024
-    ubatch: 256
-    spec_type: none 
-    pi_agent_model: >
-       { 
-            "_test": "Good",
-            "id": "Gmma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
-            "name": "Gemma4 e26b 64K (by noctrex)",  
-            "description": "Gemma 4 e26b 64K (by noctrex)",          
-            "contextWindow": 65536,
-            "maxTokens": 2048,
+            "maxTokens": 4096,
             "reasoning": true
         },
 
   Gemma-4-26B-A4B-it-UD-IQ4_NL_64k:
+    speed: 45 t/s
     file: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
     ctx_k: 64
     gpu_layers: -1
@@ -76,52 +39,50 @@ models:
        { 
             "_test": "???",
             "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
-            "name": "Gemma4 e26b UD-IQ4_NL 64K (by Unsloth)",        
+            "name": "Gemma4 26B 64K - UD-IQ4_NL (by Unsloth)",
             "contextWindow": 65536,
-            "maxTokens": 2048,
+            "maxTokens": 4096,
             "reasoning": true
         },
 
-  # Gemma 4 12B
-  Gemma-4-12B_IQ4_NL:
-    file: Gemma-4-12b-it-IQ4_NL_unsloth.gguf
+  Gemma-4-26B-it-Q4_0_128k:
+    speed: 43 t/s
+    file: Gemma-4-26B_Q4_0-it_google.gguf
     ctx_k: 128
     gpu_layers: -1
-    cpu_moe: 0
-    batch: 2048
+    cpu_moe: 1
+    batch: 1024
     ubatch: 256
     spec_type: none 
     pi_agent_model: >
-      { 
-         "_test": "???",
-          "id": "Gemma-4-12b-it-IQ4_NL_unsloth.gguf",
-          "name": "Gemma4 12B IQ4_NL",
-          "contextWindow": 131072,
-          "maxTokens": 2048,
-          "reasoning": true,
-          "input": [ "text" ]
-      },
+       { 
+            "_test": "???",            
+            "id": "Gemma-4-26B_Q4_0-it_google.gguf",
+            "name": "Gemma4 26B 128K - Q4_0 (by Google)",
+            "contextWindow": 131072,
+            "maxTokens": 4096,
+            "reasoning": true
+        },
 
-
-  # Qwen 3.6 28B 
+# Qwen 3.6 28B 
   Qwen_3.6_28b_reap_20:
     file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-    ctx_k: 64
+    ctx_k: 96
     gpu_layers: -1
     cpu_moe: 6
-    batch: 2048
+    batch: 1024
     ubatch: 256
     _spec_type: none 
     spec_type: ngram-simple
-    spec_ngram_simple_size_m: 5
-    spec_ngram_simple_size_n: 8
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_size_n: 12
     spec_ngram_simple_min_hits: 1
     pi_agent_model: >
       { 
          "_test": "Really good",
           "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
           "name": "Qwen 3.6 28B REAP20",
-          "contextWindow": 65536,
+          "contextWindow": 98304,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
@@ -129,28 +90,84 @@ models:
 
   Qwen_3.6_28b_reap_20_v2:
     file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-    ctx_k: 64
+    ctx_k: 128
     gpu_layers: -1
     cpu_moe: 6
-    batch: 2048
+    batch: 1024
     ubatch: 256
     _spec_type: none 
     spec_type: ngram-simple
-    spec_ngram_simple_size_m: 4
-    spec_ngram_simple_size_n: 8
+    spec_ngram_simple_size_m: 24
+    spec_ngram_simple_size_n: 12
     spec_ngram_simple_min_hits: 1
     pi_agent_model: >
       { 
          "_test": "Really good",
           "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
           "name": "Qwen 3.6 28B REAP20",
-          "contextWindow": 65536,
+          "contextWindow": 131072,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
 
-  # Qwen 3.6 35B A3B
+     
+
+# Qwen 3.6 35B A3B
+  Qwen_3.6_35B_A3B_MOE384-pruned-Q4_K_M:
+    file: Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 5
+    batch : 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "???",
+          "id": "Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf",
+          "name": "QWEN 3.6 35B A3B - UD Q4_K_M",
+          "contextWindow": 65536,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+
+  Qwen_3.6_35B_A3B_MOE384-pruned-Q4_K_M_v2:
+    file: Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 6
+    batch : 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "???",
+          "id": "Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf",
+          "name": "QWEN 3.6 35B A3B - UD Q4_K_M",
+          "contextWindow": 65536,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+
+  qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf:
+    file: qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 0
+    batch : 1024
+    ubatch: 512
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "OK",
+          "id": "qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf",
+          "name": "QWEN 3.6 35B A3B - qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf",
+          "contextWindow": 65536,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+
   Qwen_3.6_35B_A3B_UD-Q4_K_M:
     file: Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf
     ctx_k: 64
@@ -169,7 +186,7 @@ models:
           "reasoning": true
       },
   
-  # GLM 4.7 Flash
+# GLM 4.7 Flash
   GLM-4.7-Flash_REAP-23B-A3B_UD-Q4_K_XL:
     file: GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
     ctx_k: 64
@@ -226,22 +243,40 @@ models:
         },
 
 
-  # GPT OSS 20B
+# GPT OSS 20B
   GPT-OSS-20B_20b_UD-Q8_K_XL:
     file: GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
-    ctx_k: 64
+    ctx_k: 128
     gpu_layers: -1
     cpu_moe: 0
-    batch: 1024
-    ubatch: 256
+    batch: 2048
+    ubatch: 1024
     spec_type: none
     pi_agent_model: >
         { 
             "_test": "?",
             "id": "GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf",
-            "name": "GPT OSS 20B UD Q8_K_XL",            
-            "contextWindow": 65536,
-            "maxTokens": 4096,
+            "name": "GPT OSS 20B UD Q8_K_XL (by Unsloth)",
+            "contextWindow": 131072,
+            "maxTokens": 2048,
+            "reasoning": true
+        },
+
+  GPT-OSS-20B_20b_UD-Q6_K_XL:
+    file: GPT-OSS-20b-UD-Q6_K_XL_unsloth.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 384
+    spec_type: none
+    pi_agent_model: >
+        { 
+            "_test": "?",
+            "id": "GPT-OSS-20b-UD-Q6_K_XL_unsloth.gguf",
+            "name": "GPT OSS 20B UD Q6_K_XL (by Unsloth)",
+            "contextWindow": 131072,
+            "maxTokens": 2048,
             "reasoning": true
         },
 
@@ -289,3 +324,4 @@ models:
             "maxTokens": 4096,
             "reasoning": true
         },
+

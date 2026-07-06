@@ -13,6 +13,28 @@ Max context: 128 k
 OpenAI tools compatibility: ✔️
 
 
+# (1) UD-Q6_K_XL (by Unsloth)
+file: GPT-OSS-20b-UD-Q6_K_XL_unsloth.gguf
+
+
+# (2) UD-Q8_K_XL (by Unsloth)
+file: GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
+
+
+| Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
+| ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |
+| GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
+|  60 t/s | 128 k |   0 | 25/25  | 13.5 GB | 11.2/1.1  | --    |    656 |  11s | none             | --                             | 2048/1024    |                 |
+|  60 t/s | 128 k |   0 | 25/25  | 13.4 GB | 11.2/1.1  | --    |   1300 |  22s | none             | --                             | 2048/512     |                 |
+|  60 t/s | 128 k |   0 | 25/25  | 13.3 GB | 11.2/1.1  | --    |    850 |  14s | none             | --                             | 2048/384     |                 |
+
+| GPT-OSS-20b-UD-Q6_K_XL_unsloth.gguf
+|  71 t/s | 128 k |   0 | 25/25  | 12.8 GB | 10.6/0.6  | --    |    895 |  12s | none             | --                             | 2048/384     |                 |
+|  70 t/s | 128 k |   0 | 25/25  | 12.7 GB | 10.6/0.6  | --    |    601 |   9s | none             | --                             | 2048/256     |                 |
+|  69 t/s | 128 k |   0 | 25/25  | 12.7 GB | 10.6/0.6  | --    |    601 |   8s | none             | --                             | 1024/256     |                 |
+|  51 t/s | 128 k |   1 | 25/25  | 12.3 GB | 10.2/1.0  | --    |   1568 |  31s | none             | --                             | 1024/256     |                 |
+
+
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
 | ------- | ----- | --- | ----- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
 |  73 t/s | 25/25 |   0 | 128 k | 12.6 GB | ---   |   1345 |  18s | DFlash (N-gram)  | size_n=12 size_m=16 min_hits=1 | 2048/256     | 10.6/0.6  | UD-Q6_K_XL      |
@@ -30,7 +52,6 @@ OpenAI tools compatibility: ✔️
 |  68 t/s | 25/25 |   0 | 128 k | 12.9 GB | ---   |    714 |  10s | DFlash (N-gram)  | size_n=10 size_m=4 min_hits=1  | 2048/512     | 10.7/0.6  | Q8_0            |
 
 
-
 | Speed   | Ctx   | GPU   | MoE | VRAM    | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | VRAM/RAM  | Note            |
 | ------- | ----- | ----- | --- | ------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ | --------- | --------------- |
 | unsloth_gpt-oss-20b-UD-Q8_K_XL.gguf
@@ -39,11 +60,6 @@ OpenAI tools compatibility: ✔️
 |  64 t/s | 128 k | 25/25 |  -- | 13.2 GB | --    |   1202 |  19s | DFlash (N-gram)  | size_M=15 size_N=10 min_hits=1 | 1024/256     | 11.2/1.1  |                 |
 |  62 t/s | 128 k | 25/25 |  -- | 13.2 GB | --    |   1162 |  18s | none             | --                             | 1024/256     | 11.2/1.1  |                 |
 |  62 t/s | 128 k | 25/25 |  -- | 13.2 GB | --    |   1184 |  19s | DFlash (N-gram)  | size_M=6 size_N=4 min_hits=1   | 1024/256     | 11.2/1.1  |                 |
-| davidau_OpenAI-20B-NEO-CODE2-Plus-Uncensored-IQ4_NL.gguf
-|  83 t/s | 128 k | 25/25 |  -- | 12.7 GB | --    |   2549 |  31s | DFlash (N-gram)  | size_M=6 size_N=4 min_hits=1   | 1024/256     | 10.7/0.1  | 51% accepted    |
-|  78 t/s | 128 k | 25/25 |  -- | 12.7 GB | --    |   2075 |  26s | DFlash (N-gram)  | size_M=6 size_N=3 min_hits=1   | 1024/256     | 10.7/0.1  | 45% accepted    |
-|  82 t/s | 128 k | 25/25 |  -- | 12.7 GB | --    |   3948 |  48s | DFlash (N-gram)  | size_M=4 size_N=6 min_hits=1   | 1024/256     | 10.7/0.1  |                 |
-
 
 
 ## Run tests
@@ -51,21 +67,31 @@ OpenAI tools compatibility: ✔️
 ```bash
 cd scripts
 
-#model=unsloth_gpt-oss-20b-Q4_K_M.gguf
-#model=unsloth_gpt-oss-20b-UD-Q6_K_XL.gguf
-#model=unsloth_gpt-oss-20b-Q8_0.gguf
-#model=unsloth_gpt-oss-20b-UD-Q8_K_XL.gguf
-model=davidau_OpenAI-20B-NEO-CODE2-Plus-Uncensored-IQ4_NL.gguf
+model=GPT-OSS-20b-UD-Q6_K_XL_unsloth.gguf
 ctx_k=128
 gpu_layers=-1
 cpu_moe=0
-dflash=0
+spec=0
 draft_model=none
 predict_token=3/6
 mtp=0
 jinjia=0
-batch=1024
-ubatch=256
+batch=2048
+ubatch=384
+
+
+model=GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
+ctx_k=128
+gpu_layers=-1
+cpu_moe=0
+spec=0
+draft_model=none
+predict_token=0/0
+mtp=0
+jinjia=0
+batch=2048
+ubatch=1024
+
 
 source server_common.sh && \
 start_server \
@@ -73,14 +99,14 @@ start_server \
     $ctx_k \
     $gpu_layers \
     $cpu_moe \
-    $dflash \
+    $spec \
     $draft_model \
     $predict_token \
     $mtp \
     $jinjia \
     $batch \
     $ubatch
-
-source test_models_common.sh && test_call_result_row
+    
+source test_models_common.sh && print_test_call
 
 ```

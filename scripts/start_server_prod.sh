@@ -46,12 +46,12 @@ args=(
     --samplers "penalties;dry;top_k;top_p;min_p;temperature"
 
     ## strict for large capable models
-    --temperature 0.2 \
+    --temperature 0.1 \
     --top-k 20 \
     --top-p 0.8 \
     --min-p 0.05 \
-    --repeat-penalty 1.05 \
-    --repeat-last-n 2048 \
+    --repeat-penalty 1.10 \
+    --repeat-last-n 1024 \
 
     # I have the impression this one cause loops also on model that never loop before (Gemma-4-26B)
     #--temperature 0.3 \
@@ -152,8 +152,8 @@ start_server() {
 
 
     if ! yq -e ".models[\"$model_id\"]" "$models_config_file" > /dev/null 2>&1; then
-        echo "Error: Model '$model_id' not found in $models_config_file"
-        echo "Available models: $(yq '.models | keys | .[]' $models_config_file | tr '\n' ' ')"
+        echo -e "❌ Error: Model '$model_id' not found in ${yellow}$models_config_file${reset}"
+        #echo "Available models: $(yq '.models | keys | .[]' $models_config_file | tr '\n' ' ')"
         return 1
     fi
 

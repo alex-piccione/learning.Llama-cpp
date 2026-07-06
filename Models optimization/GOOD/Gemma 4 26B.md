@@ -1,23 +1,23 @@
-# Gemma 4 E26B
+# Gemma 4 26B
 
-Model: Gemma 4 E26B
+Model: Gemma 4 26B
 MTP: NO
 MOE: Yes
 Max contenxt: 256 k
 OpenAI tools compatibility: ✔️
 
 
-## Unsloth 
+## it (by Unsloth) 
 HuggingFace: https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF              
 Quantizer: Unsloth
 File: Gemma-4-26B-A4B-it-UD-Q4_K_M_unsloth.gguf
 
-## Unsloth UD IQ4_NL
+## UD IQ4_NL (by Unsloth)
 Huggingface: https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
 Quantizer: Unsloth
 File: Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
 
-## Unsloth QAT
+## QAT (by Unsloth)
 Huggingface: https://huggingface.co/unsloth/gemma-4-26B-A4B-it-qat-GGUF
 Quantizer: Unsloth
 File: Gemma-4-26B-A4B-it-qat-UD-Q4_K_XL_unsloth.gguf
@@ -27,9 +27,12 @@ Draft_file_1:
 HuggingFace: https://huggingface.co/noctrex/gemma-4-26B-A4B-it-MXFP4_MOE-GGUF
 Provider: noctrex
 File: Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
+Size: 14.3 GB
+⚠️ From the initial 30 t/s it become slow, 3 t/s, after some interactions.
+
 
 ## Google Q4_0
-File: Gemma-4-26B_q4_0-it_google.gguf
+File: Gemma-4-26B_Q4_0-it_google.gguf
 Quantized by: Google
 
 
@@ -38,7 +41,7 @@ Quantized by: Google
 
 | Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
 | ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |
-| Gemma-4-26B_q4_0-it_google.gguf
+| Gemma-4-26B_Q4_0-it_google.gguf
 |  46 t/s | 160 k |   1 | 31/31  | 15.7 GB | 13.0/0.4  | --    |   1320 |  28s | none             | --                             | 1024/256     |                 |
 |  48 t/s | 128 k |   1 | 31/31  | 15.4 GB | 13.0/0.4  | --    |   1320 |  27s | none             | --                             | 1024/256     |                 |
 |  49 t/s |  96 k |   1 | 31/31  | 14.9 GB | 13.0/0.4  | --    |   1320 |  27s | none             | --                             | 1024/256     |                 |
@@ -55,8 +58,6 @@ Quantized by: Google
 |  32 t/s | 128 k |   2 | 31/31  | 14.3 GB | 12.0/1.4  | --    |   1683 |  53s | none             | --                             | 1024/256     |                 |
 |  31 t/s |  64 k |   2 | 31/31  | 13.4 GB | 12.0/1.4  | --    |   1683 |  53s | none             | --                             | 1024/256     |                 |
 |  35 t/s |  64 k |   1 | 31/31  | 13.7 GB | 12.3/1.1  | --    |   1228 |  34s | none             | --                             | 1024/256     |                 |
-
-
 
 
 | Speed   | GPU   | MoE | Ctx   | VRAM    | Cache | tokens | Time | pred | pred acc | Batch/Ubatch | VRAM/RAM | Note                           |
@@ -169,3 +170,34 @@ start_server \
 source test_models_common.sh && print_test_call
 
 ```
+
+
+### Real ahgent coding performance
+
+
+Prompt
+
+```text
+gh auth status gives me this output:
+
+github.com
+  ✓ Logged in to github.com account alex-cyber-75 (GITHUB_TOKEN)
+  - Active account: true
+  - Git operations protocol: https
+  - Token: ghp_************************************
+  - Token scopes: 'repo'
+  ! Missing required token scopes: 'read:org'
+  - To request missing scopes, run: gh auth refresh -h github.com
+
+What does it mean?
+```
+  
+Test on Pi  
+
+| Setup                          | t/s | Note               |
+| ---                            | --- | ---                |
+| cpu_moe: 1  128k               |  33 |                    |
+| cpu_moe: 2  128 k              |  16 |                    |
+| cpu_moe: 2   64 k              |  32 |                    |
+| cpu_moe: 0   64 k              |  32 |                    |
+
