@@ -9,7 +9,7 @@ models:
 # Gemma 4 26B  
   Gemma-4_26B_MXFP4_MOE_128k:
     speed: 33 t/s
-    file: gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
+    file: Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
     ctx_k: 128
     gpu_layers: -1
     cpu_moe: 1
@@ -19,7 +19,7 @@ models:
     pi_agent_model: >
        { 
             "_test": "Good",
-            "id": "Gmma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
+            "id": "Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
             "name": "Gemma4 26B 128K - MXFP4 MOE (by noctrex)",
             "contextWindow": 131072,
             "maxTokens": 4096,
@@ -132,7 +132,7 @@ models:
           "reasoning": true
       },
 
-  Qwen_3.6_35B_A3B_MOE384-pruned-Q4_K_M_v2:
+  Qwen_3.6_35B_A3B_MOE384-pruned-Q4_K_M_MOE_6:
     file: Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf
     ctx_k: 64
     gpu_layers: -1
@@ -150,8 +150,8 @@ models:
           "reasoning": true
       },
 
-  qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf:
-    file: qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf
+  Qwe3.6-35b-reap-pruned-ratio-0.3-Q4_K_M_amazeble:
+    file: Qwen3.6-35b-reap-pruned-ratio-0.3-Q4_K_M_amazeble.gguf
     ctx_k: 64
     gpu_layers: -1
     cpu_moe: 0
@@ -164,6 +164,24 @@ models:
           "id": "qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf",
           "name": "QWEN 3.6 35B A3B - qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf",
           "contextWindow": 65536,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+
+  Qwe3.6-35b-reap-pruned-ratio-0.3-Q4_K_M_amazeble_v2:
+    file: Qwen3.6-35b-reap-pruned-ratio-0.3-Q4_K_M_amazeble.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 1
+    batch : 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "??",
+          "id": "qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf",
+          "name": "QWEN 3.6 35B A3B - REAP Pruned Ratio-0.3 Q4_K_M (by amazeable)",
+          "contextWindow": 131072,
           "maxTokens": 2048,
           "reasoning": true
       },
@@ -187,7 +205,7 @@ models:
       },
   
 # GLM 4.7 Flash
-  GLM-4.7-Flash_REAP-23B-A3B_UD-Q4_K_XL:
+  GLM-4.7-Flash_REAP-23B-A3B_UD-Q4_K_XL_MOE_5:
     file: GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
     ctx_k: 64
     gpu_layers: -1
@@ -199,13 +217,13 @@ models:
       { 
           "_test": "???",
           "id": "GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf",
-          "name": "GLM 4.7 Flash 23B REAP UD (Unsloth)",
+          "name": "GLM 4.7 Flash 23B REAP UD MOE 5 (Unsloth)",
           "contextWindow": 65536,
           "maxTokens": 2048,
           "reasoning": true
       },
 
-  GLM-4.7-Flash_REAP-23B-A3B_UD-Q4_K_XL_v2:
+  GLM-4.7-Flash_REAP-23B-A3B_UD-Q4_K_XL_MOE_4:
     file: GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
     ctx_k: 64
     gpu_layers: -1
@@ -217,7 +235,7 @@ models:
       { 
           "_test": "???",
           "id": "GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf",
-          "name": "GLM 4.7 Flash 23B REAP UD (Unsloth)",
+          "name": "GLM 4.7 Flash 23B REAP UD MOE 4(Unsloth)",
           "contextWindow": 65536,
           "maxTokens": 2048,
           "reasoning": true

@@ -1,7 +1,7 @@
 # Qwen 3.6 28B A3B
 
 
-File: barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf
+File: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
 Max context          : 256 k
 OpenAI tools compatibility : ✔️
 
@@ -20,7 +20,7 @@ OpenAI tools compatibility : ✔️
 ```bash
 cd scripts
 
-model=barozp_Qwen3.6-28B-REAP20-A3B-Q4_K_M.gguf
+model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
 ctx_k=256
 gpu_layers=-1
 cpu_moe=0

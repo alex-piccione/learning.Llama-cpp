@@ -121,6 +121,8 @@ start_server() {
         --repeat-penalty 1.05 \
         --repeat-last-n 256 \
 
+        #--dry_multiplier 0.05 \
+
         --cache-reuse $cache_reuse
     )
 

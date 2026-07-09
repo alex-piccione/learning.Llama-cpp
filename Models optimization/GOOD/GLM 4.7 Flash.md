@@ -72,7 +72,7 @@ More that 64
 |  36 t/s |  64 k |   5 | 48/48  | 14.2 GB | 12.1/1.1  | --    |   2048 |  56s | DFlash (N-gram)  | s_M=6 s_N=24 min=1             | 1024/256     |                 |
 
 
-| unsloth_GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M.gguf
+| GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M_unsloth.gguf
 |  34 t/s | 128 k | 48/48 |   7 | 15.4 GB | ---   |   1026 |  30s | DFlash (N-gram)  | size_M=30 size_N=30 min_hits=1 | 2048/256     | 11.4/1.6  |                 |
 |  33 t/s | 128 k | 48/48 |   8 | 15.2 GB | ---   |    971 |  30s | DFlash (N-gram)  | size_M=30 size_N=30 min_hits=1 | 2048/256     | 11.1/1.8  |                 |
 |  33 t/s | 128 k | 48/48 |   8 | 15.2 GB | ---   |   1159 |  35s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 2048/256     | 11.1/1.8  |                 |
@@ -82,7 +82,7 @@ More that 64
 |  27 t/s |  96 k | 48/48 |  11 | 13.5 GB | ---   |    726 |  27s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 10.4/2.6  |                 |
 |  27 t/s |  64 k | 48/48 |  11 | 12.6 GB | ---   |    917 |  34s | DFlash (N-gram)  | size_M=20 size_N=20 min_hits=1 | 1024/256     | 10.4/2.6  |                 |
 
-| unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf
+| GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
 |  44 t/s |  96 k | 48/48 |   4 | 15.5 GB | ---   |    969 |  22s | none             | --                             | 1024/384     | 12.3/0.8  |                 |
 |  44 t/s |  96 k | 48/48 |   4 | 15.3 GB | ---   |    931 |  22s | none             | --                             | 1024/128     | 12.3/0.8  |                 |
 |  44 t/s |  96 k | 48/48 |   4 | 15.4 GB | ---   |    989 |  23s | none             | --                             | 2048/256     | 12.3/0.8  |                 |
