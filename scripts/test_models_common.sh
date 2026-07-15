@@ -49,7 +49,7 @@ test_call() {
 
 print_test_call() {
     debug_function "print_test_call"
-    declare -g error=""
+    declare -g error="" # reset the global error
 
     ### !!! Rely on the cpu_moe parameter passed to start_server(), because this input is not present in the log
     if [[ ! -v cpu_moe ]]; then
@@ -161,7 +161,8 @@ llamacpp_run() {
 
 
     # 2. Query the endpoint with real-time speed monitoring
-    local threshold="10.0"  # minimum allowable tokens/sec threshold here
+    local SPEED_THRESHOLD="5.0"  # minimum allowable tokens/sec threshold here
+
     local response_log="logs/llama_api_response.log"
 
     # Run curl in the background so we can monitor logs simultaneously
@@ -180,9 +181,9 @@ llamacpp_run() {
                     local speed="${BASH_REMATCH[1]}"
                     
                     # Float comparison using awk
-                    local is_slow=$(awk -v s="$speed" -v t="$threshold" 'BEGIN {print (s < t) ? 1 : 0}')
+                    local is_slow=$(awk -v s="$speed" -v t="$SPEED_THRESHOLD" 'BEGIN {print (s < t) ? 1 : 0}')
                     if [[ "$is_slow" -eq 1 ]]; then
-                        echo -e "\n🛑 [ABORT] Generation speed dropped to ${speed} t/s (Threshold: ${threshold} t/s)." >&2
+                        echo -e "\n🛑 [ABORT] Generation speed dropped to ${speed} t/s (Threshold: ${SPEED_THRESHOLD} t/s)." >&2
                         # Write a flag file to drop a persistent signal
                         #echo "$speed" > logs/speed_abort.flag
                         kill -15 "$curl_pid" 2>/dev/null

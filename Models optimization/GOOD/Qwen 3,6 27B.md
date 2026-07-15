@@ -1,6 +1,11 @@
 # Qwen 3.6 27B
 
 
+## Qwopus3.6-27B-Coder-Compat-MTP-GGUF
+https://huggingface.co/Jackrong/Qwopus3.6-27B-Coder-Compat-MTP-GGUF
+
+
+
 ## Qwen 3.6 28B-REAP20-A3B (by barozp)
 
 HuggingFace: https://huggingface.co/barozp/Qwen3.6-28B-REAP20-A3B-GGUF  

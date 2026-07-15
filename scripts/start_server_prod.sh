@@ -29,14 +29,14 @@ args=(
 
     #--cache-reuse 256 \
 
-    --draft-p-min 0.6 \
+    --draft-p-min 0.7 \
 
     #--defrag-thold 0.1
     #--draft-min 1            # min tokens to draft before verifying
     #--draft-p-min 0.6        # stop drafting if token probability drops below this   
 
     # TODO: minimal ?
-    # default is 3, we need this level to print out the GPU layers
+    # default is 3, we need level 4 to print out the GPU layers
     --log-verbosity 3 \
 
     # this should avoid the values sent by Agent code tool
@@ -50,7 +50,7 @@ args=(
     --top-k 20 \
     --top-p 0.8 \
     --min-p 0.05 \
-    --repeat-penalty 1.10 \
+    --repeat-penalty 1.15 \
     --repeat-last-n 1024 \
 
     # I have the impression this one cause loops also on model that never loop before (Gemma-4-26B)
@@ -65,7 +65,7 @@ args=(
     ## With these parameters the model is INCAPABLE to write the string "26". Literally!
     #--dry-multiplier 0.8 \
     #--dry-base 1.75 \
-    #--dry-allowed-length 4 \     
+    #--dry-allowed-length 4 \
     #--dry-penalty-last-n -1 \
 
     ## Relax DRY so it doesn't break code syntax/paths
@@ -73,6 +73,8 @@ args=(
     #--dry-base 1.75 \
     #--dry-allowed-length 12 \
     #--dry-penalty-last-n -1 \
+
+    --context-shift \
 )
 
 require_arg() {

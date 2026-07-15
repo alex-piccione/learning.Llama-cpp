@@ -112,14 +112,16 @@ start_server() {
         --batch-size $batch \
         --ubatch-size $ubatch \
 
-        --draft-p-min 0.6 \
+        --draft-p-min 0.7 \
 
         --temperature 0.1 \
         --top-k 20 \
         --top-p 0.8 \
         --min-p 0.05 \
-        --repeat-penalty 1.05 \
-        --repeat-last-n 256 \
+        --repeat-penalty 1.15 \
+        --repeat-last-n 1024 \
+
+        --samplers "penalties;dry;top_k;top_p;min_p;temperature"
 
         #--dry_multiplier 0.05 \
 
@@ -371,7 +373,8 @@ get_pred_info() {
     local pred_info="--"
 
     # 0.32.990.479 I statistics     statistics #calls(b,g,a) =    1   1263      0, #gen drafts =      0, #acc drafts =     0, #gen tokens =      0, #acc tokens =     0, dur(b,g,a) = 0.003, 2.524, 0.000 ms
-    local ngram_simple=$(grep -E 'I statistics.*ngram-simple:' "$log" | tail -n 1)
+    # 0.14.367.078 I spec common_specu: adding speculative implementation 'ngram-simple'
+    local ngram_simple=$(grep -E "I spec common_specu: adding speculative implementation 'ngram-simple'" "$log" | tail -n 1)
     
     if [[ -n $ngram_simple ]]; then
         pred_type="DFlash (N-gram)"
@@ -380,15 +383,11 @@ get_pred_info() {
         # 0.10.658.011 I common_speculative_impl_ngram_simple: adding speculative implementation 'ngram-simple'
         # 0.10.658.018 I common_speculative_impl_ngram_simple: - size_n=10, size_m=4, min_hits=1
         # 0.06.214.427 I common_speculative_impl_ngram_simple: - size_n=1, size_m=2, min_hits=1
+        #local spec_line=$(grep -E 'common_speculative_impl_ngram_simple.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
 
-        # b9856
-        # 0.57.644.917 I spec common_specu: adding speculative implementation 'draft-mtp'
-        # 0.57.644.930 I spec common_specu: - n_max=12, n_min=6, p_min=0.60, n_embd=5120, backend_sampling=1
-        # 0.57.644.937 I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]
-
-        local spec_line=$(grep -E 'common_speculative_impl_ngram_simple.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
-
-        local spec_line=$(grep -E 'common_speculative_impl_ngram_simple.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
+        #b9937
+        # 0.14.367.086 I spec common_specu: - size_n=12, size_m=24, min_hits=1
+        local spec_line=$(grep -E 'common_specu:.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
         if [[ -n $spec_line ]]; then
             read -r size_n size_m min_hits <<< \
                 $(echo "$spec_line" | awk '
@@ -405,8 +404,21 @@ get_pred_info() {
             return 1
         fi
     fi    
+
+
+    # b9856
+    # 0.57.644.917 I spec common_specu: adding speculative implementation 'draft-mtp'
+    local draft_mtp=$(grep -E "I spec common_specu: adding speculative implementation 'draft-mtp'" "$log" | tail -n 1)
+    
+    if [[ -n $draft_mtp ]]; then
+        pred_type="DFlash MTP"
+
+        # TODO
+        # 0.57.644.930 I spec common_specu: - n_max=12, n_min=6, p_min=0.60, n_embd=5120, backend_sampling=1
+        # 0.57.644.937 I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+    fi
    
     return_value "pred_type" "$pred_type"  
-    return_value "pred_info" "$pred_info"      
+    return_value "pred_info" "$pred_info" 
 }
 
