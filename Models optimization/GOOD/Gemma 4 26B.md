@@ -21,14 +21,15 @@ Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf                           12.6 GB
 Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf                           14.3 GB
 https://huggingface.co/noctrex/gemma-4-26B-A4B-it-MXFP4_MOE-GGUF
 
-## ❌ REAP126 UD-IQ4_NL (techhermit)
-Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf                12.3 GB
-https://huggingface.co/techhermit/gemma-4-26B-A4B-it-reap126
-❌ Looping on Pi anf lie
-
 ## ✔️ Q4_K_M (by Unsloth) 
 Gemma-4-26B-A4B-it-UD-Q4_K_M_unsloth.gguf                            
 https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
+
+
+## ❌ REAP126 UD-IQ4_NL (techhermit)
+Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf                12.3 GB
+https://huggingface.co/techhermit/gemma-4-26B-A4B-it-reap126
+❌ Looping on Pi and lie
 
 
 
