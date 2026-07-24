@@ -1,26 +1,31 @@
 # Models
 
-| Model                 | Quantized by | File                                                     | Speed  | Context | Pi                    | Note                             |
-| --------------------- |------------- | -------------------------------------------------------- | ------ | ------- | --------------------- | -------------------------------- |
-| Gemma 4 26B           | Google       | Gemma-4-26B_Q4_0-it_google.gguf                          | 4? t/s |   128 k | ✔️ 128k 40 t/s        |                                  |
-| GPT OSS 20B           | Unsloth      | gpt-oss-20b-Q4_K_M.gguf                                  | 75 t/s |   128 k |                       |                                  |
-| GPT OSS 20B           | David AU     | davidau_OpenAI-20B-NEO-CODE2-Plus-Uncensored-IQ4_NL.gguf | 80 t/s |   128 k | ✔️ 128k 60/70 t/s     | ❌ wrong reasoning , Loop       |
-| Gemma 4 12B           | Unsloth      | unsloth_gemma-4-12b-it-IQ4_NL.gguf                       | 52 t/s |   256 k |                       |                                  |
-| Qwen 3.5 9B           | Unsloth      |                                                          | 39 t/s |   256 k |                       |                                  |
-| Qwen 3.6 35B A3B      | bazorp       | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf                | 42 t/s |    64 k | ✔️ 64k 45-80 t/s     |                                  |
-| Qwen 3.6 35B A3B      | tipe         | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf           |        |    64 k | ✔️ 40 t/s             |                                  |
+**Not updated** Look at single model files
 
-| Gemma 4 26B           | noctrex      | gemma-4-26B-A4B-it-MXFP4_MOE.gguf                        | 36 t/s |   128 k |                       |                                  |
-| GLM 4.7 Flash 23B     | Unsloth      | GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M_unsloth.gguf           | 32 t/s |   128 k | ❌ 64k 35 t/s  FAIL   | Rubbish after a few questions    |
+| Model               | Quantized by | File                                                | Speed  | Ctx   | Pi                  | Note                             |
+| ------------------- |------------- | --------------------------------------------------- | ------ | ----- | ------------------- | -------------------------------- |
+| Gemma 4 26B         | Unsloth      | Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf           | 39 t/s | 160 k | ✔️ 160k 20-25 t/s  |                                  |
+| Gemma 4 26B         | Google       | Gemma-4-26B_Q4_0-it_google.gguf                     | 4? t/s | 128 k | ✔️ 128k 40 t/s     |                                  |
+| GPT OSS 20B         | Unsloth      | GPT-OSS-20B-Q4_K_M_unsloth.gguf                     | 75 t/s | 128 k |                     |                                  |
+| Gemma 4 26B         | Noctrex      | Gemma-4-26B-A4B-it-MXFP4_MOE.gguf                   | 36 t/s | 128 k | ✔️ 128k 35 t/s     |                                  |
+| Qwen 3.6 35B A3B    | bazorp       | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf           | 42 t/s |  64 k | ✔️ 64k 45-80 t/s   |                                  |
+| Qwen 3.6 35B A3B    | tipe         | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf      |        |  64 k | ✔️ 40 t/s          | ❌ Loop and too much proactive  |
 
-| Gemma 4 26B           | Unsloth      | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                        | 28 t/s |    64 k |                       |                                  |
-| Gemma 4 26B           | Unsloth      | gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                        | 25 t/s |   128 k |                       |                                  |
-| Qwen 3.6 35B-A3B      | Unsloth      | Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf                   | 25 t/s |    96 k | ✔️ 64k 20 t/s        |                                  |
-| Qwen 3 14B            | Unsloth      | unsloth_Qwen3-14B-Q4_K_M.gguf                            | 27 t/s |    64 k |                       |                                  |
-| GLM 4.7 Flash         | Unsloth      | unsloth_GLM-4.7-Flash-Q4_K_M.gguf                        | 32 t/s |    32 k | ❌ 64k 5 t/s          | Too slow                         |
+| Gemma 4 12B         | Unsloth      | Gemma-4-12b-it-IQ4_NL_unsloth.gguf                  | 52 t/s | 256 k |                     |                                  |
+| Qwen 3.5 9B         | Unsloth      |                                                     | 39 t/s | 256 k |                     |                                  |
+
+| GPT OSS 20B         | David AU     | OpenAI-20B-NEO-CODE2-Plus-UN-IQ4_NL_davidau.gguf    | 80 t/s | 128 k | ✔️ 128k 60/70 t/s  | ❌ wrong reasoning , Loop       |
+| GLM 4.7 Flash 23B   | Unsloth      | GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M_unsloth.gguf      | 32 t/s | 128 k | ❌ 64k 35 t/s      | ❌Rubbish after a few questions |
+| Qwopus 3.6 35B A3B  | Jackrog      | Qwopus3.6-35B-A3B-Coder-MTP-Q3_K_M_jackrong.gguf    | 47 t/s |  64 k | ❌ 64k 40 t/s      | ❌ wrong reasoning , Loop       |
+
+| Gemma 4 26B         | Unsloth      | Gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                   | 28 t/s |  64 k |                     |                                  |
+| Gemma 4 26B         | Unsloth      | Gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                   | 25 t/s | 128 k |                     |                                  |
+| Qwen 3.6 35B-A3B    | Unsloth      | Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf              | 25 t/s |  96 k | ✔️ 64k 20 t/s      | Too slow                         |
+| Qwen 3 14B          | Unsloth      | Qwen3-14B-Q4_K_M_unsloth.gguf                       | 27 t/s |  64 k |                     |                                  |
+| GLM 4.7 Flash       | Unsloth      | GLM-4.7-Flash-Q4_K_M_unsloth.gguf                   | 32 t/s |  32 k | ❌ 64k 5 t/s       | Too slow                         |
 | 
-| GLM 4.7 Flash 23B     | Unsloth      | GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf       | 42 t/s |    64 k | ✔️ 37 t/s             | ❌ Rubbish with just "hi"        |
-
+| GLM 4.7 Flash 23B   | Unsloth      | GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf  | 42 t/s |  64 k | ✔️ 37 t/s          | ❌ Rubbish with just "hi"        |
+| Ornith 1.0          | liodonai     | Ornith-1.0-35B-GGUF-IQ3_M_liodonai.gguf             |        |       | ❌ 30 t/s          | ❌ An idiot                      |
 
 | 
 | Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf         |              | 18 t/s |    16 k | No  |                                |
@@ -28,19 +33,10 @@
 
 Not tested yet:
 
-- https://huggingface.co/Jackrong/Qwopus3.6-27B-Coder-Compat-MTP-GGUF
-
 - https://huggingface.co/GestaltLabs/Ornstein3.6-35B-A3B-RYS-SABER-GGUF   
 
-- https://huggingface.co/lennyhans/Qwen3.6-35B-REAP-Pruned-ratio-0.5-Q4_K_M-GGUF
-
-- https://huggingface.co/amazeble/Qwen3.6-35B-REAP-Pruned-ratio-0.3-Q4_K_M-GGUF
-  qwen3.6-35b-reap-pruned-ratio-0.3-q4_k_m_amazeble.gguf
-
 - https://huggingface.co/HauhauCS/Gemma4-26B-A4B-QAT-Uncensored-HauhauCS-Balanced-MTP
-  READ INTRUCYION to use MTP properly
-
-  https://huggingface.co/t1pe/Qwen3.6-35B-A3B-MoE384-pruned-Q4_K_M-GGUF
+  READ INTRUCTION to use MTP properly
        
 
 - https://huggingface.co/chatqaq/Qwen3.6-27B-Claude-Mythos-Distilled-MTP-GGUF

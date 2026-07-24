@@ -17,10 +17,10 @@ source common.sh
 #   ctx_k: context size (8 for 8k, 16 for 16k...) 
 #   gpu_layers: max. number of layers to store in VRAM, either an exact number, 'auto', or 'all'
 #   cpu_moe: expert layer to offload to the CPU, the lower the better (ignored for non-MOE models)  
-#   spec: Speculative draft. 0=off, 1=on 
+#   spec: Speculative draft. 0=off, 1=on   or use "dflash", "simple", "mtp"
 #   draft_model: draft model, required if Speculative draft is on
 #   predict_token: number of token to predict, min/max (5/10)
-#   mtp: 1 = model support MTP (will set --spec-type draft-mtp) 0 otherwise 
+#   mtp: 1 = model support MTP (will set --spec-type draft-mtp) 0 otherwise    [OBSOLETE]
 #   jinja: not used... (possibly required by some models)
 #   batch: batch size... 1024 is the usual value
 start_server() {
@@ -126,6 +126,8 @@ start_server() {
         #--dry_multiplier 0.05 \
 
         --cache-reuse $cache_reuse
+
+        --reasoning-preserve #  invalid argument
     )
 
     # Logging settings
@@ -139,7 +141,7 @@ start_server() {
     local pred_type="none" # default value
 
 
-    if [[ "$spec" = "1" || "$mtp" = "1"  ]]; then
+    if [[ "$spec" = "1" || "$spec" == "simple" || "$spec" == "dflash" || "$spec" == "mtp" || "$mtp" = "1"  ]]; then
         local pred_min
         local pred_max
         # Split the string by '/'
@@ -150,7 +152,7 @@ start_server() {
         fi
     fi
 
-    if [[ "$spec" = "1" ]]; then
+    if [[ "$spec" = "1" || "$spec" == "simple" ]]; then
         # Case A or B: Speculation enabled
 
         if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
@@ -181,13 +183,36 @@ start_server() {
             print_value "Speculative type" "Internal N-Gram, ngram-simple (size_N: $pred_min, size_M: $pred_max)"
         fi
 
-    elif [[ "$mtp" == "1" ]]; then
+    elif [[ "$spec" == "dflash" ]]; then
+
+        if [[ -z "$draft_model" ||  "$draft_model" == "none" ]]; then
+            echo "‼️ draft_model has to be set with Speculative type DFlash" >&2
+            return 1
+        fi
+
+        local draft_model_path="$GGUF_FOLDER/$draft_model"
+        
+        args+=(--spec-type "draft-dflash")
+        args+=(--spec-draft-model "$draft_model_path")
+        args+=(--spec-draft-n-min "$pred_min")
+        args+=(--spec-draft-n-max "$pred_max")
+
+        # Configure KV cache type specifically for the draft model
+        args+=(--spec-draft-type-k "$spec_cache_type_k")
+        args+=(--spec-draft-type-v "$spec_cache_type_v")
+
+        print_value "Speculative type" "Draft model, draft-dflash (min: $pred_min, max: $pred_max)"
+        print_value "Draft Model" "$draft_model"
+
+    elif [[ "$spec" == "mtp" ]]; then
         # Case C: MTP (Only if spec=0)
 
         if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
             # Case A: External Draft Model
             local draft_model_path="$GGUF_FOLDER/$draft_model"
             print_value "Draft Model" "$draft_model"
+
+            args+=(--spec-draft-model "$draft_model_path")
         fi
         
         args+=(--spec-type "draft-mtp")
@@ -195,6 +220,7 @@ start_server() {
         args+=(--spec-draft-n-max "$pred_max")
 
         print_value "Speculative type" "MTP, draft-mtp (min: $pred_min, max: $pred_max)"
+
     fi
 
     # clean log
@@ -310,6 +336,15 @@ get_info_from_server_log() {
     # Extracts graphic card info
     local gpu_info=$(grep -E "CUDA0.*:" "$log" | sed -E 's/.*:\s+(.*)\s+\(.*/\1/' | head -1)
     
+    # MOE 9 GPU 40
+    # 0.03.187.029 I load_tensors: offloading 39 repeating layers to GPU
+    # 0.03.187.030 I load_tensors: offloaded 40/49 layers to GPU
+    # 
+    # MOE 9 GPU -1 
+    # 0.03.585.034 I load_tensors: offloading 47 repeating layers to GPU
+    # 0.03.585.036 I load_tensors: offloaded 49/49 layers to GPU
+
+
     # Extracts layers: GPU_offload/total ("41/41")
     local layers_info=$(grep -oE "offloaded [0-9]+/[0-9]+" "$log" | awk '{print $2}' | head -1)
 

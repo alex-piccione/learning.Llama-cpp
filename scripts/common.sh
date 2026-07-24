@@ -7,7 +7,8 @@ GGUF_FOLDER="L:\GGUF"
 #LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9251-bin-win-cuda-12.4-x64"  # b9251 CUDA
 #LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9371-bin-win-cuda-12.4-x64"  # b9371 CUDA
 #LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9724-bin-win-cuda-12.4-x64"  # b9724 CUDA
-LLAMA_BINS_FOLDER="$LLAMACPP" 
+#LLAMA_BINS_FOLDER="D:\Standalone Programs\llama-b9949-bin-win-cuda-12.4-x64"  # b9949 CUDA
+LLAMA_BINS_FOLDER="$LLAMACPP"  
 
 SERVER_PORT=8001
 SERVER_LOG=logs/llama_server.log

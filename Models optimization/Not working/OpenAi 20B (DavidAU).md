@@ -9,7 +9,7 @@ OpenAI tools compatibility    : ❌
 |  78 t/s |  16 k |   0 | 25/25  | 11.1 GB | 10.7/0.0  | --    |   2048 |  26s | none             | --                             | 1024/256     |                 |
 
 
-| davidau_OpenAI-20B-NEO-CODE2-Plus-Uncensored-IQ4_NL.gguf
+| OpenAI-20B-NEO-CODE2-Plus-Uncensored-IQ4_NL_davidau.gguf
 |  83 t/s | 128 k | 25/25 |  -- | 12.7 GB | --    |   2549 |  31s | DFlash (N-gram)  | size_M=6 size_N=4 min_hits=1   | 1024/256     | 10.7/0.1  | 51% accepted    |
 |  78 t/s | 128 k | 25/25 |  -- | 12.7 GB | --    |   2075 |  26s | DFlash (N-gram)  | size_M=6 size_N=3 min_hits=1   | 1024/256     | 10.7/0.1  | 45% accepted    |
 |  82 t/s | 128 k | 25/25 |  -- | 12.7 GB | --    |   3948 |  48s | DFlash (N-gram)  | size_M=4 size_N=6 min_hits=1   | 1024/256     | 10.7/0.1  |                 |

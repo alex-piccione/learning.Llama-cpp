@@ -75,6 +75,7 @@ args=(
     #--dry-penalty-last-n -1 \
 
     --context-shift \
+    --reasoning-preserve \
 )
 
 require_arg() {

@@ -1,4 +1,70 @@
-  # 8 t/s !!!
+
+# Gemma 4 12B
+  Gemma-4_26B_REAP126_160k_(thehermit):
+    file: gemma-4-26b-reap126-pruned-UD-IQ4_NL_techhermit.gguf
+    speed: 0 t/s
+    ctx_k: 160
+    gpu_layers: -1
+    cpu_moe: 1
+    batch: 1024
+    ubatch: 512
+    spec_type: none 
+    pi_agent_model: >
+      { 
+        "_test": "❌ Looping and lie",
+        "id": "gemma-4-26b-reap126-pruned-UD-IQ4_NL_techhermit.gguf",
+        "name": "Gemma4 26B 160K - REAP126 (by techhermit)",
+        "contextWindow": 163840,
+        "maxTokens": 9192,
+        "reasoning": true
+      },
+
+  Gemma-4-12B_IQ4_NL:
+    file: Gemma-4-12b-it-IQ4_NL_unsloth.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 256
+    spec_type: none 
+    pi_agent_model: >
+      { 
+         "_test": "???",
+          "id": "Gemma-4-12b-it-IQ4_NL_unsloth.gguf",
+          "name": "Gemma4 12B IQ4_NL",
+          "contextWindow": 131072,
+          "maxTokens": 2048,
+          "reasoning": true,
+          "input": [ "text" ]
+      },
+
+  Gemma-4-12B-v2-Q4_K_M_yuxinlu1:
+    file: Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    _spec_type: none 
+    spec_type: ngram-simple
+    spec_ngram_simple_size_m: 4
+    spec_ngram_simple_size_n: 10
+    spec_ngram_simple_min_hits: 1
+
+    pi_agent_model: >
+      { 
+         "_test": "❌ Hallucinate, Loop, Liar. Slow",
+          "id": "Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf",
+          "name": "Gemma4 12B v2-Q4_K_M_yuxinlu1",
+          "_contextWindow": 262144,
+          "contextWindow": 131072,
+          "maxTokens": 2048,
+          "reasoning": true,
+          "input": [ "text" ]
+      },
+
+
+# Qwen 3.6 27B
   Qwen3.6-27B-Esper3.1:
     file: Qwen3.6-27B-Esper3.1.Q4_K_M_mr_radermacher.gguf
     ctx_k: 16
@@ -13,7 +79,7 @@
     spec_ngram_simple_min_hits: 1
     pi_agent_model: >
       { 
-         "_test": ",
+         "_test": "8 t/s",
           "id": "Qwen3.6-27B-Esper3.1.Q4_K_M_mr_radermacher.gguf",
           "name": "Qwen 3.6 27B Exper3.1",
           "contextWindow": 32000,
@@ -22,7 +88,144 @@
           "input": [ "text", "image" ]
       },  
   
-  
+# Qwen 3.6 35B A3B
+  Qwen_3.6_28b_reap_20_96k_(barozp)_No-spec:
+    file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+    ctx_k: 96
+    gpu_layers: -1
+    cpu_moe: 5
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+         "_test": "Really good",
+          "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
+          "name": "Qwen 3.6 28B REAP20 64k",
+          "contextWindow": 65536,
+          "maxTokens": 8192,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+  Qwen_3.6_28b_reap_20_96k_(barozp)_12-12:
+    file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+    ctx_k: 96
+    gpu_layers: -1
+    cpu_moe: 5
+    batch: 1024
+    ubatch: 256
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 12
+    spec_ngram_simple_size_m: 12
+    spec_ngram_simple_min_hits: 1
+    pi_agent_model: >
+      { 
+         "_test": "Really good",
+          "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
+          "name": "Qwen 3.6 28B REAP20 64k",
+          "contextWindow": 65536,
+          "maxTokens": 8192,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  Qwen_3.6_35B_A3B_MOE384-pruned-Q4_K_M_(tipe):
+    file: Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 5
+    batch : 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "❌ Good to write and analyze code but too much proactive and loop",
+          "_speed": "35 t/s"
+          "id": "Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf",
+          "name": "QWEN 3.6 35B A3B - UD Q4_K_M",
+          "contextWindow": 65536,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+
+  Qwen_3.6_35B_REAP_pruned-ratio-0.3-Q4_K_M_(amazeble):
+    file: Qwen3.6-35B-REAP-pruned-ratio-0.3-Q4_K_M_amazeble.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 1
+    batch : 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "❌ not able to use tools",
+          "id": "Qwen3.6-35B-REAP-pruned-ratio-0.3-Q4_K_M_amazeble.gguf",
+          "name": "QWEN 3.6 35B A3B - REAP pruned ratio 0.3",
+          "contextWindow": 131072,
+          "maxTokens": 4096,
+          "reasoning": true
+      },
+
+# Qwen 3 Coder
+  Qwen_3_Coder_30B_A3B_REAP_15B_A3B_Q4_K_M_lainlives:
+    file: Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 5
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "???",
+          "id": "Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf",
+          "name": "Qwen 3 Coder 30B A3B - REAP 15B A3B - Q4_K_M (lainlives)",
+          "contextWindow": 65536,
+          "maxTokens": 4096,
+          "reasoning": true
+      },
+
+# Qwopus
+  Qwopus_3.6_35B-A3B-Coder-MTP-Q3_K_M_jackrong:
+    file: Qwopus3.6-35B-A3B-Coder-MTP-Q3_K_M_jackrong.gguf
+    ctx_k: 64
+    gpu_layers: -1
+    cpu_moe: 4
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "???",
+          "id": "Qwopus3.6-35B-A3B-Coder-MTP-Q3_K_M_jackrong.gguf",
+          "name": "Qwopus 3.6 35B A3B Coder MTP Q3_K_M (Jackrong)",
+          "contextWindow": 65536,
+          "maxTokens": 2048,
+          "reasoning": true
+      },
+
+# GLM 4.7 Flash
+  GLM-4.7-Flash_REAP-23B-A3B_UD-Q4_K_XL_(Unsloth):
+    file: GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf
+    ctx_k: 96
+    gpu_layers: -1
+    cpu_moe: 2
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "❌ Total non-sense",
+          "_speed": "__ t/s",
+          "id": "GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf",
+          "name": "GLM 4.7 Flash 23B REAP UD MOE 5 (Unsloth)",
+          "contextWindow": 96000,
+          "maxTokens": 8192,
+          "reasoning": true
+      },
+
+
+# Qwythos  
   Qwythos:
     file: Qwythos-9B-Claude-Mythos-5-1M-Q4_K_M_emperoai.gguf
     ctx_k: 256
@@ -100,47 +303,23 @@
           "reasoning": true
       },
 
-# Gemma 4 12B
-  Gemma-4-12B_IQ4_NL:
-    file: Gemma-4-12b-it-IQ4_NL_unsloth.gguf
-    ctx_k: 128
+
+# Ornith 1.0
+  Ornith_1_35B:
+    file: Ornith-1.0-35B-GGUF-IQ3_M_liodonai.gguf
+    ctx_k: 64
     gpu_layers: -1
-    cpu_moe: 0
-    batch: 2048
+    cpu_moe: 5
+    batch: 1024
     ubatch: 256
-    spec_type: none 
+    spec_type: none
     pi_agent_model: >
       { 
          "_test": "???",
-          "id": "Gemma-4-12b-it-IQ4_NL_unsloth.gguf",
-          "name": "Gemma4 12B IQ4_NL",
-          "contextWindow": 131072,
-          "maxTokens": 2048,
-          "reasoning": true,
-          "input": [ "text" ]
-      },
-
-  Gemma-4-12B-v2-Q4_K_M_yuxinlu1:
-    file: Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf
-    ctx_k: 128
-    gpu_layers: -1
-    cpu_moe: 0
-    batch: 1024
-    ubatch: 256
-    _spec_type: none 
-    spec_type: ngram-simple
-    spec_ngram_simple_size_m: 4
-    spec_ngram_simple_size_n: 10
-    spec_ngram_simple_min_hits: 1
-
-    pi_agent_model: >
-      { 
-         "_test": "❌ Hallucinate, Loop, Liar. Slow",
-          "id": "Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf",
-          "name": "Gemma4 12B v2-Q4_K_M_yuxinlu1",
-          "_contextWindow": 262144,
-          "contextWindow": 131072,
-          "maxTokens": 2048,
+          "id": "Ornith-1.0-35B-GGUF-IQ3_M_liodonai.gguf",
+          "name": "Ornith 1.0 35B 64k",
+          "contextWindow": 65536,
+          "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text" ]
       },

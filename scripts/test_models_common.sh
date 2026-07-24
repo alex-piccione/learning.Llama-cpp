@@ -114,7 +114,8 @@ llamacpp_run() {
 
     # 1. Build the payload with your exact parameters (OpenAI compatible schema)
     local temperature=0.1
-    local max_tokens=2048
+    #local max_tokens=2048
+    local max_tokens=4096  # allow more reasoning
 
     json_payload=$(jq -n \
         --arg code "$prompt" \
@@ -290,11 +291,17 @@ llamacpp_run() {
     local eval_rate=$(float_div "$eval_count" "$eval_s" 6)
       
     local has_tools=0
-    local tool_chunks=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.tool_calls[0].function.arguments // empty' 2>/dev/null)
+
+
+    # select(.choices[0] != null)                           --> filter choices hat are not empty
+    # | .choices[0].delta.tool_calls[0].function.arguments  --> peek the first choice and extract the arguments
+    # // empty                                              --> return nothing if the pick return nothing
+    #local tool_chunks=$(echo "$json_stream" | jq -j 'select(.choices[0] != null) | .choices[0].delta.tool_calls[0].function.arguments // empty' 2>/dev/null)
+    local tool_chunks=$(echo "$json_stream" | jq -j '.choices[0].delta.tool_calls[0].function.arguments // empty' 2>/dev/null)
     if [ -n "$tool_chunks" ]; then
         has_tools=1
 
-        local tool_code=$(jq -r '.code // empty' <<< "$tool_chunks" 2>/dev/null) # set to epmpty means NOT set it
+        local tool_code=$(jq -r '.code // empty' <<< "$tool_chunks" 2>/dev/null) # set to empty means NOT set it
 
         if [[ ! -n tool_code ]]; then
             echo "❌ ERROR: Failed to extract .code from API response" >&2
@@ -320,7 +327,7 @@ llamacpp_run() {
     return_value "eval_duration_s" "$eval_s"
     return_value "eval_count" "$eval_count"
     return_value "eval_rate" "$eval_rate"
-    return_value "has_tools" "$has_tools"    
+    return_value "has_tools" "$has_tools"
 
     #data: {"choices":[],"created":1780561441,"id":"chatcmpl-tQCE8GXcHvGYWTBwLbPqLpyuCYh7rEU0","model":"unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf","system_fingerprint":"b9371-f12cc6d0f","object":"chat.completion.chunk","usage":{"completion_tokens":2048,"prompt_tokens":666,"total_tokens":2714,"prompt_tokens_details":{"cached_tokens":0}},"timings":{"cache_n":0,"prompt_n":666,"prompt_ms":4471.659,"prompt_per_token_ms":6.7142027027027025,"prompt_per_second":148.93801159703816,"predicted_n":2048,"predicted_ms":59833.466,"predicted_per_token_ms":29.2155595703125,  "predicted_per_second":34.22833636279737,"draft_n":176,"draft_n_accepted":92}}
     #data: {"choices":[],"created":1780562537,"id":"chatcmpl-AfHMaYacIwtKpzgubMMZ5MbURozImBIV","model":"unsloth_GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL.gguf","system_fingerprint":"b9371-f12cc6d0f","object":"chat.completion.chunk","usage":{"completion_tokens":971 ,"prompt_tokens":666,"total_tokens":1637,"prompt_tokens_details":{"cached_tokens":0}},"timings":{"cache_n":0,"prompt_n":666,"prompt_ms":3928.869,"prompt_per_token_ms":5.899202702702703, "prompt_per_second":169.51443277950983,"predicted_n":971, "predicted_ms":27352.182,"predicted_per_token_ms":28.169085478887745,"predicted_per_second":35.49991002545976}}
