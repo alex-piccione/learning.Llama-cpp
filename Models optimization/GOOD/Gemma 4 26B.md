@@ -1,17 +1,21 @@
 # Gemma 4 26B A4B
 
 | File                                                              | Result                                        |
+
 | Gemma-4-26B_Q4_0-it_google.gguf                                   | ✔️ Smart and fast - 160k 45 t/s | 256k 35 t/s |  
 | Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf                         | ✔️ Smart and fast - 160k 35 t/s               |
 | Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf                         |
 | Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf              | ⚠️ WITHOUT MTP: too slow  (MTP not tested)    |
 | Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf              | ❌ Looping on Pi and lie                      |
+| Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                                | ❌ Every here and then it breaks, 256k 40 t/s  | 
+
 
 Gemopus-4-31B-it-Q3_K_M_jackrong.gguf
 
 
 ## ✔️ Q4_0 (by Google)
 Gemma-4-26B_Q4_0-it_google.gguf                                     13.4 GB
+https://huggingface.co/google/gemma-4-26B-A4B-it-qat-q4_0-gguf
 
 ## ✔️ UD IQ4_NL (by Unsloth)
 https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
@@ -24,6 +28,11 @@ https://huggingface.co/noctrex/gemma-4-26B-A4B-it-MXFP4_MOE-GGUF
 ## ✔️ Q4_K_M (by Unsloth) 
 Gemma-4-26B-A4B-it-UD-Q4_K_M_unsloth.gguf                            
 https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
+
+## ❌ REAP 19 (by vsark)           [DELETED]
+Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                                  11.4 GB
+256K 40-45 t/s in Pi !!
+❌ Evey here and then it just print out "thought"
 
 
 ## ❌ REAP126 UD-IQ4_NL (techhermit)
@@ -60,6 +69,19 @@ Draft_file_1:
 
 | Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
 | ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |
+| ❌ Gemma-4-19B-REAP-Q4_K_M_vsark.gguf
+|  25 t/s | 256 k |   1 | 28/31  | 14.4 GB | 10.2/1.8  | --    |    504 |  20s | none             | --                             | 1024/256     |                 |
+|  32 t/s | 256 k |   1 | 29/31  | 14.8 GB | 10.6/1.4  | --    |    504 |  15s | none             | --                             | 1024/256     |                 |
+|  38 t/s | 256 k |   1 | 30/31  | 15.2 GB | 11.0/1.0  | --    |    492 |  13s | none             | --                             | 1024/256     |                 |
+
+|  44 t/s | 256 k |   1 | 31/31  | 15.4 GB | 11.1/0.9  | --    |    496 |  11s | none             | --                             | 512/256      |                 |
+|  45 t/s | 256 k |   1 | 31/31  | 15.4 GB | 11.1/0.9  | --    |    496 |  11s | none             | --                             | 1024/256     |                 |
+|  42 t/s | 256 k |   2 | 31/31  | 15.0 GB | 10.7/1.3  | --    |    497 |  12s | none             | --                             | 1024/256     |                 |
+|  38 t/s | 256 k |   3 | 31/31  | 14.6 GB | 10.3/1.7  | --    |    496 |  14s | none             | --                             | 1024/256     |                 |
+|  41 t/s | 128 k |   2 | 31/31  | 13.1 GB | 10.7/1.3  | --    |    497 |  12s | none             | --                             | 1024/256     |                 |
+|  36 t/s | 128 k |   3 | 31/31  | 12.8 GB | 10.3/1.7  | --    |    496 |  14s | none             | --                             | 1024/256     |                 |
+|  38 t/s | 128 k |   1 | 31/31  | 13.5 GB | 11.1/0.9  | --    |    496 |  12s | none             | --                             | 1024/256     |                 |
+|  45 t/s |  64 k |   1 | 31/31  | 12.5 GB | 11.1/0.9  | --    |    496 |  11s | none             | --                             | 1024/256     |                 |
 | Gemma-4-26B_Q4_0-it_google.gguf
 |  43 t/s | 256 k |   2 | 31/31  | 15.7 GB | 12.6/0.8  | --    |   1034 |  24s | none             | --                             | 768/256      |                 |
 |  43 t/s | 256 k |   2 | 31/31  | 15.7 GB | 12.6/0.8  | --    |   2048 |  48s | none             | --                             | 768/128      |                 |
@@ -145,6 +167,22 @@ _start_server() {
 }
 
 
+
+model=Gemma-4-19B-REAP-Q4_K_M_vsark.gguf
+ctx_k=256
+cpu_moe=1
+gpu_layers=-1
+spec=none
+draft_model=none
+predict_token=1/2   # (N/M)
+mtp=0
+jinjia=0
+batch=512
+ubatch=256
+_start_server
+
+
+
 ## There is currently a bug for Gemma4 MTP
 model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf 
 ctx_k=64
@@ -174,20 +212,25 @@ ubatch=256
 _start_server
 
 
-
 model=Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
 ctx_k=128
-cpu_moe=3
+cpu_moe=1
 gpu_layers=-1
-spec=0
+spec=none
 draft_model=none
-predict_token=0/0   # (N/M)
+predict_token=4/4   # (N/M)
 mtp=0
 jinjia=0
 batch=1024
 ubatch=256
+_start_server
+
+|  30 t/s | 128 k |   3 | 31/31  | 15.6 GB | 13.2/2.5  | --    |   2386 |  80s | none             | --                             | 1024/256     |                 |
+|  32 t/s |  96 k |   2 | 31/31  | 15.5 GB | 13.6/2.1  | --    |   1344 |  42s | none             | --                             | 1024/256     |                 |
+|  29 t/s |  96 k |   3 | 31/31  | 15.1 GB | 13.2/2.5  | --    |   2386 |  83s | none             | --                             | 1024/256     |                 |
 
 
+# Google Q4_0
 model=Gemma-4-26B_Q4_0-it_google.gguf
 ctx_k=256
 cpu_moe=3
@@ -203,7 +246,7 @@ _start_server
 
 
 model=Gemma-4-26B_Q4_0-it_google.gguf
-ctx_k=160
+ctx_k=96
 cpu_moe=1
 gpu_layers=-1
 spec=0

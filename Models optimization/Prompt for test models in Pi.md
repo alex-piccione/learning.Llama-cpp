@@ -4,7 +4,8 @@
 
 ## 1
 
-Can you create a function in F# where the given text is transformed and all the numbers are replaced by random numbers?
+Can you create a function in F# where the given text is transformed and all the numbers are replaced by random numbers?  
+Do it here, without creating a file.
 
 
 ## 2

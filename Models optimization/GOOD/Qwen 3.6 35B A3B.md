@@ -5,7 +5,7 @@ Files:
 | ---------------------------------------------- | ------------------------------------------------------------ | --------------------------------------- |
 | ** Qwen 3.6 35B A3B **                         |                                                              |                                         |
 | Genesis V3 APEX Compact (LuffyTheFox)          | Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf | ✔️ 30-35 t/s with 96 and 128k           | 
-| Coder CD CD-Q4_K_M (ManniX)                    | Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf                  | ✔️ 30-35 t/s with 96 and 128k TEST      |
+| Coder CD CD-Q4_K_M (ManniX)                    | Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf                  | ⚠️ 30-35 t/s with 96 and 128k TEST      |
 | REAP20 Q4_K_M (by barozp)                      | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf                    | ⚠️ Good but only 64k                    |
 | MOE384-pruned-Q4_K_M (by tipe)                 | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf               | ⚠️ Loop in Pi. Good analyze/write code  |
 | MTP MXFP4 MOE (by Unsloth)                     | Qwen3.6-35B-A3B-MXFP4_MOE_unsloth.gguf                       | ❌ Too big. Slow.                       |
@@ -15,8 +15,12 @@ Files:
 | UD Q4_K_M (Unsloth)                            | Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf                       | ❌ 22GB                                 |
 
 
-## ✔️ Coder CD Q4_K_M (by Mannix)
+## ⚠️ Coder CD Q4_K_M (by Mannix)
 Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf                             13.6 GB
+⚠️ A lot of mistakes:
+  - Instead of use the web-search skill... it tried to re-create it (actually breaking it)!
+  - It uses the write tool for edit and instead completely wipe out files.
+  - It continue to say that .net 10 cannot have F# test projects (claiming a known bug) and want to switch to xUnit ot .net 9, despite I repeatedly said I have a solution that is working fine.
 
 ## ✔️ Uncensored Genesis V3 APEX (by luffythefox)
 Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf            16.1 GB  
@@ -93,12 +97,12 @@ https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 |  44 t/s | 128 k |   2 | 42/42  | 14.6 GB | 12.6/1.1  | --    |   1113 |  25s | none             | --                             | 1024/256     |                 |
 |  38 t/s | 128 k |   4 | 42/42  | 14.0 GB | 12.0/1.6  | --    |   1144 |  30s | none             | --                             | 1024/256     |                 |
 |  40 t/s | 128 k |   3 | 42/42  | 14.3 GB | 12.3/1.3  | --    |   2835 |  71s | none             | --                             | 1024/256     |                 |
-
+| --- |
 | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf                                                                                                                    |
 |  45 t/s |  64 k |   5 | 41/41  | 15.6 GB | 14.2/2.1  | --    |   1079 |  25s | none             | --                             | 1024/256     |                 |
 |  45 t/s |  32 k |   5 | 41/41  | 15.2 GB | 14.2/2.1  | --    |   1079 |  24s | none             | --                             | 1024/256     |                 |
 |  46 t/s |  16 k |   5 | 41/41  | 15.0 GB | 14.2/2.1  | --    |   1079 |  24s | none             | --                             | 1024/256     |                 |
-
+| --- |
 | Qwen3.6-35B-REAP-pruned-ratio-0.3-Q4_K_M_amazeble.gguf
 |  52 t/s | 128 k |   1 | 41/41  | 15.7 GB | 13.7/0.3  | --    |    821 |  16s | none             | --                             | 1024/256     |                 |
 |  50 t/s | 128 k |   1 | 41/41  | 15.7 GB | 13.7/0.3  | --    |    542 |  11s | none             | --                             | 1024/512     |                 |
