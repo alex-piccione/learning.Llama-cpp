@@ -39,7 +39,7 @@ start_server() {
     local draft_model="$6"
     local predict_token="$7"
     local mtp="$8"
-    local jinjia="$9"
+    local jinja="$9"
     local batch="${10}"
     local ubatch="${11}"
     
@@ -94,10 +94,10 @@ start_server() {
     fi
 
     #--defrag-thold 0.1
-    #--draft-min 1            # min tokens to draft before verifying
-    #--draft-p-min 0.6 \        # stop drafting if token probability drops below this   (default: 0.75)
+    #--draft-min 1             # min tokens to draft before verifying
+    #--draft-p-min 0.6 \       # stop drafting if token probability drops below this   (default: 0.75)
 
-    #local cache_reuse=256        # reuse KV cache chunks across requests (big win for similar prompts)
+    #local cache_reuse=256     # reuse KV cache chunks across requests (big win for similar prompts)
     local cache_reuse=0        # 0 to have clean benchmark
 
     args=(
@@ -107,11 +107,13 @@ start_server() {
         --model "$model_path" \
         --ctx-size "$context" \
         --parallel 1 \
+        --prio 3 \
         --flash-attn on \
         --n-gpu-layers $gpu_layers \
         --n-cpu-moe $cpu_moe \
         --cache-type-k $cache_type_k \
         --cache-type-v $cache_type_v \
+        --kv-unified \
         --no-mmap \
         --mlock \
 
@@ -131,10 +133,21 @@ start_server() {
 
         #--dry_multiplier 0.05 \
 
-        --cache-reuse $cache_reuse
+        --cache-reuse $cache_reuse \
 
-        --reasoning-preserve #  invalid argument
+        --context-shift \
+        --reasoning-preserve \
+
+        #--jinja \
+        --reasoning on \
+        --reasoning-budget 4096 \
+        --reasoning-budget-message "... Considering the limited time by the user, I have to give the solution based on the thinking directly now."
     )
+
+    if [[ -n "$jinja" ]]; then
+        args+=(--jinja)
+    fi
+
 
     # Logging settings
     args+=(--log-verbosity 4) # default is 3, we need this level to print out the GPU layers

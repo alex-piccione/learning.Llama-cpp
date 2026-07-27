@@ -41,7 +41,7 @@ spec=0
 draft_model=none
 predict_token=0/0
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 
@@ -53,7 +53,7 @@ spec=0
 draft_model=none
 predict_token=0/0
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 
@@ -66,7 +66,7 @@ spec=0
 draft_model=none
 predict_token=0/0
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 
@@ -80,7 +80,7 @@ start_server \
     $draft_model \
     $predict_token \
     $mtp \
-    $jinjia \
+    $jinja \
     $batch \
     $ubatch
     

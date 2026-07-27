@@ -21,13 +21,16 @@ args=(
     --host 127.0.0.1 \
     --port "$SERVER_PORT" \
     --parallel 1 \
+    --prio 3 \
     --flash-attn on \
     --cache-type-k "q8_0" \
     --cache-type-v "q8_0" \
+    --kv-unified \
+
     --no-mmap \
     --mlock \
 
-    #--cache-reuse 256 \
+    --cache-reuse 256 \
 
     --draft-p-min 0.7 \
 
@@ -76,6 +79,11 @@ args=(
 
     --context-shift \
     --reasoning-preserve \
+
+    #--jinja \
+    --reasoning on \
+    --reasoning-budget 4096 \
+    --reasoning-budget-message "... Considering the limited time by the user, I have to give the solution based on the thinking directly now."
 )
 
 require_arg() {
@@ -130,7 +138,8 @@ start_server() {
         while IFS= read -r model_id; do
             local file=$(yq -e ".models[\"$model_id\"].file" "$models_config_file")
             if [[ -f  "$GGUF_FOLDER/$file" ]]; then exist="🟢"; else exist="🔴"; fi
-            choices+=("$model_id $exist")  # concatenate
+            #choices+=("$exist $model_id")  # concatenate
+            choices+=("$model_id $exist")  # concatenate            
         done <<< "$models_list"
 
         # Show the menu
@@ -180,12 +189,14 @@ start_server() {
     # stop running server
     stop_server >&2   
 
+    # variables from models config 
     local ctx_k
     local gpu_layers
     local cpu_moe
     local batch
     local ubatch
     local spec_type
+    local jinja
 
     # defaults
     local spec_draft_n_max="3"
@@ -193,6 +204,7 @@ start_server() {
     local spec_cache_type_k="q8_0"
     local spec_cache_type_v="q8_0"
 
+    
 
     local model_file=$GGUF_FOLDER/$file  
 
@@ -232,6 +244,8 @@ start_server() {
         require_arg spec_draft_n_max     --spec-draft-n-max || return 1
         echo "Speculative type: MTP (min: $spec_draft_n_min max: $spec_draft_n_max)"
     fi
+
+    args+=(--jinja $jinja)
 
     echo >&2
     echo "=========================================================" >&2

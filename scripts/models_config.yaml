@@ -58,7 +58,7 @@ models:
             "id": "Gemma-4-26B_Q4_0-it_google.gguf",
             "name": "Gemma4 26B 256K - Q4_0 (by Google)",
             "contextWindow": 131072,
-            "maxTokens": 8192,
+            "maxTokens": 4096,
             "reasoning": true
         },
   Gemma-4_26B_MXFP4_(Noctrex)_128k:
@@ -76,7 +76,7 @@ models:
         "id": "Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
         "name": "Gemma4 26B - MXFP4 (by Noctrex) 128K",
         "contextWindow": 131072,
-        "maxTokens": 8192,
+        "maxTokens": 4096,
         "reasoning": true
       },
 
@@ -95,7 +95,7 @@ models:
         "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
         "name": "Gemma4 26B - UD-IQ4_NL (by Unsloth) 64K",
         "contextWindow": 6500,
-        "maxTokens": 8192,
+        "maxTokens": 4096,
         "reasoning": true
       },
   Gemma-4-26B-UD-IQ4_NL_(Unsloth)_160k:
@@ -113,7 +113,7 @@ models:
         "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
         "name": "Gemma4 26B - UD-IQ4_NL (by Unsloth) 160K",
         "contextWindow": 163840,
-        "maxTokens": 8192,
+        "maxTokens": 4096,
         "reasoning": true
       },
   Gemma-4-26B-UD-IQ4_NL_(Unsloth)_SPEC_160k:
@@ -135,11 +135,30 @@ models:
         "id": "Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf",
         "name": "Gemma4 26B - UD-IQ4_NL (by Unsloth) 160K",
         "contextWindow": 163840,
-        "maxTokens": 8192,
+        "maxTokens": 4096,
         "reasoning": true
       },
 
 # Qwen 3.6 35B A3B
+  Qwen_3.6_28b_reap_20_96k_(barozp)_No-spec:
+    file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+    ctx_k: 96
+    gpu_layers: -1
+    cpu_moe: 5
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+         "_test": "Really good",
+         "_speed": "? t/s",
+          "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
+          "name": "Qwen 3.6 28B REAP20 (barozp) 64k",
+          "contextWindow": 96000,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
   Qwen_3.6_35B_A3B_Coder-CD_128k_(ManniX):
     file: Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf
     note: none
@@ -156,7 +175,7 @@ models:
           "id": "Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf",
           "name": "Qwen 3.6 35B Coder-CD (ManniX)",
           "contextWindow": 131072,
-          "maxTokens": 8192,
+          "maxTokens": 4096,
           "reasoning": true
       }, 
   Qwen_3.6_35B_A3B_Genesis_v3_APEX_128k_(luffythefox):
@@ -177,7 +196,7 @@ models:
           "name": "Qwen 3.6 35B Genesis v3 APEX (luffythefox)",
           "contextWindow": 131072,
           "_contextWindow": 96000,
-          "maxTokens": 8192,
+          "maxTokens": 4096,
           "reasoning": true
       },
 
@@ -204,6 +223,26 @@ models:
 
   
 # GLM 4.7 Flash
+  GLM_4.7-Flash_UD-Q3_K_XL_(Unsloth)_128k:
+    file: GLM-4.7-Flash-UD-Q3_K_XL_unsloth.gguf
+    ctx_k: 128
+    gpu_layers: 45
+    cpu_moe: 2
+    batch: 1024
+    ubatch: 256
+    spec_type: none
+    jinja: 1
+    pi_agent_model: >
+      { 
+        "_test": "?",
+        "_speed": "? t/s",
+        "id": "GLM-4.7-Flash-UD-Q3_K_XL_unsloth.gguf",
+        "name": "GLM 4.7 Flash UD Q3_K_XL (Unsloth) 128K",
+        "contextWindow": 131072,
+        "maxTokens": 4096,
+        "reasoning": true
+      },
+
   GLM_4.7-Flash_(gaionaus)_128k:
     file: GLM-4.7-flash-Q4_K_M_gaionaus.gguf
     ctx_k: 128
@@ -216,9 +255,9 @@ models:
       { 
         "_test": "?",
         "id": "GLM-4.7-flash-Q4_K_M_gaionaus.gguf",
-        "name": "GLM 4.7 Flash Qa_K_M (by gaionaus) 128K",
+        "name": "GLM 4.7 Flash Q4_K_M (by gaionaus) 128K",
         "contextWindow": 131072,
-        "maxTokens": 8192,
+        "maxTokens": 4096,
         "reasoning": true
       },
 

@@ -159,7 +159,7 @@ _start_server() {
         $draft_model \
         $predict_token \
         $mtp \
-        $jinjia \
+        $jinja \
         $batch \
         $ubatch
 
@@ -176,7 +176,7 @@ spec=none
 draft_model=none
 predict_token=1/2   # (N/M)
 mtp=0
-jinjia=0
+jinja=0
 batch=512
 ubatch=256
 _start_server
@@ -192,7 +192,7 @@ spec=mtp
 draft_model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.mtp.gguf
 predict_token=1/2   # (N/M)
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 _start_server
@@ -206,7 +206,7 @@ spec=none
 draft_model=none
 predict_token=1/2   # (N/M)
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 _start_server
@@ -220,7 +220,7 @@ spec=none
 draft_model=none
 predict_token=4/4   # (N/M)
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 _start_server
@@ -239,7 +239,7 @@ spec=0
 draft_model=none
 predict_token=0/0
 mtp=0
-jinjia=0
+jinja=0
 batch=768
 ubatch=256
 _start_server
@@ -253,7 +253,7 @@ spec=0
 draft_model=none #Gemma-4-26B-A4B-it-Q8_0-MTP_unsloth.gguf
 predict_token=1/2
 mtp=1
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 
@@ -266,7 +266,7 @@ spec=0
 draft_model=none
 predict_token=0/0
 mtp=0
-jinjia=0
+jinja=0
 batch=768
 ubatch=128
 _start_server 
@@ -282,7 +282,7 @@ spec=none
 draft_model=none
 predict_token=8/8
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 _start_server
@@ -304,7 +304,7 @@ spec=0
 draft_model=none
 predict_token=0/0
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 
@@ -317,7 +317,7 @@ spec=0
 draft_model=none
 predict_token=0/0
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 _start_server
@@ -332,7 +332,7 @@ start_server \
     $draft_model \
     $predict_token \
     $mtp \
-    $jinjia \
+    $jinja \
     $batch \
     $ubatch
 

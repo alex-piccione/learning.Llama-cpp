@@ -36,7 +36,7 @@ dflash=0
 draft_model=none
 predict_token=0
 mtp=0
-jinjia=0
+jinja=0
 
 source start_server_common.sh && \
 start_server \
@@ -48,7 +48,7 @@ start_server \
     $draft_model \
     $predict_token \
     $mtp \
-    $jinjia
+    $jinja
 
 source test_models_common.sh && \
 test_call_result_row $(flag_or $dflash $mtp)

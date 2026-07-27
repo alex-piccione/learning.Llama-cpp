@@ -34,7 +34,7 @@ test_call() {
         fi
     done
     
-    local code_payload=$(cat "$test_code_file")    
+    local code_payload=$(cat "$test_code_file")
 
     local run_output=$(run_with_spinner "(llama.cpp RUN)" llamacpp_run "$code_payload")
     #debug "run_output: $run_output"

@@ -44,7 +44,7 @@ dflash=0
 draft_model=none
 predict_token=32
 mtp=0
-jinjia=0
+jinja=0
 batch=2048
 ubatch=256
 
@@ -58,7 +58,7 @@ start_server \
     $draft_model \
     $predict_token \
     $mtp \
-    $jinjia \
+    $jinja \
     $batch \
     $ubatch
 

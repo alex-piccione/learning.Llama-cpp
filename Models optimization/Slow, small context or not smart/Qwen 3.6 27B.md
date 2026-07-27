@@ -65,7 +65,7 @@ spec=1
 draft_model=none
 predict_token=12/12
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 _start_server
@@ -79,7 +79,7 @@ spec=0
 draft_model=none
 predict_token=16/16
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 _start_server
@@ -94,7 +94,7 @@ spec=1
 draft_model=Qwen3.6-27B-MTP-IQ4_NL_unsloth.gguf
 predict_token=6/12
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 
@@ -107,7 +107,7 @@ spec=none
 draft_model=none
 predict_token=6/12
 mtp=0
-jinjia=0
+jinja=0
 batch=1024
 ubatch=256
 _start_server
@@ -124,7 +124,7 @@ start_server \
     $draft_model \
     $predict_token \
     $mtp \
-    $jinjia \
+    $jinja \
     $batch \
     $ubatch
     
