@@ -1,9 +1,6 @@
 source common.sh
 
-## This is called by specific models, look at their .sopecific .md file.
-
-# used memory
-# nvidia-smi --query-gpu memory.used --format=csv,noheader | awk '{print $1}'
+## This is called by specific models, look at their specific .md file.
 
 # Functions
 # start_server: used to start Lllama.cpp server
@@ -11,6 +8,15 @@ source common.sh
 # get_info_from_server_log: rertrieve information from the server log
 
 #---
+
+is_server_started() {
+    PROCESS_NAME="llama-server.exe"   # Define the exact name of the executable to look for
+    if ps -ef | grep -v grep | grep "$PROCESS_NAME" > /dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 # start_server 
 #   model: the model name

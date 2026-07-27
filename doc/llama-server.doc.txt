@@ -1,4 +1,4 @@
-$ "$LLAMACPP\llama-server" --help
+$ "$LLAMACPP/llama-server.exe" --help
 ----- common params -----
 
 -h,    --help, --usage                  print usage and exit
@@ -473,6 +473,21 @@ $ "$LLAMACPP\llama-server" --help
                                         (env: LLAMA_ARG_REUSE_PORT)
 --path PATH                             path to serve static files from (default: )
                                         (env: LLAMA_ARG_STATIC_PATH)
+--cors-origins ORIGINS                  comma-separated list of allowed origins for CORS (default: *)
+                                        if set to special value 'localhost', reflect the Origin header only if
+                                        it is localhost
+                                        (env: LLAMA_ARG_CORS_ORIGINS)
+--cors-methods METHODS                  comma-separated list of allowed methods for CORS (default: GET, POST,
+                                        DELETE, OPTIONS)
+                                        (env: LLAMA_ARG_CORS_METHODS)
+--cors-headers HEADERS                  comma-separated list of allowed headers for CORS (default: *)
+                                        (env: LLAMA_ARG_CORS_HEADERS)
+--cors-credentials, --no-cors-credentials
+                                        whether to allow credentials for CORS (default: enabled)
+                                        note: if this is enabled and --cors-origins is set to * (default), the
+                                        Origin header will be echoed back, and credentials will always be
+                                        allowed
+                                        (env: LLAMA_ARG_CORS_CREDENTIALS)
 --api-prefix PREFIX                     prefix path the server serves from, without the trailing slash
                                         (default: )
                                         (env: LLAMA_ARG_API_PREFIX)
@@ -489,10 +504,14 @@ $ "$LLAMACPP\llama-server" --help
                                         enable in untrusted environments (default: no tools)
                                         specify "all" to enable all tools
                                         available tools: read_file, file_glob_search, grep_search,
-                                        exec_shell_command, write_file, edit_file, apply_diff, get_datetime
+                                        exec_shell_command, write_file, edit_file, get_datetime
+                                        note: for security reasons, this will limit --cors-origins to
+                                        localhost by default
                                         (env: LLAMA_ARG_TOOLS)
 -ag,   --agent, -no-ag, --no-agent      whether to enable CORS proxy and all built-in tools - do not enable in
                                         untrusted environments (default: disabled)
+                                        note: for security reasons, this will limit --cors-origins to
+                                        localhost by default
                                         (env: LLAMA_ARG_AGENT)
 --ui,  --webui, --no-ui, --no-webui     whether to enable the Web UI (default: enabled)
                                         (env: LLAMA_ARG_UI)
