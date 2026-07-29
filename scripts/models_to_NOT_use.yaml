@@ -130,6 +130,26 @@
           "reasoning": true
       },
 
+  Qwen_3.6_35B_A3B_Coder-CD_(ManniX)_128K:
+    file: Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf
+    note: none
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 1
+    batch : 1024
+    ubatch: 512
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "⚠️ OK, but too much work for a simple task and it overdo and possibly touch what it is not supposed to do",
+          "_speed": "37 t/s",
+          "id": "Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf",
+          "name": "Qwen 3.6 35B Coder-CD (ManniX)",
+          "contextWindow": 131072,
+          "maxTokens": 4096,
+          "reasoning": true
+      }, 
+
   Qwen_3.6_35B_REAP_pruned-ratio-0.3-Q4_K_M_(amazeble):
     file: Qwen3.6-35B-REAP-pruned-ratio-0.3-Q4_K_M_amazeble.gguf
     ctx_k: 128
@@ -166,7 +186,6 @@
           "maxTokens": 4096,
           "reasoning": true
       },
-
 # Qwopus
   Qwopus_3.6_35B-A3B-Coder-MTP-Q3_K_M_jackrong:
     file: Qwopus3.6-35B-A3B-Coder-MTP-Q3_K_M_jackrong.gguf

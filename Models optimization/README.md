@@ -4,6 +4,7 @@
 
 | Model               | Quantized by | File                                                | Speed  | Ctx   | Pi                  | Note                             |
 | ------------------- |------------- | --------------------------------------------------- | ------ | ----- | ------------------- | -------------------------------- |
+| Qwen 3.5 27B        | Unsloth      | Qwen3.5-27B-IQ4_XS_unsloth.gguf                     | 16 t/s |  64 k | ✔️ 64k 16 t/s      | Best reasoning and action        |
 | Gemma 4 26B         | Unsloth      | Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf           | 39 t/s | 160 k | ✔️ 160k 20-25 t/s  |                                  |
 | Gemma 4 26B         | Google       | Gemma-4-26B_Q4_0-it_google.gguf                     | 4? t/s | 128 k | ✔️ 128k 40 t/s     |                                  |
 | GPT OSS 20B         | Unsloth      | GPT-OSS-20B-Q4_K_M_unsloth.gguf                     | 75 t/s | 128 k |                     |                                  |

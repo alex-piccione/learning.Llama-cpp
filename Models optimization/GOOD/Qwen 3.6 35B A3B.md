@@ -2,23 +2,15 @@
 
 | Model                                    | File                                                         | Result                                  |
 | ---------------------------------------- | ------------------------------------------------------------ | --------------------------------------- |
+| REAP20 Q4_K_M (by barozp)                | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf                    | ✔️ Really Good but only 64k             |
 | Genesis V3 APEX Compact (LuffyTheFox)    | Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf | ✔️ 30-35 t/s with 96 and 128k           | 
 | Coder CD CD-Q4_K_M (ManniX)              | Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf                  | ⚠️ 30-35 t/s with 96 and 128k TEST      |
-| REAP20 Q4_K_M (by barozp)                | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf                    | ⚠️ Good but only 64k                    |
 | MOE384-pruned-Q4_K_M (by tipe)           | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf               | ⚠️ Loop in Pi. Good analyze/write code  |
 | MTP MXFP4 MOE (by Unsloth)               | Qwen3.6-35B-A3B-MXFP4_MOE_unsloth.gguf                       | ❌ Too big. Slow.                       |
 | REAP pruned ratio 0.3 Q4_K_M (amazeble)  | Qwen3.6-35B-REAP-pruned-ratio-0.3-Q4_K_M_amazeble.gguf       | ❌ no tools                             |
 | REAP pruned ratio 0.5 Q4_K_M (lemmyhans) | Qwen3.6-35B-REAP-pruned-ratio-0.5-Q4_K_M_lemmyhans.gguf      | ❌ no tools                             |
 | UD Q3_K_XL (Unsloth)                     | Qwen3.6-35B-A3B-UD-Q3_K_XL_unsloth.gguf                      | ❌ Too slow at 96K                      |
 | UD Q4_K_M (Unsloth)                      | Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf                       | ❌ 22GB                                 |
-
-
-## ⚠️ Coder CD Q4_K_M (by Mannix)
-Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf                             13.6 GB
-⚠️ A lot of mistakes:
-  - Instead of use the web-search skill... it tried to re-create it (actually breaking it)!
-  - It uses the write tool for edit and instead completely wipe out files.
-  - It continue to say that .net 10 cannot have F# test projects (claiming a known bug) and want to switch to xUnit ot .net 9, despite I repeatedly said I have a solution that is working fine.
 
 ## ✔️ Uncensored Genesis V3 APEX (by luffythefox)
 Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf            16.1 GB  
@@ -31,16 +23,27 @@ Speed is super variable, it can get stuck at 10-15 t/s and reach 40 t/s with bot
 No Spec: Speculation active gives low t/s in real use (Test: 45 t/s, Pi: 18 t/s).
 
 
+## ⚠️ Coder CD Q4_K_M (by Mannix)
+Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf                             13.6 GB
+⚠️ A lot of mistakes:
+  - Instead of use the web-search skill... it tried to re-create it (actually breaking it)!
+  - It uses the write tool for edit and instead completely wipe out files.
+  - It continue to say that .net 10 cannot have F# test projects (claiming a known bug) and want to switch to xUnit ot .net 9, despite I repeatedly said I have a solution that is working fine.
+
+
 ## Q4_K_XL (Unsloth)
-                                    GB
+[LOST FILE]                                    GB
 https://huggingface.co/unsloth/Qwen3.5-35B-A3B-GGUF
 
-## ⚠️ REAP20 Q4_K_M (by barozp)
+## ✔️ REAP20 Q4_K_M (by barozp)
 Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf                            16.0 GB
 https://huggingface.co/barozp/Qwen3.6-28B-REAP20-A3B-GGUF
 
-CPU_MOE: 3-4
-Context: MAX 64k, can't go over! ❌
+CPU_MOE: 4-5 or 11
+Context: MAX 96K, can't go over! 
+  - With 96K speed pass from 35-40 t/s at 7 after few messages
+  - With 64K is fine for a little bit more
+
 
 Speed on Pi
 | N/M   |   t/s | Note                                 |
@@ -90,7 +93,32 @@ https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 
 | Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
 | ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |
-| Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf
+| Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+|  45 t/s |  96 k |   4 | 41/41  | 15.7 GB | 14.2/1.8  | --    |   1214 |  27s | none             | --                             | 1024/256     |                 |
+|  41 t/s |  96 k |   5 | 41/41  | 15.5 GB | 13.9/2.2  | --    |   2203 |  53s | none             | --                             | 1024/256     |                 |
+|  36 t/s |  96 k |   4 | 40/41  | 15.7 GB | 14.2/1.8  | --    |   1289 |  36s | none             | --                             | 1024/256     |                 |
+|  28 t/s |  96 k |   9 | 41/41  | 14.2 GB | 12.5/3.6  | --    |   1271 |  46s | none             | --                             | 1024/256     |                 |
+|  28 t/s |  96 k |   7 | 41/41  | 14.9 GB | 13.2/2.9  | --    |   1337 |  47s | none             | --                             | 1024/256     |                 |
+|  34 t/s |  96 k |   6 | 41/41  | 15.2 GB | 13.5/2.6  | --    |   2330 |  68s | none             | --                             | 1024/256     |                 |
+|  33 t/s |  96 k |   6 | 41/41  | 15.2 GB | 13.5/2.6  | --    |   2330 |  71s | none             | --                             | 1024/256     |                 |
+|  26 t/s |  96 k |   5 | 37/41  | 15.3 GB | 13.8/2.3  | --    |    745 |  29s | none             | --                             | 1024/256     |                 |
+|  24 t/s |  96 k |   9 | 39/41  | 14.1 GB | 12.4/3.7  | --    |    625 |  25s | none             | --                             | 1024/256     |                 |
+|  20 t/s |  96 k |   9 | 37/41  | 13.9 GB | 12.4/3.7  | --    |   1681 |  83s | none             | --                             | 1024/256     |                 |
+
+
+|  42 t/s |  64 k |   4 | 41/41  | 15.5 GB | 14.2/1.8  | --    |   1214 |  29s | none             | --                             | 1024/256     |                 |
+
+|  39 t/s |  64 k |   5 | 41/41  | 15.1 GB | 13.9/2.2  | --    |   2203 |  57s | none             | --                             | 1024/256     |                 |
+|  38 t/s |  64 k |   5 | 41/41  | 15.1 GB | 13.9/2.2  | --    |   2203 |  57s | none             | --                             | 1024/256     |                 |
+|  35 t/s |  64 k |   6 | 41/41  | 14.8 GB | 13.5/2.6  | --    |   2330 |  66s | none             | --                             | 1024/256     |                 |
+|  42 t/s | 128 k |   5 | 41/41  | 15.7 GB | 13.9/1.9  | --    |   2048 |  49s | none             | --                             | 1024/256     |                 |
+|  34 t/s | 128 k |   5 | 41/41  | 15.7 GB | 13.9/1.9  | --    |   1261 |  38s | DFlash (N-gram)  | s_M=12 s_N=12 min=1 (77%)      | 1024/256     |                 |
+|  43 t/s |  96 k |   5 | 41/41  | 15.5 GB | 13.9/1.9  | --    |   2048 |  47s | none             | --                             | 1024/256     |                 |
+|  38 t/s |  96 k |   5 | 41/41  | 15.5 GB | 13.9/1.9  | --    |   1261 |  32s | DFlash (N-gram)  | s_M=12 s_N=12 min=1 (77%)      | 1024/256     |                 |
+|  32 t/s | 128 k |  11 | 41/41  | 13.8 GB | 11.7/4.3  | --    |    665 |  20s | none             | --                             | 1024/256     |                 |
+|  28 t/s | 128 k |  12 | 41/41  | 13.5 GB | 11.4/4.7  | --    |    799 |  29s | none             | --                             | 1024/256     |                 |
+|  29 t/s |  96 k |  11 | 41/41  | 13.4 GB | 11.7/4.3  | --    |    665 |  23s | none             | --                             | 1024/256     |                 |
+| ❌ Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf
 |  51 t/s | 128 k |   1 | 42/42  | 14.9 GB | 12.9/0.8  | --    |   1185 |  24s | none             | --                             | 1024/512     |                 |
 |  43 t/s | 128 k |   1 | 42/42  | 15.0 GB | 12.9/0.8  | --    |   1173 |  27s | DFlash (N-gram)  | s_M=12 s_N=12 min=1 (76%)      | 1024/512     |                 |
 |  47 t/s | 128 k |   1 | 42/42  | 14.9 GB | 12.9/0.8  | --    |   2291 |  48s | none             | --                             | 1024/256     |                 |
@@ -115,14 +143,7 @@ https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 |  42 t/s |  64 k |   5 | 41/41  | 13.6 GB | 12.3/1.7  | --    |    702 |  17s | none             | --                             | 1024/256     |                 |
 |  32 t/s |  64 k |   3 | 41/41  | 14.1 GB | 13.0/1.0  | --    |    639 |  20s | none             | ngram N:12, M:24 (16%)         | 1024/256     |                 |
 |
-| Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-|  42 t/s | 128 k |   5 | 41/41  | 15.7 GB | 13.9/1.9  | --    |   2048 |  49s | none             | --                             | 1024/256     |                 |
-|  34 t/s | 128 k |   5 | 41/41  | 15.7 GB | 13.9/1.9  | --    |   1261 |  38s | DFlash (N-gram)  | s_M=12 s_N=12 min=1 (77%)      | 1024/256     |                 |
-|  43 t/s |  96 k |   5 | 41/41  | 15.5 GB | 13.9/1.9  | --    |   2048 |  47s | none             | --                             | 1024/256     |                 |
-|  38 t/s |  96 k |   5 | 41/41  | 15.5 GB | 13.9/1.9  | --    |   1261 |  32s | DFlash (N-gram)  | s_M=12 s_N=12 min=1 (77%)      | 1024/256     |                 |
-|  32 t/s | 128 k |  11 | 41/41  | 13.8 GB | 11.7/4.3  | --    |    665 |  20s | none             | --                             | 1024/256     |                 |
-|  28 t/s | 128 k |  12 | 41/41  | 13.5 GB | 11.4/4.7  | --    |    799 |  29s | none             | --                             | 1024/256     |                 |
-|  29 t/s |  96 k |  11 | 41/41  | 13.4 GB | 11.7/4.3  | --    |    665 |  23s | none             | --                             | 1024/256     |                 |
+
 
 |
 |  43 t/s |  64 k |   3 | 41/41  | 15.7 GB | 14.6/1.2  | --    |   1100 |  25s | DFlash (N-gram)  | s_M=16 s_N=16 min=1 (72%)      | 1024/256     |                 |
@@ -176,6 +197,36 @@ https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 
 
 ```bash
+## 96K
+model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+ctx_k=96
+gpu_layers=99
+#gpu_layers=40
+cpu_moe=4
+spec=0
+draft_model=none
+predict_token=0/0
+mtp=0
+jinja=0
+batch=1024
+ubatch=256
+_start_server
+
+## 64K
+model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+ctx_k=64
+gpu_layers=99
+#gpu_layers=40
+cpu_moe=4
+spec=0
+draft_model=none
+predict_token=0/0
+mtp=0
+jinja=0
+batch=1024
+ubatch=256
+_start_server
+
 
 model=Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf
 ctx_k=96
@@ -190,28 +241,8 @@ batch=2048
 ubatch=512
 _start_server
 
-model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-ctx_k=96
-#gpu_layers=-1
-gpu_layers=39
-#cpu_moe=11
-cpu_moe=9
-spec=0
-draft_model=none
-predict_token=0/0
-mtp=0
-jinja=1
-batch=1024
-ubatch=256
-_start_server
 
-|  28 t/s |  96 k |   9 | 41/41  | 14.2 GB | 12.5/3.6  | --    |   1271 |  46s | none             | --                             | 1024/256     |                 |
-|  28 t/s |  96 k |   7 | 41/41  | 14.9 GB | 13.2/2.9  | --    |   1337 |  47s | none             | --                             | 1024/256     |                 |
-|  34 t/s |  96 k |   6 | 41/41  | 15.2 GB | 13.5/2.6  | --    |   2330 |  68s | none             | --                             | 1024/256     |                 |
-|  33 t/s |  96 k |   6 | 41/41  | 15.2 GB | 13.5/2.6  | --    |   2330 |  71s | none             | --                             | 1024/256     |                 |
-|  39 t/s |  64 k |   5 | 41/41  | 15.1 GB | 13.9/2.2  | --    |   2203 |  57s | none             | --                             | 1024/256     |                 |
-|  38 t/s |  64 k |   5 | 41/41  | 15.1 GB | 13.9/2.2  | --    |   2203 |  57s | none             | --                             | 1024/256     |                 |
-|  35 t/s |  64 k |   6 | 41/41  | 14.8 GB | 13.5/2.6  | --    |   2330 |  66s | none             | --                             | 1024/256     |                 |
+
 
 model=unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
 ctx_k=96

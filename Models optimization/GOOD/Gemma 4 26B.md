@@ -1,16 +1,20 @@
 # Gemma 4 26B A4B
 
-| File                                                              | Result                                        |
+| File                                                         | Result                                        |
+| Gemma-4-26B_Q4_0-it_google.gguf                              | ✔️ Smart and fast - 160k 45 t/s | 256k 35 t/s |  
+| Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf                    | ✔️ Smart and fast - 160k 35 t/s               |
+| Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf                    |
+| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf         | ⚠️ WITHOUT MTP: too slow  (MTP not tested)    |
+| Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf         | ❌ Looping on Pi and lie                      |
+| Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                           | ❌ Every here and then it breaks, 256k 40 t/s  | 
+| Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf           | ❌ Gibebrish and unformatted output. Also slow. |
+| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf
 
-| Gemma-4-26B_Q4_0-it_google.gguf                                   | ✔️ Smart and fast - 160k 45 t/s | 256k 35 t/s |  
-| Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf                         | ✔️ Smart and fast - 160k 35 t/s               |
-| Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf                         |
-| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf              | ⚠️ WITHOUT MTP: too slow  (MTP not tested)    |
-| Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf              | ❌ Looping on Pi and lie                      |
-| Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                                | ❌ Every here and then it breaks, 256k 40 t/s  | 
 
 
 Gemopus-4-31B-it-Q3_K_M_jackrong.gguf
+
+# Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf
 
 
 ## ✔️ Q4_0 (by Google)
@@ -29,6 +33,14 @@ https://huggingface.co/noctrex/gemma-4-26B-A4B-it-MXFP4_MOE-GGUF
 Gemma-4-26B-A4B-it-UD-Q4_K_M_unsloth.gguf                            
 https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
 
+## ❌ Supergemma fast v2 (Jiunsong)            [DELETED]
+Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf                  15.6 GB
+❌ Gibebrish and unformatted output. Also slow.
+(real file: supergemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf)
+
+## ❌ Gemma-4-26B-A4B-APEX-I-Compact_mudler.gguf            [DELETED]
+❌ Not good reasoning. Incapable to get some edit completed.
+
 ## ❌ REAP 19 (by vsark)           [DELETED]
 Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                                  11.4 GB
 256K 40-45 t/s in Pi !!
@@ -39,11 +51,6 @@ Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                                  11.4 GB
 Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf                12.3 GB
 https://huggingface.co/techhermit/gemma-4-26B-A4B-it-reap126
 ❌ Looping on Pi and lie
-
-
-
-## supergemma fast v2 (by Jiunsong)
-supergemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf             15.6 GB
 
 
 ## ⚠️ QAT Uncensored Balanced Q4_K_M (by HauhauCS)
@@ -146,9 +153,7 @@ Draft_file_1:
 
 
 ```bash
-cd scripts
-
-_start_server() {
+_test_model() {
     source server_common.sh && \
     start_server \
         $model \
@@ -166,7 +171,40 @@ _start_server() {
     source test_models_common.sh && print_test_call
 }
 
+model=Gemma-4-26B-A4B-APEX-I-Compact_mudler.gguf
+ctx_k=128
+cpu_moe=4
+gpu_layers=-1
+spec=none
+draft_model=none
+predict_token=1/2   # (N/M)
+mtp=0
+jinja=0
+batch=1024
+ubatch=256
+_test_model
 
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Predicion                  | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------- | --------- |----------- |
+|  25 t/s | 160 k |   6 | 31/31 | 14.1 | 11.2/3.1  | q8_0  |   1328 |  53s | none       --              |  1024/256 |            |
+
+model=Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf
+ctx_k=160
+cpu_moe=6
+gpu_layers=-1
+spec=none
+draft_model=none
+predict_token=1/2   # (N/M)
+mtp=0
+jinja=0
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                 | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------- | --------- | ---------- |
+|  25 t/s | 160 k |   6 | 31/31 | 15.6 | 12.7/3.5  | q8_0  |   1295 |  50s | none                       | 1024/256  |            |
+|  31 t/s | 128 k |   5 | 31/31 | 15.6 | 13.2/3.0  | q8_0  |   1436 |  46s | none                       | 1024/256  |            |
 
 model=Gemma-4-19B-REAP-Q4_K_M_vsark.gguf
 ctx_k=256
@@ -179,7 +217,7 @@ mtp=0
 jinja=0
 batch=512
 ubatch=256
-_start_server
+_test_model
 
 
 
@@ -195,7 +233,7 @@ mtp=0
 jinja=0
 batch=1024
 ubatch=256
-_start_server
+_test_model
 
 
 model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf 
@@ -209,7 +247,7 @@ mtp=0
 jinja=0
 batch=1024
 ubatch=256
-_start_server
+_test_model
 
 
 model=Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
@@ -223,7 +261,7 @@ mtp=0
 jinja=0
 batch=1024
 ubatch=256
-_start_server
+_test_model
 
 |  30 t/s | 128 k |   3 | 31/31  | 15.6 GB | 13.2/2.5  | --    |   2386 |  80s | none             | --                             | 1024/256     |                 |
 |  32 t/s |  96 k |   2 | 31/31  | 15.5 GB | 13.6/2.1  | --    |   1344 |  42s | none             | --                             | 1024/256     |                 |
@@ -242,7 +280,7 @@ mtp=0
 jinja=0
 batch=768
 ubatch=256
-_start_server
+_test_model
 
 
 model=Gemma-4-26B_Q4_0-it_google.gguf
@@ -269,9 +307,7 @@ mtp=0
 jinja=0
 batch=768
 ubatch=128
-_start_server 
-
-
+_test_model
 
 
 model=Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf
@@ -285,7 +321,8 @@ mtp=0
 jinja=0
 batch=1024
 ubatch=256
-_start_server
+_test_model
+
 |  38 t/s | 256 k |   1 | 31/31  | 15.7 GB | 12.3/1.1  | --    |   1228 |  32s | none             | --                             | 1024/256     |                 |
 
 |  33 t/s | 256 k |   1 | 31/31  | 15.7 GB | 12.3/1.1  | --    |   1494 |  45s | DFlash (N-gram)  | s_M=4 s_N=4 min=1 (45%)        | 1024/256     |                 |
@@ -320,22 +357,6 @@ mtp=0
 jinja=0
 batch=1024
 ubatch=256
-_start_server
-
-source server_common.sh && \
-start_server \
-    $model \
-    $ctx_k \
-    $gpu_layers \
-    $cpu_moe \
-    $spec \
-    $draft_model \
-    $predict_token \
-    $mtp \
-    $jinja \
-    $batch \
-    $ubatch
-
-source test_models_common.sh && print_test_call
+_test_model
 
 ```

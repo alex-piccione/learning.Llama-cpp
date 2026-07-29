@@ -7,6 +7,9 @@
 | Qwen3.6-27B-Esper3.1.Q4_K_M_mr_radermacher.gguf            | ❌ too slow                                 |
 | Qwen3.6-27B-Claude-Mythos-Distilled.Q4_K_M_chatqaq.gguf    | ❌ too slow                                 |
 
+## Q4_K_X (Unsloth)
+
+
 
 ## ❌ Esper 3.1 (by mr radermacher)
 Qwen3.6-27B-Esper3.1.Q4_K_M_mr_radermacher.gguf                    15.4 GB

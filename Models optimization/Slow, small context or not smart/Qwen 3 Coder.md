@@ -1,14 +1,15 @@
 # Qwen3-Coder
 
 | File                                                                             | Result                                                      |
+| Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                             | 
 | Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf                                   | ❌ Max 64k and slow                                        |
 | Qwen3-Coder-30B-A3B-Instruct-Q4_K_M_unsloth.gguf                                 | ❌ too slow
 | Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf           | ❌ No tools capability                                      |
 | qwen3-coder-30b-a3b-instruct_pruned_reap-15b-a3b-safetensors-q5_0_lainlives.gguf | ❌ No tools capability                                      |
 
+## UD Q3_K_XL (Unsloth)
+Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                   12.8 GB
 
-## UD-Q3_K_XL
-https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF
 
 ## ❌ REAP-25B-A3B-Q4_K_M (by bartowski)
 Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf                                  14.1 GB
@@ -55,6 +56,23 @@ qwen3-coder-30b-a3b-instruct_pruned_reap-15b-a3b-safetensors-q5_0_lainlives.gguf
 |  41 t/s |  64 k |   3 | 49/49  | 13.1 GB | 9.5/0.8   | --    |    446 |  11s | none             | --                             | 1024/256     |                 |
 
 ```bash
+
+model=Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf
+ctx_k=96
+gpu_layers=-1
+cpu_moe=0
+spec=0
+draft_model=none
+predict_token=0/0
+mtp=0
+jinja=0
+batch=1024
+ubatch=512
+_start_server
+
+|  46 t/s |  64 k |   0 | 49/49  | 14.0 GB | 11.9/1.0  | --    |    993 |  21s | none             | --                             | 1024/512     |                 |
+|  33 t/s |  96 k |   0 | 49/49  | 14.0 GB | 11.0/1.9  | --    |    961 |  29s | none             | --                             | 1024/512     |                 |
+
 
 model=Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf
 ctx_k=96
