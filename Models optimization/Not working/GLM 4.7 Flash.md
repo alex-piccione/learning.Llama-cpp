@@ -3,16 +3,17 @@
 Max context                   : 198 k
 
 | File                                                              | Result                                      |
-| GLM-4.7-Flash-UD-Q3_K_XL_unsloth.gguf                             |                                             |
+| GLM-4.7-Flash-UD-Q3_K_XL_unsloth.gguf                             | ❌ Gibberish  after few interaction         |
 | GLM-4.7-Flash-Q4_K_M_unsloth.gguf                                 | ??                                          |
 | GLM-4.7-flash-Q4_K_M_gaionaus.gguf                                | ❌ Gibberish and not valid format in Pi     |
-| GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf                | ❌ Total non-semse in Pi  (45 t/s at 96k)   |
+| GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf                | ❌ Total non-sense in Pi  (45 t/s at 96k)   |
 | GLM-4.7-Flash-REAP-09.Q3_K_L_akicou.gguf                          | ❌ No tool calls                            |
 | GLM-4.7-Flash-REAP-19.Q4_K_M_akicou.gguf                          | ❌ No tool calls                            |
 
 
-## UD Q3_K_XL (Unsloth)
+## ❌ UD Q3_K_XL (Unsloth)
 GLM-4.7-Flash-UD-Q3_K_XL_unsloth.gguf                                  12.8 GB
+Gibberish after few interactions.
 
 
 ## ❌ Q4_K_M (by Unsloth)    [MISSING FILE]

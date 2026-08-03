@@ -12,6 +12,10 @@
 | UD Q3_K_XL (Unsloth)                     | Qwen3.6-35B-A3B-UD-Q3_K_XL_unsloth.gguf                      | ❌ Too slow at 96K                      |
 | UD Q4_K_M (Unsloth)                      | Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf                       | ❌ 22GB                                 |
 
+
+## https://huggingface.co/avlp12/Qwen3.5-35B-A3B-Alis-Ultra-GGUF
+
+
 ## ✔️ Uncensored Genesis V3 APEX (by luffythefox)
 Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf            16.1 GB  
 With scepulation like 24/24 I obtain 50 t/s in the test but 18 t/s in the real use in Pi  
@@ -336,7 +340,7 @@ jinja=0
 batch=1024
 ubatch=256
 
-cd scripts
+
 
 _start_server() {
 source server_common.sh && \

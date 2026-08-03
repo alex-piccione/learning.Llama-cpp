@@ -3,11 +3,6 @@ source server_common.sh
 
 test_code_file="test_code.fs"
 
-cache_type_k="q8_0" # f16 q8_0, tbq4_0, tbq3_0 
-cache_type_v="q8_0" # f16 q8_0, tbq4_0, tbq3_0 
-#--spec-draft-type="f16"  # "q8_0"
-#--spec-draft-type-v f16,
-
 # call the model with a pompt that check if the model supports OpenAI tools calling
 test_call() {
     debug_function "test_call"
@@ -41,9 +36,9 @@ test_call() {
     return_output_values "$run_output" 1
     if_error && return 1
 
-    local server_output=$(get_info_from_server_log)
-    debug "server_output: $server_output"
-    return_output_values "$server_output" 1    
+    local server_output=$(extract_info_from_server_log)
+    #debug "server_output: $server_output"
+    return_output_values "$server_output" 1
 }
 
 
@@ -72,28 +67,31 @@ print_test_call() {
     print_value "Max context"  "$ctx_train_k k"
     print_value "OpenAI tools compatibility"  "$tool_flag"
     
-    # fixed values
-    local cache_type="--"    
-
     local vram_used=${vram_usage%%/*}  # %% remove the longhest match from the end of the string, /* matches everything after the first "/"
     local cuda_vram_gb=$(awk "BEGIN{printf \"%.1f\", $cuda_vram/1024}")
-    local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")   
+    local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")
 
-    if [[ "$accepted_pct" != "" && "$accepted_pct" != "--" && "$accepted_pct" != "n.a." ]]; then
+    # normalize (where is the "--" value came from??)
+    if [[ "$accepted_pct" == "" || "$accepted_pct" == "n.a." ]]; then
+        accepted_pct=""
+    fi
+
+    if [[ "$accepted_pct" != "" ]]; then
         print_value "Accepted prediction %" "$accepted_pct"
         pred_info+=" ($(printf "%.0f" "$accepted_pct")%)"
     fi
     
-    printf "| Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |\n"
-    printf "| ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |\n"
-    printf "| %3.0f t/s | %3s k | %3s | %5s  | %4.1f GB | %-9s | %-5s | %6s | %3.0fs | %-16s | %-30s | %-12s | %-15s |\n" \
+    #printf "| Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |\n"
+    printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |\n"
+    printf "| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |\n"
+    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-5s | %6s | %3.0fs | %-10s %21s | %9s | %-10s |\n" \
         "$eval_rate" \
         "$ctx_k" \
         "$cpu_moe" \
         "$layers_info" \
         "$vram_used" \
         "$cuda_vram_gb/$host_ram_gb" \
-        "$cache_type" \
+        "$cache_kv" \
         "$eval_count" \
         "$total_duration_s" \
         "$pred_type" \
@@ -113,7 +111,7 @@ llamacpp_run() {
     fi
 
     # 1. Build the payload with your exact parameters (OpenAI compatible schema)
-    local temperature=0.1
+    local temperature=0.3
     #local max_tokens=2048
     local max_tokens=4096  # allow more reasoning
 

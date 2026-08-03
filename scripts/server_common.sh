@@ -3,9 +3,11 @@ source common.sh
 ## This is called by specific models, look at their specific .md file.
 
 # Functions
+# is_server_started: return 0/1
 # start_server: used to start Lllama.cpp server
 # stop_server: used to stop the Llama.cpp server instance
-# get_info_from_server_log: rertrieve information from the server log
+# extract_info_from_server_log: rertrieve information from the server log
+
 
 #---
 
@@ -16,6 +18,12 @@ is_server_started() {
     else
         return 1
     fi
+}
+
+
+server_info() {
+    local command=$(ps -ef | grep llama-server | sed 's/ -/\n-/g' | sed 's/^.*\llama-b/"llama-b/')
+    print_value "Command" "$command"
 }
 
 # start_server 
@@ -34,15 +42,14 @@ start_server() {
     local model="$1"
     local ctx_k="$2"
     local gpu_layers="$3"
-    local cpu_moe="$4"    
+    local cpu_moe="$4"
     local spec="$5"
     local draft_model="$6"
     local predict_token="$7"
-    local mtp="$8"
-    local jinja="$9"
-    local batch="${10}"
-    local ubatch="${11}"
-    
+    local jinja="$8"
+    local batch="$9"
+    local ubatch="${10}"
+        
     # stop running server
     stop_server >&2
 
@@ -82,11 +89,12 @@ start_server() {
 
     local context=$(($ctx_k * 1024))
 
-    ### Set common parameters
-    local cache_type_k="q8_0"
-    local cache_type_v="q8_0"
-    local spec_cache_type_k="q8_0"
-    local spec_cache_type_v="q8_0"
+    local cache_kv=$(get_cache_for_model "$model")
+
+    local cache_type_k=$cache_kv
+    local cache_type_v=$cache_kv
+    local spec_cache_type_k=$cache_kv
+    local spec_cache_type_v=$cache_kv
 
     # A good rule: batch-size = 2x your ubatch-size.
     if [[ "$ubatch" == "auto" || "$ubatch" == "0" || "$ubatch" == "-1" ]]; then
@@ -111,11 +119,12 @@ start_server() {
         --flash-attn on \
         --n-gpu-layers $gpu_layers \
         --n-cpu-moe $cpu_moe \
+        --kv-unified \
         --cache-type-k $cache_type_k \
         --cache-type-v $cache_type_v \
-        --kv-unified \
-        --no-mmap \
-        --mlock \
+
+        --load-mode mmap \
+        --fit off \
 
         --batch-size $batch \
         --ubatch-size $ubatch \
@@ -138,29 +147,22 @@ start_server() {
         --context-shift \
         --reasoning-preserve \
 
-        #--jinja \
         --reasoning on \
         --reasoning-budget 4096 \
         --reasoning-budget-message "... Considering the limited time by the user, I have to give the solution based on the thinking directly now."
     )
 
-    if [[ -n "$jinja" ]]; then
+    if [[ "$jinja" == "1" ]]; then
         args+=(--jinja)
     fi
-
 
     # Logging settings
     args+=(--log-verbosity 4) # default is 3, we need this level to print out the GPU layers
 
-    if [[ "$spec" = "1" && "$mtp" = "1" ]] ; then
-        echo "‼️ You can't used both Speculation and MTP" >&2
-        return 1
-    fi
-
     local pred_type="none" # default value
 
 
-    if [[ "$spec" = "1" || "$spec" == "simple" || "$spec" == "dflash" || "$spec" == "mtp" || "$mtp" = "1"  ]]; then
+    if [[ "$spec" = "1" || "$spec" == "simple" || "$spec" == "dflash" || "$spec" == "mtp" ]]; then
         local pred_min
         local pred_max
         # Split the string by '/'
@@ -239,7 +241,6 @@ start_server() {
         args+=(--spec-draft-n-max "$pred_max")
 
         print_value "Speculative type" "MTP, draft-mtp (min: $pred_min, max: $pred_max)"
-
     fi
 
     # clean log
@@ -317,6 +318,15 @@ stop_server() {
     fi
 }
 
+# local cache_kv=get_cache_for_model "Qwen3.5-27B-UD-Q4_K_M.gguf"
+get_cache_for_model() {
+    local model=$1
+    if [[ "$model" == Qwen3.5-27B* || "$model" == Qwen3.6-27B* ]]; then
+        echo "q4_0"
+    else
+        echo "q8_0"
+    fi
+}
 
 ## TODO
 #check_load_model_fail() {
@@ -324,8 +334,8 @@ stop_server() {
 #        ## 0.09.054.775 W llama_init_from_model: context type MTP requested but model doesn't contain MTP layers
 #}
 
-get_info_from_server_log() {
-    debug_function "get_info_from_server_log"
+extract_info_from_server_log() {
+    debug_function "extract_info_from_server_log"
     local log=$SERVER_LOG
 
     # TODO: extract "Quantized by"
@@ -415,9 +425,17 @@ get_info_from_server_log() {
 
     return_value "layers_info" "$layers_info"
 
-    # is calling "get_pred_info" enough without "return_output_values" ?
+    # TODO: calling "get_pred_info" requires also "return_output_values" ?
     #get_pred_info
     return_output_values "$(get_pred_info)" 1
+
+    # Extract cache quantization
+    # I llama_kv_cache: size =  680.00 MiB ( 65536 cells,  10 layers,  1/1 seqs), K (q8_0):  340.00 MiB, V (q8_0):  340.00 MiB
+    # [^)]+   everything that is not a closing parenthesis
+    # NOTE. Capture only K, assume V = K
+    local cache_kv=$(grep -E "llama_kv_cache:.*K \(" "$log" | head -1 | sed -E 's/.* K \(([^)]+)\).*/\1/')
+    # "$row" | grep "llama_kv_cache:" | sed -E 's/.* K \(([^)]+)\).*/\1/'
+    return_value "cache_kv" "$cache_kv"
 }
 
 
@@ -431,7 +449,7 @@ get_pred_info() {
     local ngram_simple=$(grep -E "I spec common_specu: adding speculative implementation 'ngram-simple'" "$log" | tail -n 1)
     
     if [[ -n $ngram_simple ]]; then
-        pred_type="DFlash (N-gram)"
+        pred_type="N-gram"
 
         # b97..
         # 0.10.658.011 I common_speculative_impl_ngram_simple: adding speculative implementation 'ngram-simple'
@@ -450,7 +468,7 @@ get_pred_info() {
                         print a[2], a[4], a[6]
                     }
                 ')                
-            pred_info=$(printf 's_M=%s s_N=%s min=%s' "$size_m" "$size_n"  "$min_hits")
+            pred_info=$(printf 'N=%s M=%s min=%s' "$size_n" "$size_m" "$min_hits")
 
         else
             return_value "error" "found spec type 'ngram-simple' but failed to find its parameters'"
@@ -465,7 +483,7 @@ get_pred_info() {
     local draft_mtp=$(grep -E "I spec common_specu: adding speculative implementation 'draft-mtp'" "$log" | tail -n 1)
     
     if [[ -n $draft_mtp ]]; then
-        pred_type="DFlash MTP"
+        pred_type="MTP"
 
         # TODO
         # 0.57.644.930 I spec common_specu: - n_max=12, n_min=6, p_min=0.60, n_embd=5120, backend_sampling=1

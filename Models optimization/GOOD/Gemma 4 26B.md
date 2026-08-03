@@ -8,18 +8,14 @@
 | Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf         | ❌ Looping on Pi and lie                      |
 | Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                           | ❌ Every here and then it breaks, 256k 40 t/s  | 
 | Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf           | ❌ Gibebrish and unformatted output. Also slow. |
-| Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf
 
-
-
-Gemopus-4-31B-it-Q3_K_M_jackrong.gguf
-
-# Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf
 
 
 ## ✔️ Q4_0 (by Google)
 Gemma-4-26B_Q4_0-it_google.gguf                                     13.4 GB
 https://huggingface.co/google/gemma-4-26B-A4B-it-qat-q4_0-gguf
+
+❌ For the bug3 fix :it took half an hour and havent done. It failed to cal "edit" very often (sometime instead of edit a single line). I lied saying it did the job: No changes and no test !
 
 ## ✔️ UD IQ4_NL (by Unsloth)
 https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
@@ -28,6 +24,8 @@ Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf                           12.6 GB
 ## ✔️ MXFP4 MOE (by Noctrex)
 Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf                           14.3 GB
 https://huggingface.co/noctrex/gemma-4-26B-A4B-it-MXFP4_MOE-GGUF
+
+❌ For the bug3 fix: edit fails and then a lot of reasoning without conclusion.
 
 ## ✔️ Q4_K_M (by Unsloth) 
 Gemma-4-26B-A4B-it-UD-Q4_K_M_unsloth.gguf                            
@@ -38,26 +36,28 @@ Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf                  15.6 GB
 ❌ Gibebrish and unformatted output. Also slow.
 (real file: supergemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf)
 
-## ❌ Gemma-4-26B-A4B-APEX-I-Compact_mudler.gguf            [DELETED]
+## ❌ A4B-APEX-I-Compact (mudler)            [DELETED]
+Gemma-4-26B-A4B-APEX-I-Compact_mudler.gguf
 ❌ Not good reasoning. Incapable to get some edit completed.
 
-## ❌ REAP 19 (by vsark)           [DELETED]
+## ❌ REAP 19 (by vsark)                     [DELETED]
 Gemma-4-19B-REAP-Q4_K_M_vsark.gguf                                  11.4 GB
 256K 40-45 t/s in Pi !!
 ❌ Evey here and then it just print out "thought"
-
 
 ## ❌ REAP126 UD-IQ4_NL (techhermit)
 Gemma-4-26B-REAP126-pruned-UD-IQ4_NL_techhermit.gguf                12.3 GB
 https://huggingface.co/techhermit/gemma-4-26B-A4B-it-reap126
 ❌ Looping on Pi and lie
 
-
-## ⚠️ QAT Uncensored Balanced Q4_K_M (by HauhauCS)
+## ❌ A4B-QAT-Unc-Balanced Q4_K_M (HauhauCS)        [DELETED]
 Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf                15.6 GB
 Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.mtp.gguf
 https://huggingface.co/HauhauCS/Gemma4-26B-A4B-QAT-Uncensored-HauhauCS-Balanced-MTP
-❌  tested WITHOUT MTP: too slow
+
+Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf
+❌ half an hour and not completed a 5 minutes fix. Also, edit completely unrelated parts.
+
 
 ## ❌ PRISM-PRO-DQ-GGUF (by Ex0bit)
 huggingface.co/Ex0bit/Gemma4-26B-A4B-PRISM-PRO-DQ-GGUF
@@ -163,7 +163,6 @@ _test_model() {
         $spec \
         $draft_model \
         $predict_token \
-        $mtp \
         $jinja \
         $batch \
         $ubatch
@@ -171,40 +170,39 @@ _test_model() {
     source test_models_common.sh && print_test_call
 }
 
-model=Gemma-4-26B-A4B-APEX-I-Compact_mudler.gguf
+
+## There is currently a bug for Gemma4 MTP
+model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf 
+ctx_k=64
+cpu_moe=1
+gpu_layers=-1
+spec=mtp
+draft_model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.mtp.gguf
+predict_token=1/2   # (N/M)
+jinja=0
+batch=1024
+ubatch=512
+_test_model
+
+
+model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf
 ctx_k=128
-cpu_moe=4
+cpu_moe=7
 gpu_layers=-1
 spec=none
 draft_model=none
 predict_token=1/2   # (N/M)
-mtp=0
+mtp=1
 jinja=0
 batch=1024
-ubatch=256
+ubatch=1024
 _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Predicion                  | Batch/Ub. | Note       |
 | ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------- | --------- |----------- |
-|  25 t/s | 160 k |   6 | 31/31 | 14.1 | 11.2/3.1  | q8_0  |   1328 |  53s | none       --              |  1024/256 |            |
+|  33 t/s | 128 k |   4 | 31/31 | 15.7 | 13.6/2.5  | q8_0  |    898 |  27s | none       --              |  1024/256 |            |
+|  36 t/s |  64 k |   3 | 31/31 | 15.6 | 14.1/2.1  | q8_0  |    892 |  25s | none       --              |  1024/256 |            |
 
-model=Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf
-ctx_k=160
-cpu_moe=6
-gpu_layers=-1
-spec=none
-draft_model=none
-predict_token=1/2   # (N/M)
-mtp=0
-jinja=0
-batch=1024
-ubatch=256
-_test_model
-
-| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                 | Batch/Ub. | Note       |
-| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------- | --------- | ---------- |
-|  25 t/s | 160 k |   6 | 31/31 | 15.6 | 12.7/3.5  | q8_0  |   1295 |  50s | none                       | 1024/256  |            |
-|  31 t/s | 128 k |   5 | 31/31 | 15.6 | 13.2/3.0  | q8_0  |   1436 |  46s | none                       | 1024/256  |            |
 
 model=Gemma-4-19B-REAP-Q4_K_M_vsark.gguf
 ctx_k=256
@@ -220,48 +218,24 @@ ubatch=256
 _test_model
 
 
-
-## There is currently a bug for Gemma4 MTP
-model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf 
-ctx_k=64
-cpu_moe=1
-gpu_layers=-1
-spec=mtp
-draft_model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.mtp.gguf
-predict_token=1/2   # (N/M)
-mtp=0
-jinja=0
-batch=1024
-ubatch=256
-_test_model
-
-
-model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf 
-ctx_k=64
-cpu_moe=3
-gpu_layers=-1
-spec=none
-draft_model=none
-predict_token=1/2   # (N/M)
-mtp=0
-jinja=0
-batch=1024
-ubatch=256
-_test_model
-
-
 model=Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
-ctx_k=128
-cpu_moe=1
-gpu_layers=-1
+ctx_k=160
+cpu_moe=3
+gpu_layers=99
 spec=none
 draft_model=none
 predict_token=4/4   # (N/M)
-mtp=0
 jinja=0
-batch=1024
-ubatch=256
+batch=2048
+ubatch=512
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Predicion                  | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------- | --------- |----------- |
+|  31 t/s | 160 k |   3 | 31/31 | 15.7 | 13.2/0.2  | q8_0  |   1336 |  43s | none       --              |  2048/512 |            |
+|  31 t/s | 128 k |   3 | 31/31 | 15.7 | 13.2/0.1  | q8_0  |   1336 |  43s | none       --              |  1024/512 |            |
+|  30 t/s | 128 k |   3 | 31/31 | 15.7 | 13.2/0.3  | q8_0  |   1814 |  59s | none       --              | 2048/1024 |            |
+|  29 t/s | 128 k |   3 | 31/31 | 15.7 | 13.2/0.3  | q8_0  |   1814 |  61s | none       --              | 1024/1024 |            |
 
 |  30 t/s | 128 k |   3 | 31/31  | 15.6 GB | 13.2/2.5  | --    |   2386 |  80s | none             | --                             | 1024/256     |                 |
 |  32 t/s |  96 k |   2 | 31/31  | 15.5 GB | 13.6/2.1  | --    |   1344 |  42s | none             | --                             | 1024/256     |                 |
@@ -270,17 +244,27 @@ _test_model
 
 # Google Q4_0
 model=Gemma-4-26B_Q4_0-it_google.gguf
-ctx_k=256
-cpu_moe=3
-gpu_layers=-1
+ctx_k=128
+cpu_moe=0
+gpu_layers=99
 spec=0
 draft_model=none
 predict_token=0/0
-mtp=0
 jinja=0
-batch=768
-ubatch=256
+batch=2048
+ubatch=512
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Predicion                  | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------- | --------- |----------- |
+|  57 t/s | 128 k |   0 | 31/31 | 15.7 | 13.4/0.1  | q8_0  |    929 |  16s | none       --              |  2048/512 |            |
+|  57 t/s | 128 k |   0 | 31/31 | 15.7 | 13.4/0.1  | q8_0  |    929 |  17s | none       --              |  1024/512 |            |
+|  56 t/s | 128 k |   0 | 31/31 | 15.7 | 13.4/0.1  | q8_0  |   1185 |  21s | none       --              |   768/256 |            |
+|  39 t/s | 256 k |   3 | 31/31 | 15.7 | 12.2/0.1  | q8_0  |    892 |  23s | none       --              |   768/256 |            |
+|  48 t/s | 160 k |   1 | 31/31 | 15.7 | 13.0/0.1  | q8_0  |   1320 |  28s | none       --              |   768/256 |            |
+|  47 t/s | 160 k |   1 | 31/31 | 15.7 | 13.0/0.1  | q8_0  |   1320 |  29s | none       --              |   768/256 |            |
+|  42 t/s | 160 k |   2 | 31/31 | 15.5 | 12.6/0.1  | q8_0  |   1034 |  25s | none       --              |   768/256 |            |
+|  38 t/s | 160 k |   3 | 31/31 | 15.1 | 12.2/0.1  | q8_0  |    892 |  24s | none       --              |   768/256 |            |
 
 
 model=Gemma-4-26B_Q4_0-it_google.gguf
@@ -344,19 +328,43 @@ mtp=0
 jinja=0
 batch=1024
 ubatch=256
+_test_model
 
 
-model=supergemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf
-ctx_k=256
-cpu_moe=3
+model=Gemma-4-26B-A4B-APEX-I-Compact_mudler.gguf
+ctx_k=128
+cpu_moe=4
 gpu_layers=-1
-spec=0
+spec=none
 draft_model=none
-predict_token=0/0
+predict_token=1/2   # (N/M)
 mtp=0
 jinja=0
 batch=1024
 ubatch=256
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Predicion                  | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------- | --------- |----------- |
+|  25 t/s | 160 k |   6 | 31/31 | 14.1 | 11.2/3.1  | q8_0  |   1328 |  53s | none       --              |  1024/256 |            |
+
+model=Gemma4-26b-uncensored-fast-v2-Q4_K_M_Jiunsong.gguf
+ctx_k=160
+cpu_moe=6
+gpu_layers=-1
+spec=none
+draft_model=none
+predict_token=1/2   # (N/M)
+mtp=0
+jinja=0
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                 | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------- | --------- | ---------- |
+|  25 t/s | 160 k |   6 | 31/31 | 15.6 | 12.7/3.5  | q8_0  |   1295 |  50s | none                       | 1024/256  |            |
+|  31 t/s | 128 k |   5 | 31/31 | 15.6 | 13.2/3.0  | q8_0  |   1436 |  46s | none                       | 1024/256  |            |
+
 
 ```

@@ -7,14 +7,32 @@
 models:
 
 # Gemma 4 26B  
+  Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf:
+    file: Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf
+    ctx_k: 128
+    gpu_layers: 99
+    cpu_moe: 4
+    batch: 1024
+    ubatch: 512
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "???",
+            "id": "Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf",
+            "name": "Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf",
+            "contextWindow": 131072,
+            "maxTokens": 8192,
+            "reasoning": true
+        },
+
   Gemma-4-26B-Q4_0_(Google)_64k:
     speed: 0 t/s
     file: Gemma-4-26B_Q4_0-it_google.gguf
     ctx_k: 64
     gpu_layers: -1
-    cpu_moe: 1
-    batch: 1024
-    ubatch: 256
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 1024
     spec_type: none 
     pi_agent_model: >
        { 
@@ -32,7 +50,7 @@ models:
     gpu_layers: -1
     cpu_moe: 1
     batch: 1024
-    ubatch: 256
+    ubatch: 512
     spec_type: none 
     pi_agent_model: >
        { 
@@ -65,14 +83,15 @@ models:
     speed: 33 t/s
     file: Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf
     ctx_k: 128
-    gpu_layers: -1
-    cpu_moe: 1
+    gpu_layers: 99
+    cpu_moe: 3
     batch: 1024
-    ubatch: 256
+    ubatch: 512
     spec_type: none 
     pi_agent_model: >
       { 
         "_test": "Good",
+        "_sped": "? t/s",
         "id": "Gemma-4-26B-A4B-it-MXFP4_MOE_noctrex.gguf",
         "name": "Gemma4 26B - MXFP4 (by Noctrex) 128K",
         "contextWindow": 131072,
@@ -161,6 +180,100 @@ models:
           "reasoning": true,
           "input": [ "text", "image" ]
       },
+
+
+# Qwen 3.6 27B
+  Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_(deucebucket)_96k:
+    file: Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_deucebucket.gguf
+    ctx_k: 96
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 512
+    spec_type: none
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "🥇 Ottimo!",
+         "_speed": "17 t/s",
+          "id": "Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_deucebucket.gguf",
+          "name": "Qwen3.6-27B Cerebellum-v5 Q2_K Mixed (deucebucket) 96k",
+          "contextWindow": 96000,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_(deucebucket)_SPEC__96k:
+    file: Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_deucebucket.gguf
+    ctx_k: 96
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 512
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 8
+    spec_ngram_simple_size_m: 8
+    spec_ngram_simple_min_hits: 1
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "🥇 Ottimo!",
+         "_speed": "20 t/s",
+          "id": "Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_deucebucket.gguf",
+          "name": "Qwen3.6-27B Cerebellum-v5 Q2_K Mixed (deucebucket) 96k",
+          "contextWindow": 96000,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  Qwen3.6-27B_IQ4_XS_(unsloth)_64k:
+    file: Qwen3.6-27B-IQ4_XS_unsloth.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 1024
+    spec_type: none
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "?",
+         "_speed": "? t/s",
+          "id": "Qwen3.6-27B-IQ4_XS_unsloth.gguf",
+          "name": "Qwen3.6 27B IQ4_XS (Unsloth) 64k",
+          "contextWindow": 64000,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+
+  Qwen3.6-27B_IQ4_XS_(unsloth)_80k_spec:
+    file: Qwen3.6-27B-IQ4_XS_unsloth.gguf
+    ctx_k: 80
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 8
+    spec_ngram_simple_size_m: 16
+    spec_ngram_simple_min_hits: 1
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "?",
+         "_speed": "? t/s",
+          "id": "Qwen3.6-27B-IQ4_XS_unsloth.gguf",
+          "name": "Qwen3.6 27B IQ4_XS (Unsloth) 64k",
+          "contextWindow": 64000,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
 
 # Qwen 3.6 35B A3B
   Qwen_3.6_28b_reap_20_(barozp)_64k:

@@ -23,20 +23,15 @@ args=(
     --parallel 1 \
     --prio 3 \
     --flash-attn on \
-    --cache-type-k "q8_0" \
-    --cache-type-v "q8_0" \
     --kv-unified \
-
-    --no-mmap \
-    --mlock \
+    --load-mode mmap \
+    --fit off \
 
     --cache-reuse 256 \
 
-    --draft-p-min 0.7 \
+    --draft-p-min 0.6 \
 
     #--defrag-thold 0.1
-    #--draft-min 1            # min tokens to draft before verifying
-    #--draft-p-min 0.6        # stop drafting if token probability drops below this   
 
     # TODO: minimal ?
     # default is 3, we need level 4 to print out the GPU layers
@@ -49,7 +44,7 @@ args=(
     --samplers "penalties;dry;top_k;top_p;min_p;temperature"
 
     ## strict for large capable models
-    --temperature 0.1 \
+    --temperature 0.3 \
     --top-k 20 \
     --top-p 0.8 \
     --min-p 0.05 \
@@ -80,9 +75,8 @@ args=(
     --context-shift \
     --reasoning-preserve \
 
-    #--jinja \
     --reasoning on \
-    --reasoning-budget 4096 \
+    --reasoning-budget 8192 \
     --reasoning-budget-message "... Considering the limited time by the user, I have to give the solution based on the thinking directly now."
 )
 
@@ -198,13 +192,16 @@ start_server() {
     local spec_type
     local jinja
 
+    local cahe_kv=$(get_cache_for_model "$file")
+
+    args+=(--cache-type-k "$cahe_kv")
+    args+=(--cache-type-v "$cahe_kv")
+    args+=(--spec-draft-type-k "$cahe_kv")
+    args+=(--spec-draft-type-v "$cahe_kv")
+
     # defaults
     local spec_draft_n_max="3"
-    local spec_draft_n_min="1"
-    local spec_cache_type_k="q8_0"
-    local spec_cache_type_v="q8_0"
-
-    
+    local spec_draft_n_min="1"    
 
     local model_file=$GGUF_FOLDER/$file  
 
@@ -224,18 +221,16 @@ start_server() {
 
     args+=(--spec-type "$spec_type" )
 
-    # for DFlash
+    # for Speculative
     args+=(--spec-draft-n-max "$spec_draft_n_max")
     args+=(--spec-draft-n-min "$spec_draft_n_min")
-    args+=(--spec-draft-type-k "$spec_cache_type_k")
-    args+=(--spec-draft-type-v "$spec_cache_type_v")
 
     # for N-Gram   
-    if [[ "$spec_type" == "ngram-simple" ]]; then
-        require_arg spec_ngram_simple_size_m     --spec-ngram-simple-size-m || return 1
+    if [[ "$spec_type" == "ngram-simple"  ]]; then
         require_arg spec_ngram_simple_size_n     --spec-ngram-simple-size-n || return 1
+        require_arg spec_ngram_simple_size_m     --spec-ngram-simple-size-m || return 1        
         require_arg spec_ngram_simple_min_hits   --spec-ngram-simple-min-hits || return 1
-        echo "Speculative type: ngram-simple (size_M: $spec_ngram_simple_size_m size_N: $spec_ngram_simple_size_n min_hits: $spec_ngram_simple_min_hits)"
+        echo "Speculative type: ngram-simple (size_N: $spec_ngram_simple_size_n size_M: $spec_ngram_simple_size_m min_hits: $spec_ngram_simple_min_hits)"
     fi
 
     # for MTP  
@@ -245,7 +240,17 @@ start_server() {
         echo "Speculative type: MTP (min: $spec_draft_n_min max: $spec_draft_n_max)"
     fi
 
-    args+=(--jinja $jinja)
+    # DFlash
+    if [[ "$spec_type" == "dflash" ]]; then
+        ### TODO: not implemented
+        echo "Speculative type: DFlash ... "
+        echo -e "❌ Spec \"DFlash\" not supported!"
+        return 1
+    fi
+
+    if [[ "$jinja" == "1" ]]; then
+        args+=(--jinja)
+    fi
 
     echo >&2
     echo "=========================================================" >&2
