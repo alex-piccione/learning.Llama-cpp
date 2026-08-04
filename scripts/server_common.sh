@@ -133,7 +133,7 @@ start_server() {
 
         --temperature 0.1 \
         --top-k 20 \
-        --top-p 0.8 \
+        --top-p 0.80 \
         --min-p 0.05 \
         --repeat-penalty 1.15 \
         --repeat-last-n 1024 \

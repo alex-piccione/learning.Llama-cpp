@@ -46,7 +46,7 @@ args=(
     ## strict for large capable models
     --temperature 0.3 \
     --top-k 20 \
-    --top-p 0.8 \
+    --top-p 0.80 \
     --min-p 0.05 \
     --repeat-penalty 1.15 \
     --repeat-last-n 1024 \

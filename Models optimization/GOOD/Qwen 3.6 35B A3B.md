@@ -1,31 +1,32 @@
 # Qwen 3.6 35B A3B
 
-| Model                                    | File                                                         | Result                                  |
-| ---------------------------------------- | ------------------------------------------------------------ | --------------------------------------- |
-| REAP20 Q4_K_M (by barozp)                | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf                    | ✔️ Really Good but only 64k             |
-| Genesis V3 APEX Compact (LuffyTheFox)    | Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf | ✔️ 30-35 t/s with 96 and 128k           | 
-| Coder CD CD-Q4_K_M (ManniX)              | Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf                  | ⚠️ 30-35 t/s with 96 and 128k TEST      |
-| MOE384-pruned-Q4_K_M (by tipe)           | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf               | ⚠️ Loop in Pi. Good analyze/write code  |
-| MTP MXFP4 MOE (by Unsloth)               | Qwen3.6-35B-A3B-MXFP4_MOE_unsloth.gguf                       | ❌ Too big. Slow.                       |
-| REAP pruned ratio 0.3 Q4_K_M (amazeble)  | Qwen3.6-35B-REAP-pruned-ratio-0.3-Q4_K_M_amazeble.gguf       | ❌ no tools                             |
-| REAP pruned ratio 0.5 Q4_K_M (lemmyhans) | Qwen3.6-35B-REAP-pruned-ratio-0.5-Q4_K_M_lemmyhans.gguf      | ❌ no tools                             |
-| UD Q3_K_XL (Unsloth)                     | Qwen3.6-35B-A3B-UD-Q3_K_XL_unsloth.gguf                      | ❌ Too slow at 96K                      |
-| UD Q4_K_M (Unsloth)                      | Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf                       | ❌ 22GB                                 |
+| Model                                    | File                                                    | Result                                  |
+| ---------------------------------------- | ------------------------------------------------------- | --------------------------------------- |
+| REAP20 Q4_K_M (by barozp)                | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf               | ✔️ Really Good but only 64k             |
+| Genesis V3 APEX Compact (LuffyTheFox)    | Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf     | ⚠️ 30-35 t/s with 96 and 128k           | 
+| Coder CD CD-Q4_K_M (ManniX)              | Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf             | ⚠️ 30-35 t/s with 96 and 128k TEST      |
+| MOE384-pruned-Q4_K_M (by tipe)           | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf          | ⚠️ Loop in Pi. Good analyze/write code  |
+| MTP MXFP4 MOE (by Unsloth)               | Qwen3.6-35B-A3B-MXFP4_MOE_unsloth.gguf                  | ❌ Too big. Slow.                       |
+| REAP pruned ratio 0.3 Q4_K_M (amazeble)  | Qwen3.6-35B-REAP-pruned-ratio-0.3-Q4_K_M_amazeble.gguf  | ❌ no tools                             |
+| REAP pruned ratio 0.5 Q4_K_M (lemmyhans) | Qwen3.6-35B-REAP-pruned-ratio-0.5-Q4_K_M_lemmyhans.gguf | ❌ no tools                             |
+| UD Q3_K_XL (Unsloth)                     | Qwen3.6-35B-A3B-UD-Q3_K_XL_unsloth.gguf                 | ❌ Too slow at 96K                      |
+| UD Q4_K_M (Unsloth)                      | Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf                  | ❌ 22GB                                 |
 
 
 ## https://huggingface.co/avlp12/Qwen3.5-35B-A3B-Alis-Ultra-GGUF
 
 
-## ✔️ Uncensored Genesis V3 APEX (by luffythefox)
-Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf            16.1 GB  
-With scepulation like 24/24 I obtain 50 t/s in the test but 18 t/s in the real use in Pi  
+## ⚠️ Uncensored Genesis V3 APEX (by luffythefox)
+Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf            16.1 GB  
+With speculation like 24/24 I obtain 50 t/s in the test but 18 t/s in the real use in Pi.  
 
 - 128k with MOE 4
 - 96k with MOE 3 
 Speed is super variable, it can get stuck at 10-15 t/s and reach 40 t/s with both the configuration.
 
-No Spec: Speculation active gives low t/s in real use (Test: 45 t/s, Pi: 18 t/s).
-
+⚠️ Overdo and does not follow the rules: once crearted a PR, instead of waiting... when I asked "next?" it create the whole project structure, without changing branch.
+   When I said that it just moved on proposing more work ?!  
+   After doing a lot of changes it didn't run "dotnet build"
 
 ## ⚠️ Coder CD Q4_K_M (by Mannix)
 Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf                             13.6 GB
@@ -342,7 +343,7 @@ ubatch=256
 
 
 
-_start_server() {
+_test_model() {
 source server_common.sh && \
 start_server \
     $model \

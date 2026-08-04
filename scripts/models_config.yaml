@@ -183,8 +183,8 @@ models:
 
 
 # Qwen 3.6 27B
-  Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_(deucebucket)_96k:
-    file: Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_deucebucket.gguf
+  Qwen3.6-27B-Cerebellum-v5-Q2_K_(deucebucket)_96k:
+    file: Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf
     ctx_k: 96
     gpu_layers: 99
     cpu_moe: 0
@@ -196,17 +196,17 @@ models:
       { 
          "_test": "🥇 Ottimo!",
          "_speed": "17 t/s",
-          "id": "Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_deucebucket.gguf",
-          "name": "Qwen3.6-27B Cerebellum-v5 Q2_K Mixed (deucebucket) 96k",
+          "id": "Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf",
+          "name": "Qwen3.6-27B Cerebellum-v5 Q2_K (deucebucket) 96k",
           "contextWindow": 96000,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
 
-  Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_(deucebucket)_SPEC__96k:
-    file: Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_deucebucket.gguf
-    ctx_k: 96
+  Qwen3.6-27B-Cerebellum-v5-Q2_K_(deucebucket)_SPEC__96k:
+    file: Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf
+    ctx_k: 128
     gpu_layers: 99
     cpu_moe: 0
     batch: 1024
@@ -220,9 +220,9 @@ models:
       { 
          "_test": "🥇 Ottimo!",
          "_speed": "20 t/s",
-          "id": "Qwen3.6-27B-Cerebellum-v5-Q2_K_Mixed_deucebucket.gguf",
-          "name": "Qwen3.6-27B Cerebellum-v5 Q2_K Mixed (deucebucket) 96k",
-          "contextWindow": 96000,
+          "id": "Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf",
+          "name": "Qwen3.6-27B Cerebellum-v5 Q2_K (deucebucket) 128k",
+          "contextWindow": 128000,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
@@ -234,7 +234,7 @@ models:
     gpu_layers: 99
     cpu_moe: 0
     batch: 1024
-    ubatch: 1024
+    ubatch: 512
     spec_type: none
     jinja: 0
     pi_agent_model: >
@@ -317,8 +317,8 @@ models:
           "input": [ "text", "image" ]
       },
 
-  Qwen_3.6_35B_A3B_Genesis_v3_APEX_128k_(luffythefox):
-    file: Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf
+  Qwen_3.6_35B_A3B_Genesis_v3_APEX_(luffythefox)_128k:
+    file: Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf
     note: Can use 96K with MOE 3
     note_2: With ngram-simple 4/4 is super fast in tests but slow in reality
     ctx_k: 128
@@ -331,8 +331,8 @@ models:
       { 
           "_test": "✔️ OK, chatty with open ended questions",
           "_speed": "30 t/s",
-          "id": "Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf",
-          "name": "Qwen 3.6 35B Genesis v3 APEX (luffythefox)",
+          "id": "Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf",
+          "name": "Qwen 3.6 35B Genesis v3 APEX (luffythefox) 128k",
           "contextWindow": 131072,
           "_contextWindow": 96000,
           "maxTokens": 4096,
@@ -426,7 +426,7 @@ models:
   GPT-OSS-20B_20b_UD-Q8_K_XL:
     file: GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
     ctx_k: 128
-    gpu_layers: -1
+    gpu_layers: 99
     cpu_moe: 0
     batch: 2048
     ubatch: 1024

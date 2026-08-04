@@ -12,13 +12,19 @@ MTP: No
 Max context: 128 k
 OpenAI tools compatibility: ✔️
 
+| File                                                    | Result                                                  |
+|---------------------------------------------------------|---------------------------------------------------------|
+| GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf                     | ❌ Super fast but not adapt for coding                  |
+
 
 # (1) UD-Q6_K_XL (by Unsloth)
 file: GPT-OSS-20b-UD-Q6_K_XL_unsloth.gguf
 
 
-# (2) UD-Q8_K_XL (by Unsloth)
-file: GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
+# ❌ UD-Q8_K_XL (by Unsloth)
+GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf 
+
+❌ Does not follow the rule and check PR comments, neither when specifically asked to fo it.
 
 
 | Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
@@ -81,18 +87,25 @@ ubatch=384
 
 
 model=GPT-OSS-20b-UD-Q8_K_XL_unsloth.gguf
-ctx_k=128
-gpu_layers=-1
-cpu_moe=0
+ctx_k=256
+gpu_layers=99
+cpu_moe=2
 spec=0
 draft_model=none
 predict_token=0/0
-mtp=0
 jinja=0
 batch=2048
 ubatch=1024
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
+|  59 t/s | 256 k |   0 | 25/25 | 15.6 | 11.2/0.5  | q8_0  |   1282 |  21s | none                          -- | 2048/1024 |            |
+|  61 t/s | 128 k |   0 | 25/25 | 13.5 | 11.2/0.3  | q8_0  |   1282 |  21s | none                          -- | 2048/1024 |            |
+|  33 t/s | 128 k |   3 | 25/25 | 12.6 | 10.0/0.3  | q8_0  |    914 |  27s | none                          -- | 2048/1024 |            |
 
 
+_test_model() {
 source server_common.sh && \
 start_server \
     $model \
@@ -108,5 +121,6 @@ start_server \
     $ubatch
     
 source test_models_common.sh && print_test_call
+}
 
 ```

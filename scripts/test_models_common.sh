@@ -112,8 +112,8 @@ llamacpp_run() {
 
     # 1. Build the payload with your exact parameters (OpenAI compatible schema)
     local temperature=0.3
-    #local max_tokens=2048
-    local max_tokens=4096  # allow more reasoning
+    local max_tokens=2048
+    #local max_tokens=4096  # allow more reasoning
 
     json_payload=$(jq -n \
         --arg code "$prompt" \
@@ -129,7 +129,7 @@ llamacpp_run() {
   temperature: ($temperature | tonumber),
   max_tokens: ($max_tokens | tonumber),  
   top_k: 20,
-  top_p: 0.8,
+  top_p: 0.80,
   min_p: 0.05,
   repeat_penalty: 1.05,
   repeat_last_n: 256,
