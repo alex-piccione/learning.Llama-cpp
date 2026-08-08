@@ -43,26 +43,8 @@ cpu_moe=5
 spec=0
 draft_model=none
 predict_token=5/12
-mtp=0
 jinja=0
 batch=1024
 ubatch=512
-
-
-source server_common.sh && \
-start_server \
-    $model \
-    $ctx_k \
-    $gpu_layers \
-    $cpu_moe \
-    $spec \
-    $draft_model \
-    $predict_token \
-    $mtp \
-    $jinja \
-    $batch \
-    $ubatch
-
-source test_models_common.sh && print_test_call
 
 ```

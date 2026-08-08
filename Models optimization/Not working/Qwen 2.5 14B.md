@@ -38,22 +38,8 @@ cpu_moe=0
 dflash=0
 draft_model="not-empty"
 predict_token=0
-mtp=0
 jinja=0
-
-source start_server_common.sh && \
-start_server \
-    $model \
-    $ctx_k \
-    $gpu_layers \
-    $cpu_moe \
-    $dflash \
-    $draft_model \
-    $predict_token \
-    $mtp \
-    $jinja
-
-source test_models_common.sh && \
-test_call $dflash
+batch
+ubatch
 
 ```

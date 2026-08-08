@@ -83,7 +83,6 @@ cpu_moe=2
 spec=none
 draft_model=none
 predict_token=1/2   # (N/M)
-mtp=0
 jinja=1
 batch=1024
 ubatch=256
@@ -106,7 +105,6 @@ cpu_moe=2
 spec=none
 draft_model=none
 predict_token=1/2   # (N/M)
-mtp=0
 jinja=1
 batch=1024
 ubatch=256
@@ -127,28 +125,11 @@ cpu_moe=1
 spec=none
 draft_model=none
 predict_token=1/2   # (N/M)
-mtp=0
 jinja=1
 batch=1024
 ubatch=256
 _start_server
 
-
-source server_common.sh && \
-start_server \
-    $model \
-    $ctx_k \
-    $gpu_layers \
-    $cpu_moe \
-    $spec \
-    $draft_model \
-    $predict_token \
-    $mtp \
-    $jinja \
-    $batch \
-    $ubatch
-    
-source test_models_common.sh && print_test_call
 
 
 model=GLM-4.7-Flash-REAP-09.Q3_K_L_akicou.gguf
@@ -158,30 +139,10 @@ cpu_moe=5
 spec=1
 draft_model=none
 predict_token=24/6  # N lookup /M predict
-mtp=0
 jinja=0
 batch=1024
 ubatch=256
 
-
-
-_start_server() {
-    source server_common.sh && \
-    start_server \
-        $model \
-        $ctx_k \
-        $gpu_layers \
-        $cpu_moe \
-        $spec \
-        $draft_model \
-        $predict_token \
-        $mtp \
-        $jinja \
-        $batch \
-        $ubatch
-
-    source test_models_common.sh && print_test_call
-}
 
 ```
 

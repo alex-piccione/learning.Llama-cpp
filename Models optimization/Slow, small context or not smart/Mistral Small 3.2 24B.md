@@ -43,26 +43,8 @@ cpu_moe=0
 dflash=0
 draft_model=none
 predict_token=32
-mtp=0
 jinja=0
 batch=2048
 ubatch=256
-
-source server_common.sh && \
-start_server \
-    $model \
-    $ctx_k \
-    $gpu_layers \
-    $cpu_moe \
-    $dflash \
-    $draft_model \
-    $predict_token \
-    $mtp \
-    $jinja \
-    $batch \
-    $ubatch
-
-source test_models_common.sh && \
-test_call_result_row $(flag_or $dflash $mtp)
 
 ```

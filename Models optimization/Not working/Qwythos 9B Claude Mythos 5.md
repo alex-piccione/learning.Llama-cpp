@@ -45,7 +45,6 @@ cpu_moe=1
 spec=0
 draft_model=none
 predict_token=0/0  # N lookup /M predict
-mtp=0
 jinja=0
 batch=768
 ubatch=256
@@ -59,32 +58,11 @@ model=Qwythos-9B-Claude-Mythos-5-1M-MTP-Q4_K_M_emperoai.gguf
 ctx_k=256
 gpu_layers=-1
 cpu_moe=0
-spec=0
+spec=mtp
 draft_model=none
 predict_token=2/8  # MTP, draft-mtp (min: 1, max: 4)
-mtp=1
 jinja=0
 batch=1024
 ubatch=256
 
 ```
-
-
-```bash
-source server_common.sh && \
-start_server \
-    $model \
-    $ctx_k \
-    $gpu_layers \
-    $cpu_moe \
-    $spec \
-    $draft_model \
-    $predict_token \
-    $mtp \
-    $jinja \
-    $batch \
-    $ubatch
-    
-source test_models_common.sh && print_test_call
-
-``` 

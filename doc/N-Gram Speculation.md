@@ -41,11 +41,3 @@ Do not use ngram-simple for code generation agents.
 - **For Repetitive Tasks** (Boilerplate, Loops, JSON): N-gram might help if the output is highly repetitive, but gains are marginal.
 - **Alternative**: If you require speculative speedups for code, use a Neural Draft Model (--spec-type draft-simple) or MTP (--spec-type draft-mtp), which predict based on probabilities rather than exact string matches.
 
-**Recommended Config for Coding Agents:**
-```
-spec=0
-# OR
-draft_model=none
-mtp=0
-```
-Trust the baseline speed. N-gram speculation is a trap for unique text generation.

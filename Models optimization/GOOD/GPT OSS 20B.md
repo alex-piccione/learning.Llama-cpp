@@ -80,7 +80,6 @@ cpu_moe=0
 spec=0
 draft_model=none
 predict_token=3/6
-mtp=0
 jinja=0
 batch=2048
 ubatch=384
@@ -115,7 +114,6 @@ start_server \
     $spec \
     $draft_model \
     $predict_token \
-    $mtp \
     $jinja \
     $batch \
     $ubatch

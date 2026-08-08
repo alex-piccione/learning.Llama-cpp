@@ -113,6 +113,7 @@ start_server() {
         --port "$SERVER_PORT" \
         --seed "1" \
         --model "$model_path" \
+        #--alias 'unsloth/Qwen3.6-27B-MTP-GGUF' \
         --ctx-size "$context" \
         --parallel 1 \
         --prio 3 \
@@ -130,6 +131,12 @@ start_server() {
         --ubatch-size $ubatch \
 
         --draft-p-min 0.7 \
+        #--spec-draft-p-min 0.2 
+        # --cache-ram 16384
+        # --no-mmproj
+
+        #--metrics \
+        #--perf \ 
 
         --temperature 0.1 \
         --top-k 20 \
@@ -203,7 +210,20 @@ start_server() {
 
             print_value "Speculative type" "Internal N-Gram, ngram-simple (size_N: $pred_min, size_M: $pred_max)"
         fi
+    elif [[ "$spec" == "draft-simple" ]]; then
+        ### TODO: check if draft-simple requires ALWAYS a draft model !!!
+        args+=(--spec-type "draft-simple")
+        args+=(--spec-draft-model "$draft_model_path")
+        args+=(--spec-draft-n-min "$pred_min")
+        args+=(--spec-draft-n-max "$pred_max")
 
+        # Configure KV cache type specifically for the draft model
+        args+=(--spec-draft-type-k "$spec_cache_type_k")
+        args+=(--spec-draft-type-v "$spec_cache_type_v")
+
+        print_value "Speculative type" "Draft model, draft-simple (min: $pred_min, max: $pred_max)"
+        print_value "Draft Model" "$draft_model"
+ 
     elif [[ "$spec" == "dflash" ]]; then
 
         if [[ -z "$draft_model" ||  "$draft_model" == "none" ]]; then

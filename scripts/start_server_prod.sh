@@ -76,7 +76,7 @@ args=(
     --reasoning-preserve \
 
     --reasoning on \
-    --reasoning-budget 8192 \
+    --reasoning-budget 4096 \
     --reasoning-budget-message "... Considering the limited time by the user, I have to give the solution based on the thinking directly now."
 )
 
@@ -104,7 +104,7 @@ start_server() {
 
     # 1. If no model ID provided, show a selection menu
     if [[ -z "$model_id" ]]; then
-        echo "Select a model:"      
+        echo "Select a model:"
         # Extract keys from YAML
         local models_list
         local win_path=$(cygpath -w "$models_config_file") # yq is a .exe
@@ -133,7 +133,7 @@ start_server() {
             local file=$(yq -e ".models[\"$model_id\"].file" "$models_config_file")
             if [[ -f  "$GGUF_FOLDER/$file" ]]; then exist="🟢"; else exist="🔴"; fi
             #choices+=("$exist $model_id")  # concatenate
-            choices+=("$model_id $exist")  # concatenate            
+            choices+=("$model_id $exist")  # concatenate
         done <<< "$models_list"
 
         # Show the menu
@@ -211,7 +211,11 @@ start_server() {
     fi
 
     args+=(--model "$model_file")
-    args+=(--alias "$model_id")
+    if [[ -n "$alias" ]]; then
+        args+=(--alias "$alias")
+    else
+        args+=(--alias "$model_id")
+    fi    
     args+=(--ctx-size "$(($ctx_k * 1024))")
     args+=(--n-gpu-layers "$gpu_layers")
     args+=(--n-cpu-moe "$cpu_moe")

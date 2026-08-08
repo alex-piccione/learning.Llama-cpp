@@ -96,33 +96,15 @@ https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 
 ## Run results
 
-| Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |
-| ------- | ----- | --- | -----  | ------- | --------- | ----- | ------ | ---- | ---------------- | ------------------------------ | ------------ |---------------- |
-| Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-|  45 t/s |  96 k |   4 | 41/41  | 15.7 GB | 14.2/1.8  | --    |   1214 |  27s | none             | --                             | 1024/256     |                 |
-|  41 t/s |  96 k |   5 | 41/41  | 15.5 GB | 13.9/2.2  | --    |   2203 |  53s | none             | --                             | 1024/256     |                 |
-|  36 t/s |  96 k |   4 | 40/41  | 15.7 GB | 14.2/1.8  | --    |   1289 |  36s | none             | --                             | 1024/256     |                 |
-|  28 t/s |  96 k |   9 | 41/41  | 14.2 GB | 12.5/3.6  | --    |   1271 |  46s | none             | --                             | 1024/256     |                 |
-|  28 t/s |  96 k |   7 | 41/41  | 14.9 GB | 13.2/2.9  | --    |   1337 |  47s | none             | --                             | 1024/256     |                 |
-|  34 t/s |  96 k |   6 | 41/41  | 15.2 GB | 13.5/2.6  | --    |   2330 |  68s | none             | --                             | 1024/256     |                 |
-|  33 t/s |  96 k |   6 | 41/41  | 15.2 GB | 13.5/2.6  | --    |   2330 |  71s | none             | --                             | 1024/256     |                 |
-|  26 t/s |  96 k |   5 | 37/41  | 15.3 GB | 13.8/2.3  | --    |    745 |  29s | none             | --                             | 1024/256     |                 |
-|  24 t/s |  96 k |   9 | 39/41  | 14.1 GB | 12.4/3.7  | --    |    625 |  25s | none             | --                             | 1024/256     |                 |
-|  20 t/s |  96 k |   9 | 37/41  | 13.9 GB | 12.4/3.7  | --    |   1681 |  83s | none             | --                             | 1024/256     |                 |
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
+| ✔️ Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+|  44 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0  |   1282 |  29s | none                          -- |  1024/256 |            |
+|  42 t/s |  96 k |   5 | 41/41 | 15.5 | 13.9/0.1  | q8_0  |   1281 |  30s | none                          -- |  1024/256 |            |
+|  44 t/s |  64 k |   4 | 41/41 | 15.5 | 14.2/0.0  | q8_0  |   1282 |  29s | none                          -- |  1024/256 |            |
+|  38 t/s |  64 k |   4 | 40/41 | 15.5 | 14.2/0.0  | q8_0  |   2048 |  53s | none                          -- |  1024/256 |            |
+|  39 t/s |  64 k |   3 | 41/41 | 15.7 | 14.6/0.1  | q8_0  |   1266 |  32s | none                          -- |  1024/512 |            |
 
-
-|  42 t/s |  64 k |   4 | 41/41  | 15.5 GB | 14.2/1.8  | --    |   1214 |  29s | none             | --                             | 1024/256     |                 |
-
-|  39 t/s |  64 k |   5 | 41/41  | 15.1 GB | 13.9/2.2  | --    |   2203 |  57s | none             | --                             | 1024/256     |                 |
-|  38 t/s |  64 k |   5 | 41/41  | 15.1 GB | 13.9/2.2  | --    |   2203 |  57s | none             | --                             | 1024/256     |                 |
-|  35 t/s |  64 k |   6 | 41/41  | 14.8 GB | 13.5/2.6  | --    |   2330 |  66s | none             | --                             | 1024/256     |                 |
-|  42 t/s | 128 k |   5 | 41/41  | 15.7 GB | 13.9/1.9  | --    |   2048 |  49s | none             | --                             | 1024/256     |                 |
-|  34 t/s | 128 k |   5 | 41/41  | 15.7 GB | 13.9/1.9  | --    |   1261 |  38s | DFlash (N-gram)  | s_M=12 s_N=12 min=1 (77%)      | 1024/256     |                 |
-|  43 t/s |  96 k |   5 | 41/41  | 15.5 GB | 13.9/1.9  | --    |   2048 |  47s | none             | --                             | 1024/256     |                 |
-|  38 t/s |  96 k |   5 | 41/41  | 15.5 GB | 13.9/1.9  | --    |   1261 |  32s | DFlash (N-gram)  | s_M=12 s_N=12 min=1 (77%)      | 1024/256     |                 |
-|  32 t/s | 128 k |  11 | 41/41  | 13.8 GB | 11.7/4.3  | --    |    665 |  20s | none             | --                             | 1024/256     |                 |
-|  28 t/s | 128 k |  12 | 41/41  | 13.5 GB | 11.4/4.7  | --    |    799 |  29s | none             | --                             | 1024/256     |                 |
-|  29 t/s |  96 k |  11 | 41/41  | 13.4 GB | 11.7/4.3  | --    |    665 |  23s | none             | --                             | 1024/256     |                 |
 | ❌ Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf
 |  51 t/s | 128 k |   1 | 42/42  | 14.9 GB | 12.9/0.8  | --    |   1185 |  24s | none             | --                             | 1024/512     |                 |
 |  43 t/s | 128 k |   1 | 42/42  | 15.0 GB | 12.9/0.8  | --    |   1173 |  27s | DFlash (N-gram)  | s_M=12 s_N=12 min=1 (76%)      | 1024/512     |                 |
@@ -202,35 +184,19 @@ https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 
 
 ```bash
-## 96K
-model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-ctx_k=96
-gpu_layers=99
-#gpu_layers=40
-cpu_moe=4
-spec=0
-draft_model=none
-predict_token=0/0
-mtp=0
-jinja=0
-batch=1024
-ubatch=256
-_start_server
 
-## 64K
 model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
 ctx_k=64
 gpu_layers=99
-#gpu_layers=40
-cpu_moe=4
+cpu_moe=3
 spec=0
 draft_model=none
 predict_token=0/0
-mtp=0
 jinja=0
 batch=1024
-ubatch=256
-_start_server
+ubatch=512
+_test_model
+
 
 
 model=Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf
@@ -240,13 +206,10 @@ cpu_moe=3
 spec=none
 draft_model=none
 predict_token=4/4
-mtp=0
 jinja=0
 batch=2048
 ubatch=512
-_start_server
-
-
+_test_model
 
 
 model=unsloth_Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
@@ -256,10 +219,10 @@ cpu_moe=0
 spec=1
 draft_model=none
 predict_token=8/12
-mtp=0
 jinja=0
 batch=2048
 ubatch=256
+_test_model
 
 
 model=Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf
@@ -269,7 +232,6 @@ cpu_moe=1
 spec=none
 draft_model=none
 predict_token=0/0
-mtp=0
 jinja=0
 batch=1024
 ubatch=512
@@ -283,7 +245,6 @@ cpu_moe=1
 spec=none
 draft_model=none
 predict_token=0/0
-mtp=0
 jinja=0
 batch=1024
 ubatch=256
@@ -294,8 +255,7 @@ model=Qwen3.6-35B-A3B-MXFP4_MOE_unsloth.gguf
 ctx_k=64
 gpu_layers=-1
 cpu_moe=6
-spec=0
-mtp=1
+spec=mtp
 draft_model=none
 predict_token=2/4
 jinja=0
@@ -310,7 +270,6 @@ cpu_moe=5
 spec=0
 draft_model=none
 predict_token=0/0
-mtp=0
 jinja=0
 batch=1024
 ubatch=256
@@ -323,7 +282,6 @@ cpu_moe=3
 spec=0
 draft_model=none
 predict_token=0/0
-mtp=0
 jinja=0
 batch=1024
 ubatch=256
@@ -336,11 +294,9 @@ cpu_moe=3
 spec=0
 draft_model=none
 predict_token=0/0
-mtp=0
 jinja=0
 batch=1024
 ubatch=256
-
 
 
 _test_model() {
@@ -353,7 +309,6 @@ start_server \
     $spec \
     $draft_model \
     $predict_token \
-    $mtp \
     $jinja \
     $batch \
     $ubatch

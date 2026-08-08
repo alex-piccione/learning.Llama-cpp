@@ -20,6 +20,11 @@ Max: 96K context
 With Ngram-simple, Temperature of 0.1 gives 22 t/s while temperature of 0.3 gives 17 t/s.  
 Low temperature increasa the t/s at 40-43 near the end of the stream, I suppose when code is generated, but it creates longher responses.
 
+
+##
+Qwen3.6-27B-Fable-Fus-711-UnHeretic-NM-DAU-NEO-MAX-NEO-LOW-MTP-IQ4_XS_davidau.gguf            14 GB
+
+
 ## ❌ Esper 3.1 (by mr radermacher)
 Qwen3.6-27B-Esper3.1.Q4_K_M_mr_radermacher.gguf                    15.4 GB
 https://huggingface.co/mradermacher/Qwen3.6-27B-Esper3.1-GGUF  
@@ -61,6 +66,26 @@ Qwen3.6-27B-DFlash-Q8_0_anbeeld.dflash.gguf
 
 
 ```bash
+
+
+model=Qwen3.6-27B-Fable-Fus-711-UnHeretic-NM-DAU-NEO-MAX-NEO-LOW-MTP-IQ4_XS_davidau.gguf
+ctx_k=64
+gpu_layers=99
+cpu_moe=0
+spec=mtp
+draft_model=none
+predict_token=4/6
+jinja=0
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
+|  15 t/s |  64 k |   0 | 66/66 | 15.3 | 13.5/0.1  | q4_0  |    690 |  45s | N-gram      N=6 M=12 min=1 (43%) |  1024/512 |            |
+|  15 t/s |  64 k |   3 | 66/66 | 15.3 | 13.5/0.1  | q4_0  |    690 |  45s | N-gram      N=6 M=12 min=1 (43%) |  1024/512 |            |
+|  15 t/s |  64 k |   0 | 66/66 | 15.7 | 13.5/0.1  | q4_0  |    837 |  56s | MTP                     -- (95%) |  1024/512 |            |
+
 
 model=Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf
 ctx_k=128

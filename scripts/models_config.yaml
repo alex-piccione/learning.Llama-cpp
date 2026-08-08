@@ -160,7 +160,7 @@ models:
 
 
 # Qwen 3.5 27B
-  Qwen_3.5_27B_(Unsloth)_64k:
+  Qwen_3.5_27B_(Unsloth)_48k:
     file: Qwen3.5-27B-IQ4_XS_unsloth.gguf
     ctx_k: 48
     gpu_layers: 99
@@ -172,15 +172,14 @@ models:
     pi_agent_model: >
       { 
          "_test": "Slooooow",
-         "_speed": "? t/s",
+         "_speed": "16 t/s",
           "id": "Qwen3.5-27B-IQ4_XS_unsloth.gguf",
-          "name": "Qwen 3.5 27B (Unsloth) 64k",
-          "contextWindow": 64000,
+          "name": "Qwen 3.5 27B (Unsloth) 48k",
+          "contextWindow": 49152,
           "maxTokens": 2048,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
-
 
 # Qwen 3.6 27B
   Qwen3.6-27B-Cerebellum-v5-Q2_K_(deucebucket)_96k:
@@ -267,6 +266,7 @@ models:
          "_test": "?",
          "_speed": "? t/s",
           "id": "Qwen3.6-27B-IQ4_XS_unsloth.gguf",
+          "alias": "Unsloth/Qwen3.6 27B IQ4_XS [64k]",
           "name": "Qwen3.6 27B IQ4_XS (Unsloth) 64k",
           "contextWindow": 64000,
           "maxTokens": 4096,
@@ -278,21 +278,23 @@ models:
 # Qwen 3.6 35B A3B
   Qwen_3.6_28b_reap_20_(barozp)_64k:
     file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+    alias: Qwen 3.6 28B-REAP20-A3B Q4_K_M (by barozp) [64k]
     ctx_k: 64
     gpu_layers: 99
-    cpu_moe: 0
+    cpu_moe: 4
     batch: 1024
     ubatch: 512
     spec_type: none
     jinja: 0
     pi_agent_model: >
       { 
-         "_test": "Really good",
-         "_speed": "? t/s",
+         "_test": "✔️ Really good",
+         "_speed": "35 t/s",
           "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
           "name": "Qwen 3.6 28B REAP20 (barozp) 64k",
+          "alias": "barozp/Qwen 3.6 28B REAP20 A3B [64k]",
           "contextWindow": 64000,
-          "maxTokens": 2048,
+          "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
@@ -340,6 +342,27 @@ models:
       },
 
 # Qwen 3 Coder
+  Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mrradermacher.gguf:
+    file: Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mrradermacher.gguf
+    note: ...
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 7
+    batch : 1024
+    ubatch: 512
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "✔️ Very good",
+          "_speed": "22 t/s",
+          "id": "Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mrradermacher.gguf",
+          "name": "Qwen3-Coder-Next REAP-40B-A3B i1 IQ3_M (mrradermacher) 64k",
+          "alias": "mrradermacher/Qwen3-Coder-Next REAP-40B-A3B i1 IQ3_M [64k]",
+          "contextWindow": 64000,
+          "maxTokens": 4096,
+          "reasoning": true
+      },
+
   Qwen_3_Coder_UD-Q3_K_XL_(Unsloth)_64k:
     file: Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf
     note: ...

@@ -3,9 +3,10 @@
 | File                                                                             | Result                                                      |
 | Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                             | 
 | Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf                                   | ❌ Max 64k and slow                                        |
-| Qwen3-Coder-30B-A3B-Instruct-Q4_K_M_unsloth.gguf                                 | ❌ too slow
+| Qwen3-Coder-30B-A3B-Instruct-Q4_K_M_unsloth.gguf                                 | ❌ too slow                                                |
 | Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf           | ❌ No tools capability                                      |
 | qwen3-coder-30b-a3b-instruct_pruned_reap-15b-a3b-safetensors-q5_0_lainlives.gguf | ❌ No tools capability                                      |
+| Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mrradermacher.gguf                        | ❌ too slow                                                |
 
 ## UD Q3_K_XL (Unsloth)
 Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                   12.8 GB
@@ -16,7 +17,11 @@ Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf                                  
 https://huggingface.co/bartowski/cerebras_Qwen3-Coder-REAP-25B-A3B-GGUF
 128K... No
 96k.... No
-64k.... 34 t/s    
+64k.... 34 t/s   
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
+|  34 t/s |  64 k |   6 | 49/49 | 15.7 | 12.2/0.0  | q8_0  |    552 |  16s | none                          -- |  1024/256 |            |
 
 ## ❌ Q4_K_M (Unsloth)
 Qwen3-Coder-30B-A3B-Instruct-Q4_K_M_unsloth.gguf                                17.2 GB
@@ -64,7 +69,6 @@ cpu_moe=0
 spec=0
 draft_model=none
 predict_token=0/0
-mtp=0
 jinja=0
 batch=1024
 ubatch=512
@@ -75,25 +79,24 @@ _start_server
 
 
 model=Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf
-ctx_k=96
-gpu_layers=-1
-cpu_moe=1
-spec=0
+ctx_k=80
+gpu_layers=99
+cpu_moe=6
+spec=simple
 draft_model=none
-predict_token=0/0
-mtp=0
+predict_token=6/8
 jinja=0
 batch=1024
 ubatch=256
-_start_server
+_test_model
 
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
+|  37 t/s |  64 k |   6 | 49/49 | 15.7 | 12.2/0.0  | q8_0  |    552 |  15s | N-gram       N=6 M=8 min=1 (82%) |  1024/256 |            |
+|  34 t/s |  64 k |   6 | 49/49 | 15.7 | 12.2/0.0  | q8_0  |    552 |  16s | none                          -- |  1024/256 |            |
+|  22 t/s |  64 k |   6 | 44/49 | 15.5 | 12.2/0.0  | q8_0  |    964 |  45s | N-gram       N=6 M=8 min=1 (72%) |  1024/256 |            |
+|  21 t/s |  64 k |   6 | 44/49 | 15.5 | 12.2/0.0  | q8_0  |    964 |  45s | none                          -- |  1024/256 |            |
 
-|   7 t/s |  80 k |   6 | 47/49  | 15.7 GB | 12.2/1.9  | --    |    967 | 142s | none             | --                             | 1024/256     |                 |
-
-|  29 t/s |  64 k |   6 | 49/49  | 15.7 GB | 12.2/1.8  | --    |   1016 |  35s | none             | --                             | 1024/256     |                 |
-|  29 t/s |  64 k |   6 | 47/49  | 15.7 GB | 12.2/1.8  | --    |    967 |  34s | none             | --                             | 1024/256     |                 |
-|  26 t/s |  64 k |   6 | 47/49  | 15.7 GB | 12.2/1.8  | --    |    967 |  37s | none             | --                             | 1024/256     |                 |
-|  24 t/s |  64 k |   6 | 45/49  | 15.6 GB | 12.2/2.0  | --    |    992 |  41s | none             | --                             | 1024/256     |                 |
 
 model=Qwen3-Coder-30B-A3B-Instruct-Q4_K_M_unsloth.gguf
 ctx_k=32
@@ -103,7 +106,6 @@ cpu_moe=3
 spec=0
 draft_model=none
 predict_token=8/8
-mtp=0
 jinja=0
 batch=2048
 ubatch=512
@@ -117,7 +119,6 @@ cpu_moe=5
 spec=0
 draft_model=none
 predict_token=8/8
-mtp=0
 jinja=0
 batch=1024
 ubatch=256
@@ -126,18 +127,52 @@ _start_server
 
 model=Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf
 ctx_k=64
-gpu_layers-1
+gpu_layers=-1
 cpu_moe=1
 spec=0
 draft_model=none
 predict_token=8/8
-mtp=0
 jinja=0
 batch=1024
 ubatch=256
 
 
-_start_server() {
+model=Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mrradermacher.gguf
+ctx_k=64
+gpu_layers=99
+cpu_moe=7
+spec=simple
+draft_model=none
+predict_token=8/12
+jinja=1
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
+|  24 t/s |  64 k |   7 | 49/49 | 15.7 | 14.3/0.0  | q8_0  |    548 |  23s | none                          -- |  1024/256 |            |
+|  23 t/s |  64 k |   8 | 49/49 | 15.4 | 14.0/0.0  | q8_0  |    485 |  21s | none                          -- |  1024/256 |            |
+|  19 t/s |  64 k |   6 | 49/49 | 15.7 | 14.6/0.0  | q8_0  |    485 |  26s | none                          -- |  1024/256 |            |
+
+|  16 t/s |  64 k |   7 | 49/49 | 15.7 | 14.3/0.0  | q8_0  |    552 |  33s | N-gram      N=8 M=12 min=1 (48%) |  1024/256 |            |
+|  15 t/s |  64 k |   7 | 49/49 | 15.7 | 14.3/0.0  | q8_0  |    547 |  36s | N-gram       N=6 M=8 min=1 (53%) |  1024/256 |            |
+
+
+|  28 t/s |  32 k |   6 | 49/49 | 15.6 | 14.6/0.0  | q8_0  |    485 |  17s | none                          -- |  1024/256 |            |
+|  15 t/s |  32 k |   7 | 44/49 | 15.1 | 14.2/0.0  | q8_0  |    485 |  33s | none                          -- |  1024/256 |            |
+|  15 t/s |  32 k |   6 | 44/49 | 15.4 | 14.5/0.0  | q8_0  |    542 |  37s | none                          -- |  1024/256 |            |
+|  14 t/s |  32 k |   0 | 44/49 | 15.7 | 14.9/0.0  | q8_0  |    539 |  38s | none                          -- |  1024/256 |            |
+|  14 t/s |  32 k |   0 | 43/49 | 15.4 | 14.5/0.0  | q8_0  |    537 |  37s | none                          -- |  1024/256 |            |
+|  13 t/s |  32 k |   0 | 42/49 | 15.0 | 14.2/0.0  | q8_0  |    510 |  39s | none                          -- |  1024/256 |            |
+|  11 t/s |  32 k |   0 | 41/49 | 14.7 | 13.8/0.0  | q8_0  |    485 |  43s | none                          -- |  1024/256 |            |
+|   9 t/s |  32 k |   0 | 40/49 | 14.3 | 13.5/0.0  | q8_0  |    549 |  61s | none                          -- |  1024/256 |            |
+|  12 t/s |  32 k |   3 | 43/49 | 15.4 | 14.5/0.0  | q8_0  |    538 |  44s | N-gram       N=8 M=8 min=1 (67%) |  1024/256 |            |
+|  11 t/s |  32 k |   0 | 44/49 | 15.7 | 14.9/0.0  | q8_0  |    536 |  47s | N-gram      N=8 M=12 min=1 (48%) |  1024/256 |            |
+|  10 t/s |  32 k |   0 | 43/49 | 15.4 | 14.5/0.0  | q8_0  |    538 |  52s | N-gram      N=8 M=16 min=1 (38%) |  1024/256 |            |
+
+
+_test_model() {
 source server_common.sh && \
 start_server \
     $model \
@@ -147,13 +182,11 @@ start_server \
     $spec \
     $draft_model \
     $predict_token \
-    $mtp \
     $jinja \
     $batch \
     $ubatch
     
 source test_models_common.sh && print_test_call
 }
-
 ```
 

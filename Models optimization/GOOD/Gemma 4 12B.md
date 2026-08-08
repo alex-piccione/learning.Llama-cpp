@@ -94,7 +94,6 @@ cd scripts
 #spec=1
 #draft_model=unsloth_mtp-gemma-4-12B-it.gguf
 #predict_token=5/10
-#mtp=0
 #jinja=0
 #batch=512
 #ubatch=512
@@ -110,26 +109,9 @@ spec=1
 draft_model=none
 #draft_model=Gemma-4-12B-it-MTP_unsloth.gguf
 predict_token=4/10
-mtp=0
 jinja=0
 batch=1024
 ubatch=256
 
-
-source server_common.sh && \
-start_server \
-    $model \
-    $ctx_k \
-    $gpu_layers \
-    $cpu_moe \
-    $spec \
-    $draft_model \
-    $predict_token \
-    $mtp \
-    $jinja \
-    $batch \
-    $ubatch
-
-source test_models_common.sh && print_test_call
 
 ```

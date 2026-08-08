@@ -72,7 +72,6 @@ gpu_layers=-1
 spec=1
 draft_model=none
 predict_token=12/12
-mtp=0
 jinja=0
 batch=1024
 ubatch=256
@@ -82,16 +81,13 @@ model=Qwen3.6-27B-Claude-Mythos-Distilled.Q4_K_M_chatqaq.gguf
 ctx_k=16
 gpu_layers=-1
 cpu_moe=1
-spec=0
+spec=mtp
 draft_model=none
 predict_token=2/2
-mtp=1
 jinja=0
 batch=1024
 ubatch=256
 _test_model
-
-
 
 
 model=Qwen3.6-27B-MTP-UD-Q4_K_XL_unsloth.gguf
@@ -110,10 +106,9 @@ model=Qwen3.6-27B-Q4_K_M_MTP_unsloth.gguf
 ctx_k=8
 gpu_layers=-1
 cpu_moe=0
-spec=0
+spec=mtp
 draft_model=none
 predict_token=0/2
-mtp=1
 jinja=0
 batch=1024
 ubatch=256
