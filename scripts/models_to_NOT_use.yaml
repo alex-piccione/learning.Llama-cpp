@@ -1,66 +1,21 @@
 
-# Gemma 4 12B
-  Gemma-4_26B_REAP126_160k_(thehermit):
-    file: gemma-4-26b-reap126-pruned-UD-IQ4_NL_techhermit.gguf
-    speed: 0 t/s
-    ctx_k: 160
+# Qwen 3 Coder
+  Qwen_3_Coder_30B_A3B_REAP_15B_A3B_Q4_K_M_lainlives:
+    file: Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf
+    ctx_k: 64
     gpu_layers: -1
-    cpu_moe: 1
-    batch: 1024
-    ubatch: 512
-    spec_type: none 
-    pi_agent_model: >
-      { 
-        "_test": "❌ Looping and lie",
-        "id": "gemma-4-26b-reap126-pruned-UD-IQ4_NL_techhermit.gguf",
-        "name": "Gemma4 26B 160K - REAP126 (by techhermit)",
-        "contextWindow": 163840,
-        "maxTokens": 4096,
-        "reasoning": true
-      },
-
-  Gemma-4-12B_IQ4_NL:
-    file: Gemma-4-12b-it-IQ4_NL_unsloth.gguf
-    ctx_k: 128
-    gpu_layers: -1
-    cpu_moe: 0
-    batch: 2048
-    ubatch: 256
-    spec_type: none 
-    pi_agent_model: >
-      { 
-         "_test": "???",
-          "id": "Gemma-4-12b-it-IQ4_NL_unsloth.gguf",
-          "name": "Gemma4 12B IQ4_NL",
-          "contextWindow": 131072,
-          "maxTokens": 2048,
-          "reasoning": true,
-          "input": [ "text" ]
-      },
-
-  Gemma-4-12B-v2-Q4_K_M_yuxinlu1:
-    file: Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf
-    ctx_k: 128
-    gpu_layers: -1
-    cpu_moe: 0
+    cpu_moe: 5
     batch: 1024
     ubatch: 256
-    _spec_type: none 
-    spec_type: ngram-simple
-    spec_ngram_simple_size_m: 4
-    spec_ngram_simple_size_n: 10
-    spec_ngram_simple_min_hits: 1
-
+    spec_type: none
     pi_agent_model: >
       { 
-         "_test": "❌ Hallucinate, Loop, Liar. Slow",
-          "id": "Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf",
-          "name": "Gemma4 12B v2-Q4_K_M_yuxinlu1",
-          "_contextWindow": 262144,
-          "contextWindow": 131072,
-          "maxTokens": 2048,
-          "reasoning": true,
-          "input": [ "text" ]
+          "_test": "???",
+          "id": "Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf",
+          "name": "Qwen 3 Coder 30B A3B - REAP 15B A3B - Q4_K_M (lainlives)",
+          "contextWindow": 65536,
+          "maxTokens": 4096,
+          "reasoning": true
       },
 
 
@@ -168,24 +123,6 @@
           "reasoning": true
       },
 
-# Qwen 3 Coder
-  Qwen_3_Coder_30B_A3B_REAP_15B_A3B_Q4_K_M_lainlives:
-    file: Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf
-    ctx_k: 64
-    gpu_layers: -1
-    cpu_moe: 5
-    batch: 1024
-    ubatch: 256
-    spec_type: none
-    pi_agent_model: >
-      { 
-          "_test": "???",
-          "id": "Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf",
-          "name": "Qwen 3 Coder 30B A3B - REAP 15B A3B - Q4_K_M (lainlives)",
-          "contextWindow": 65536,
-          "maxTokens": 4096,
-          "reasoning": true
-      },
 # Qwopus
   Qwopus_3.6_35B-A3B-Coder-MTP-Q3_K_M_jackrong:
     file: Qwopus3.6-35B-A3B-Coder-MTP-Q3_K_M_jackrong.gguf
@@ -204,6 +141,74 @@
           "maxTokens": 2048,
           "reasoning": true
       },
+
+
+# Gemma 4 26B
+  Gemma-4_26B_REAP126_160k_(thehermit):
+    file: gemma-4-26b-reap126-pruned-UD-IQ4_NL_techhermit.gguf
+    speed: 0 t/s
+    ctx_k: 160
+    gpu_layers: -1
+    cpu_moe: 1
+    batch: 1024
+    ubatch: 512
+    spec_type: none 
+    pi_agent_model: >
+      { 
+        "_test": "❌ Looping and lie",
+        "id": "gemma-4-26b-reap126-pruned-UD-IQ4_NL_techhermit.gguf",
+        "name": "Gemma4 26B 160K - REAP126 (by techhermit)",
+        "contextWindow": 163840,
+        "maxTokens": 4096,
+        "reasoning": true
+      },
+
+# Gemma 4 12B
+  Gemma-4-12B_IQ4_NL:
+    file: Gemma-4-12b-it-IQ4_NL_unsloth.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 2048
+    ubatch: 256
+    spec_type: none 
+    pi_agent_model: >
+      { 
+         "_test": "???",
+          "id": "Gemma-4-12b-it-IQ4_NL_unsloth.gguf",
+          "name": "Gemma4 12B IQ4_NL",
+          "contextWindow": 131072,
+          "maxTokens": 2048,
+          "reasoning": true,
+          "input": [ "text" ]
+      },
+
+  Gemma-4-12B-v2-Q4_K_M_yuxinlu1:
+    file: Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf
+    ctx_k: 128
+    gpu_layers: -1
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    _spec_type: none 
+    spec_type: ngram-simple
+    spec_ngram_simple_size_m: 4
+    spec_ngram_simple_size_n: 10
+    spec_ngram_simple_min_hits: 1
+
+    pi_agent_model: >
+      { 
+         "_test": "❌ Hallucinate, Loop, Liar. Slow",
+          "id": "Gemma-4-12B-v2-Q4_K_M_yuxinlu1.gguf",
+          "name": "Gemma4 12B v2-Q4_K_M_yuxinlu1",
+          "_contextWindow": 262144,
+          "contextWindow": 131072,
+          "maxTokens": 2048,
+          "reasoning": true,
+          "input": [ "text" ]
+      },
+
+
 
 # GLM 4.7 Flash
   GLM-4.7-Flash_REAP-23B-A3B_UD-Q4_K_XL_(Unsloth):

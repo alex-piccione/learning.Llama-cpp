@@ -9,6 +9,14 @@ source common.sh
 # extract_info_from_server_log: rertrieve information from the server log
 
 
+# Array of model patterns of models that should use q4_0 cache
+declare -a Q4_QUANTIZATION_MODELS=(
+    "Qwen3.5-27B*"
+    "Qwen3.6-27B*"
+    "Qwen3-Coder-30B*"
+)
+
+
 #---
 
 is_server_started() {
@@ -23,7 +31,7 @@ is_server_started() {
 
 server_info() {
     local command=$(ps -ef | grep llama-server | sed 's/ -/\n-/g' | sed 's/^.*\llama-b/"llama-b/')
-    print_value "Command" "$command"
+    echo "$command"
 }
 
 # start_server 
@@ -89,7 +97,7 @@ start_server() {
 
     local context=$(($ctx_k * 1024))
 
-    local cache_kv=$(get_cache_for_model "$model")
+    local cache_kv=$(set_cache_for_model "$model")
 
     local cache_type_k=$cache_kv
     local cache_type_v=$cache_kv
@@ -338,14 +346,21 @@ stop_server() {
     fi
 }
 
-# local cache_kv=get_cache_for_model "Qwen3.5-27B-UD-Q4_K_M.gguf"
-get_cache_for_model() {
-    local model=$1
-    if [[ "$model" == Qwen3.5-27B* || "$model" == Qwen3.6-27B* ]]; then
-        echo "q4_0"
-    else
-        echo "q8_0"
-    fi
+
+# usage: local cache_kv=get_cache_for_model "Qwen3.5-27B-UD-Q4_K_M.gguf"
+set_cache_for_model() {
+    local model="$1"
+    
+    # Check each pattern
+    for pattern in "${Q4_QUANTIZATION_MODELS[@]}"; do
+        if [[ "$model" == $pattern ]]; then
+            echo "q4_0"
+            return 0
+        fi
+    done
+    
+    # Default case
+    echo "q8_0"
 }
 
 ## TODO
