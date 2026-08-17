@@ -186,7 +186,7 @@ models:
          "_speed": "17 t/s",
           "id": "Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf",
           "name": "Qwen3.6-27B Cerebellum-v5 Q2_K (deucebucket) 96k",
-          "contextWindow": 96000,
+          "contextWindow": 98304,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
@@ -231,7 +231,7 @@ models:
          "_speed": "? t/s",
           "id": "Qwen3.6-27B-IQ4_XS_unsloth.gguf",
           "name": "Qwen3.6 27B IQ4_XS (Unsloth) 64k",
-          "contextWindow": 64000,
+          "contextWindow": 65536,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
@@ -256,7 +256,7 @@ models:
           "id": "Qwen3.6-27B-IQ4_XS_unsloth.gguf",
           "alias": "Unsloth/Qwen3.6 27B IQ4_XS [64k]",
           "name": "Qwen3.6 27B IQ4_XS (Unsloth) 64k",
-          "contextWindow": 64000,
+          "contextWindow": 65536,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
@@ -281,7 +281,7 @@ models:
           "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
           "name": "Qwen 3.6 28B REAP20 (barozp) 64k",
           "alias": "barozp/Qwen 3.6 28B REAP20 A3B [64k]",
-          "contextWindow": 64000,
+          "contextWindow": 65536,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
@@ -325,7 +325,7 @@ models:
           "id": "Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf",
           "name": "Qwen 3.6 35B Genesis v3 APEX (luffythefox) 128k",
           "contextWindow": 131072,
-          "_contextWindow": 96000,
+          "_contextWindow": 98304,
           "maxTokens": 4096,
           "reasoning": true
       },
@@ -353,6 +353,29 @@ models:
             "maxTokens": 4096,
             "reasoning": true
        },
+
+# Nemotron 3.5 Lightning
+  Nemotron-3.5-Lightning-30B-A3B-IQ4_NL_bartowski:
+    file: Nemotron-3.5-Lightning-30B-A3B-IQ4_NL_bartowski.gguf
+    alias: Nemotron-3.5-Lightning_(bartowski)_96k
+    ctx_k: 96
+    gpu_layers: 99
+    cpu_moe: 8
+    batch: 1024
+    ubatch: 256
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "?",
+            "_speed": "? t/s",
+            "id_kelp": "it has to be the alias of llama.cpp"
+            "id": "Nemotron-3.5-Lightning_(bartowski)_96k",
+            "name": "Nemotron-3.5-Lightning (bartowski) [96k]",
+            "contextWindow": 98304,
+            "maxTokens": 4096,
+            "reasoning": true
+       },
+
 
 # Gemma 4 26B  
   Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf:
@@ -387,7 +410,7 @@ models:
             "_test": "???",
             "id": "Gemma-4-26B_Q4_0-it_google.gguf",
             "name": "Gemma4 26B 64K - Q4_0 (by Google)",
-            "contextWindow": 64000,
+            "contextWindow": 65536,
             "maxTokens": 4096,
             "reasoning": true
         },

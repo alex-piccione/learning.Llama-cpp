@@ -4,13 +4,13 @@
 
 | Model               | Quantized by | File                                                | Speed  | Ctx   | Pi                  | Note                             |
 | ------------------- |------------- | --------------------------------------------------- | ------ | ----- | ------------------- | -------------------------------- |
-| Qwen 3.6 27B        |              | Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf     | 17 t/s |  96 K | ✔️ 96k 16 t/s      | Best reasoning and action        |
+| Qwen 3.6 27B        | deucebucket  | Qwen3.6-27B-Cerebellum-v5-Q2_K                      | 17 t/s |  96 K | ✔️ 96k 16 t/s      | Best reasoning and action        |
 | Qwen 3.5 27B        | Unsloth      | Qwen3.5-27B-IQ4_XS_unsloth.gguf                     | 16 t/s |  64 k | ✔️ 64k 16 t/s      | Best reasoning and action        |
 | Qwen 3 Coder Next   | mradermacher | Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_.gguf        | 24 t/s |  64 k | ✔️ 64k 22 t/s      | Very good untill now             |
 | Gemma 4 26B         | Unsloth      | Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf           | 39 t/s | 160 k | ✔️ 160k 20-25 t/s  |                                  |
 | Gemma 4 26B         | Google       | Gemma-4-26B_Q4_0-it_google.gguf                     | 4? t/s | 128 k | ✔️ 128k 40 t/s     |                                  |
 | KAT Coder           | deucebucket  | KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2               | 50 t/s | 128 k | ✔️ 128k 45 t/s     | Not yet fully tested             |
-
+| Nemotron-3.5        | bartowski    | Nemotron-3.5-Lightning-30B-A3B-IQ4_NL               | 45 t/s |  96 k | ✔️ 96k: 40 t/s     | Not yet fully tested             |
 
 | Gemma 4 26B         | Noctrex      | Gemma-4-26B-A4B-it-MXFP4_MOE.gguf                   | 36 t/s | 128 k | ✔️ 128k 35 t/s     |                                  |
 | Qwen 3.6 35B A3B    | bazorp       | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf           | 42 t/s |  64 k | ✔️ 64k 45-80 t/s   | ✔️ Real discussion in PR.       | 

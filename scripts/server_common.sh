@@ -196,7 +196,7 @@ start_server() {
             # Case A: External Draft Model
             local draft_model_path="$GGUF_FOLDER/$draft_model"
             
-            args+=(--spec-type "draft-simple")
+            args+=(--spec-type "draft-simple")                      # draft-simple
             args+=(--spec-draft-model "$draft_model_path")
             args+=(--spec-draft-n-min "$pred_min")
             args+=(--spec-draft-n-max "$pred_max")
@@ -221,7 +221,7 @@ start_server() {
         fi
     elif [[ "$spec" == "draft-simple" ]]; then
         ### TODO: check if draft-simple requires ALWAYS a draft model !!!
-        args+=(--spec-type "draft-simple")
+        args+=(--spec-type "draft-simple")                            # draft-simple (again ???)
         args+=(--spec-draft-model "$draft_model_path")
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
@@ -242,7 +242,7 @@ start_server() {
 
         local draft_model_path="$GGUF_FOLDER/$draft_model"
         
-        args+=(--spec-type "draft-dflash")
+        args+=(--spec-type "draft-dflash")                               # draft-dflash
         args+=(--spec-draft-model "$draft_model_path")
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
@@ -265,7 +265,7 @@ start_server() {
             args+=(--spec-draft-model "$draft_model_path")
         fi
         
-        args+=(--spec-type "draft-mtp")
+        args+=(--spec-type "draft-mtp")                            # draft-mtp
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
 
@@ -487,14 +487,8 @@ get_pred_info() {
     if [[ -n $ngram_simple ]]; then
         pred_type="N-gram"
 
-        # b97..
-        # 0.10.658.011 I common_speculative_impl_ngram_simple: adding speculative implementation 'ngram-simple'
-        # 0.10.658.018 I common_speculative_impl_ngram_simple: - size_n=10, size_m=4, min_hits=1
-        # 0.06.214.427 I common_speculative_impl_ngram_simple: - size_n=1, size_m=2, min_hits=1
-        #local spec_line=$(grep -E 'common_speculative_impl_ngram_simple.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
-
         #b9937
-        # 0.14.367.086 I spec common_specu: - size_n=12, size_m=24, min_hits=1
+        # I spec common_specu: - size_n=12, size_m=24, min_hits=1
         local spec_line=$(grep -E 'common_specu:.*size_n=.*size_m=.*min_hits=.*' "$log" | tail -n 1)
         if [[ -n $spec_line ]]; then
             read -r size_n size_m min_hits <<< \
@@ -503,7 +497,7 @@ get_pred_info() {
                         split($0, a, /size_n=|,|size_m=|,|min_hits=/)
                         print a[2], a[4], a[6]
                     }
-                ')                
+                ')
             pred_info=$(printf 'N=%s M=%s min=%s' "$size_n" "$size_m" "$min_hits")
 
         else
@@ -511,8 +505,7 @@ get_pred_info() {
             printf 'ERROR: found spec type "ngram-simple" but failed to find its parameters'
             return 1
         fi
-    fi    
-
+    fi
 
     # b9856
     # 0.57.644.917 I spec common_specu: adding speculative implementation 'draft-mtp'
@@ -521,9 +514,26 @@ get_pred_info() {
     if [[ -n $draft_mtp ]]; then
         pred_type="MTP"
 
-        # TODO
-        # 0.57.644.930 I spec common_specu: - n_max=12, n_min=6, p_min=0.60, n_embd=5120, backend_sampling=1
-        # 0.57.644.937 I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+        # b10456
+        # I spec common_specu: - n_max=4, n_min=2, p_min=0.70, n_embd=2688, backend_sampling=1
+        # I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]        
+
+        local spec_line=$(grep -E 'common_specu:.*n_max=.*n_min=.*p_min=.*' "$log" | tail -n 1)
+
+        if [[ -n $spec_line ]]; then
+            read -r n_max n_min p_min <<< \
+                $(echo "$spec_line" | awk '
+                    /.*/ {
+                        split($0, a, /,|n_max=|n_min=|p_min=/)
+                        print a[2], a[4], a[6] 
+                    }
+                ')
+            pred_info=$(printf 'min=%s max=%s p_min=%s' "$n_min" "$n_max" "$p_min")
+        else
+            return_value "error" "found spec type '$pred_type' but failed to find its parameters'"
+            printf "ERROR: found spec type '$pred_type' but failed to find its parameters"
+            return 1
+        fi
     fi
    
     return_value "pred_type" "$pred_type"  
