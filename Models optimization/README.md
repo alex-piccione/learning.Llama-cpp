@@ -9,6 +9,8 @@
 | Qwen 3 Coder Next   | mradermacher | Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_.gguf        | 24 t/s |  64 k | ✔️ 64k 22 t/s      | Very good untill now             |
 | Gemma 4 26B         | Unsloth      | Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf           | 39 t/s | 160 k | ✔️ 160k 20-25 t/s  |                                  |
 | Gemma 4 26B         | Google       | Gemma-4-26B_Q4_0-it_google.gguf                     | 4? t/s | 128 k | ✔️ 128k 40 t/s     |                                  |
+| KAT Coder           | deucebucket  | KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2               | 50 t/s | 128 k | ✔️ 128k 45 t/s     | Not yet fully tested             |
+
 
 | Gemma 4 26B         | Noctrex      | Gemma-4-26B-A4B-it-MXFP4_MOE.gguf                   | 36 t/s | 128 k | ✔️ 128k 35 t/s     |                                  |
 | Qwen 3.6 35B A3B    | bazorp       | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf           | 42 t/s |  64 k | ✔️ 64k 45-80 t/s   | ✔️ Real discussion in PR.       | 
@@ -23,7 +25,6 @@
 | GLM 4.7 Flash 23B   | Unsloth      | GLM-4.7-Flash-REAP-23B-A3B-Q4_K_M_unsloth.gguf      | 32 t/s | 128 k | ❌ 64k 35 t/s      | ❌Rubbish after a few questions |
 | Qwopus 3.6 35B A3B  | Jackrog      | Qwopus3.6-35B-A3B-Coder-MTP-Q3_K_M_jackrong.gguf    | 47 t/s |  64 k | ❌ 64k 40 t/s      | ❌ wrong reasoning , Loop       |
 
-| Gemma 4 26B         | Unsloth      | Gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                   | 28 t/s |  64 k |                     |                                  |
 | Gemma 4 26B         | Unsloth      | Gemma-4-26B-A4B-it-UD-Q4_K_M.gguf                   | 25 t/s | 128 k |                     |                                  |
 | Qwen 3.6 35B-A3B    | Unsloth      | Qwen3.6-35B-A3B-UD-Q4_K_M_unsloth.gguf              | 25 t/s |  96 k | ✔️ 64k 20 t/s      | Too slow                         |
 | Qwen 3.6 27B        | Unsloth      | Qwen3.6-27B-IQ4_XS_unsloth.gguf                     | 16 t/s |  80 k |                     | 24 t/s with ngram-simple
@@ -34,18 +35,22 @@
 | GLM 4.7 Flash 23B   | Unsloth      | GLM-4.7-Flash-REAP-23B-A3B-UD-Q4_K_XL_unsloth.gguf  | 42 t/s |  64 k | ✔️ 37 t/s          | ❌ Rubbish with just "hi"        |
 | Ornith 1.0          | liodonai     | Ornith-1.0-35B-GGUF-IQ3_M_liodonai.gguf             |        |       | ❌ 30 t/s          | ❌ An idiot                      |
 
+
+| Qwen3 Coder Next    | mradermacher | Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M.gguf         |        |       |                     |                                  |
+| Qwen3 Coder         | Unsloth      | Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL             |        |  64 k | ❌ 22 t/s          | ❌ Chatty. Inconcludent.         | 
+| Qwen3 Coder         | Unsloth      | Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL             | 70 t/s |  96 k | ❌ 50 t/s          | ❌ Indisciplinate                | 
+
 | 
 | Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf         |              | 18 t/s |    16 k | No  |                                |
 | Nemotron-3-Nano-30B-A3B-Q4_K_M.gguf                     | Unsloth      | 16 t/s |    16 k |     |                                |
 
 Not tested yet:
 
-- https://huggingface.co/GestaltLabs/Ornstein3.6-35B-A3B-RYS-SABER-GGUF   
+- https://huggingface.co/deucebucket/KAT-Coder-V2.5-Dev-Cerebellum-GGUF
 
 - https://huggingface.co/HauhauCS/Gemma4-26B-A4B-QAT-Uncensored-HauhauCS-Balanced-MTP
   READ INTRUCTION to use MTP properly
        
-
 - https://huggingface.co/chatqaq/Qwen3.6-27B-Claude-Mythos-Distilled-MTP-GGUF
 
 - https://huggingface.co/JZC973/Qwen3.6-35B-REAP-MTP-UD-GGUF-Collection
@@ -59,13 +64,8 @@ Not tested yet:
   It requires special compiled version of llama.cpp. 
 
 
-
 Not working models:  
-- qwen2.5-coder-14b-instruct-q4_k_m.gguf                         : No OpenAI tools capability         
-- ERNIE-4.5-21B-A3B-Thinking-Q4_K_M.gguf                         : No OpenAI tools capability  
 - Mistral Small 3.2 24B.md                                       : No MoE, no MTP, no predictive, not possible to optimize (18 t/s at 24K context)
-- unsloth_Qwen3.6-27B-Q4_K_M.gguf                                : 1 t/s
-- unsloth_Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf                        : 1 t/s
 - lucy_in_the_sky_deepseek-moe-16b-base-q4_k_m.gguf              : No OpenAI tools capability  
 - mammoth-coder-13b.Q4_K_M.gguf                                  : Response contains 1 token. That's it.
 - Deepseek-Coder-V2-Lite-13B-Instruct-sft-s1K.i1-Q4_K_M.gguf     : No OpenAI tools capability           (100 t/s !!)

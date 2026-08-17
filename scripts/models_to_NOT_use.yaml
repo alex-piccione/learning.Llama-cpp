@@ -1,5 +1,45 @@
 
 # Qwen 3 Coder
+  Qwen3_Coder_UD-Q4_K_XL_(Unsloth)_64k:
+    file: Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL_unsloth.gguf
+    note: ...
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 8
+    batch : 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "X Chatty. Not able to complete a task.",
+          "_speed": "20 t/s",
+          "id": "Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL_unsloth.gguf",
+          "name": "Unsloth/Qwen3 Coder UD-Q4_K_XL [64k]",
+          "contextWindow": 65536,
+          "maxTokens": 4096,
+          "reasoning": true
+      },
+
+  Qwen3_Coder_UD-Q3_K_XL_(Unsloth)_96k:
+    file: Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf
+    note: ...
+    ctx_k: 96
+    gpu_layers: 99
+    cpu_moe: 0
+    batch : 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "X Indisciplinate",
+          "_speed": "45 t/s",
+          "id": "Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf",
+          "name": "Unsloth/Qwen3 Coder UD-Q3_K_XL [96k]",
+          "contextWindow": 98304,
+          "maxTokens": 4096,
+          "reasoning": true
+      },
+
   Qwen_3_Coder_30B_A3B_REAP_15B_A3B_Q4_K_M_lainlives:
     file: Qwen3-Coder-30B-A3B-instruct_pruned_REAP-15B-A3B-Q4_K_M_lainlives.gguf
     ctx_k: 64

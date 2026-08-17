@@ -13,6 +13,7 @@ source common.sh
 declare -a Q4_QUANTIZATION_MODELS=(
     "Qwen3.5-27B*"
     "Qwen3.6-27B*"
+    "Qwen3.8-27B*"
     "Qwen3-Coder-30B*"
 )
 

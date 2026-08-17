@@ -1,22 +1,32 @@
 # Qwen3-Coder
 
-| File                                                                      | Result                                                      |
-| Qwen_3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mradermacher.gguf                 | ✔️ Max 64k                                                 |
+| File                                                                      | Result                                                     |
+| Qwen_3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mradermacher.gguf                 | ✔️ Max 64k     22 t/s  Pi: GOOD                            |
 | Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth.gguf                          | ✔️ 96k  30 t/s                                             |
-| Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                      | ✔️ Q4 96k  70 t/s    Q8 96k   30 t/s                       |
+| Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                      | ❌ Q4 96k:70 t/s Q8 96k:30 t/s   Pi: indisciplinate        |
 | Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf                            | ✔️ Max 64k                                                 |
 | Qwen3-Coder-30B-A3B-Instruct-Q4_K_M_unsloth.gguf                          | ❌ too slow                                                |
+| Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL_unsloth.gguf                      | ❌ Chatty. Not able to complete a task. 64k:20 t/s         |
 | Qwen3-Coder-30B-A3B-Instruct-RTPurbo.Q4_K_M_mradermacher.gguf             | ❌ No tools capability                                     |
 | Qwen3-Coder-30B-A3B-instruct_REAP-15B-A3B-Q4_K_M_lainlives.gguf           | ❌ No tools capability                                     |
 | qwen3-coder-30b-a3b-instruct_REA-15b-a3b-safetensors-q5_0_lainlives.gguf  | ❌ No tools capability                                     |
+| Qwen3-Coder-30B-A3B-Instruct-128x1.8B-Q4_K_M_intel.gguf                   |  |
 
 
-## UD Q3_K_XL (Unsloth)
-Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                   12.8 GB
+##
+Qwen3-Coder-30B-A3B-Instruct-128x1.8B-Q4_K_M_intel.gguf                         16.1 GB
+
 
 ## 
 Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth.gguf                                15.2 GB
 
+
+## 
+https://huggingface.co/Intel/Qwen3-Coder-30B-A3B-Instruct-gguf-q4km-AutoRound
+
+
+##
+https://huggingface.co/mradermacher/Qwen3-30B-A3B-CoderThinking-YOYO-linear-GGUF        
 
 
 ## ✔️ Next REAP-40B-A3B (mradermacher)
@@ -29,6 +39,19 @@ Context: max 64k
 ## ✔️ REAP-25B-A3B-Q4_K_M (by bartowski)
 Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf                                  14.1 GB
 https://huggingface.co/bartowski/cerebras_Qwen3-Coder-REAP-25B-A3B-GGUF
+
+
+## ❌ UD Q4_K_XL (Unsloth)
+Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL_unsloth.gguf                   16.4 GB
+❌ Chatty. Not able to complete a task.
+
+
+## ❌ UD Q3_K_XL (Unsloth)
+Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                   12.8 GB
+- Started the job without permissions
+- Pi speed is not so incredible (30-50 t/s)
+- A lot of command calls errors
+❌ Started to work on main branch
 
 
 ## ❌ Q4_K_M (Unsloth)
@@ -78,6 +101,25 @@ qwen3-coder-30b-a3b-instruct_pruned_reap-15b-a3b-safetensors-q5_0_lainlives.gguf
 ```bash
 
 
+model=Qwen3-Coder-30B-A3B-Instruct-128x1.8B-Q4_K_M_intel.gguf
+ctx_k=96
+gpu_layers=99
+cpu_moe=9
+spec=0
+draft_model=none
+predict_token=0/0
+jinja=0
+batch=512
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
+|  30 t/s |  64 k |   8 | 49/49 | 15.5 | 13.4/0.0  | q4_0  |    586 |  19s | none                          -- |  1024/256 |            |
+|  10 t/s |  96 k |   9 | 49/49 | 15.7 | 13.1/0.1  | q4_0  |    570 |  56s | none                          -- |   512/256 |            |
+|   6 t/s |  96 k |   8 | 49/49 | 15.7 | 13.4/0.1  | q4_0  |    586 |  92s | none                          -- |   512/256 |            |
+
+
 model=Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth.gguf
 ctx_k=96
 gpu_layers=99
@@ -97,6 +139,26 @@ _test_model
 |  13 t/s |  96 k |   7 | 49/49 | 15.7 | 13.0/0.1  | q4_0  |    540 |  40s | none                          -- |  1024/256 |            |
 
 |  39 t/s |  64 k |   6 | 49/49 | 15.3 | 13.3/0.0  | q4_0  |    993 |  25s | none                          -- |  1024/256 |            |
+
+
+model=Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL_unsloth.gguf
+ctx_k=96
+gpu_layers=99
+cpu_moe=8
+spec=0
+draft_model=none
+predict_token=0/0
+jinja=0
+batch=1024
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
+|  33 t/s |  64 k |   8 | 49/49 | 15.7 | 13.7/0.0  | q4_0  |    559 |  17s | none                          -- |  1024/256 |            |
+|  30 t/s |  64 k |   9 | 49/49 | 15.4 | 13.4/0.0  | q4_0  |    562 |  19s | none                          -- |  1024/256 |            |
+|   9 t/s |  64 k |   7 | 49/49 | 15.7 | 14.0/0.0  | q4_0  |    562 |  59s | none                          -- |  1024/256 |            |
+|  36 t/s |  32 k |   7 | 49/49 | 15.2 | 14.0/0.0  | q4_0  |    562 |  15s | none                          -- |  1024/256 |            |
 
 
 model=Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf
@@ -209,22 +271,24 @@ ubatch=256
 
 model=Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mradermacher.gguf
 ctx_k=64
-gpu_layers=45
-cpu_moe=9
+gpu_layers=99
+cpu_moe=7
 spec=none
 draft_model=none
 predict_token=3/4
 jinja=0
 batch=512
-ubatch=128
+ubatch=256
 _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
 | ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
 |  25 t/s |  64 k |   7 | 49/49 | 15.7 | 14.3/0.0  | q8_0  |    548 |  22s | none                          -- |   512/256 |            |
+|  25 t/s |  64 k |   7 | 49/49 | 15.7 | 14.3/0.0  | q8_0  |    548 |  22s | none                          -- |   512/256 |            |
 |  24 t/s |  64 k |   7 | 49/49 | 15.7 | 14.3/0.0  | q8_0  |    485 |  21s | none                          -- |   512/128 |            |
 |  24 t/s |  64 k |   7 | 49/49 | 15.7 | 14.3/0.0  | q8_0  |    548 |  23s | none                          -- |  1024/256 |            |
 |  23 t/s |  64 k |   8 | 49/49 | 15.4 | 14.0/0.0  | q8_0  |    485 |  21s | none                          -- |  1024/256 |            |
+|  20 t/s |  64 k |   9 | 49/49 | 15.1 | 13.7/0.0  | q8_0  |    522 |  26s | none                          -- |   512/128 |            |
 |  19 t/s |  64 k |   6 | 49/49 | 15.7 | 14.6/0.0  | q8_0  |    485 |  26s | none                          -- |  1024/256 |            |
 |  18 t/s |  64 k |   6 | 49/49 | 15.7 | 14.6/0.0  | q8_0  |    485 |  27s | none                          -- |   512/256 |            |
 
