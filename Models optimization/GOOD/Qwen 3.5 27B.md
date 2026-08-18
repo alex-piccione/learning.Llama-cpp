@@ -3,19 +3,20 @@
 3.5 models are smaller than 3.6 models, allowing more context.  
 I think 3.5 models require the --jinja parameter.
 
-| File                                                       | Result                                      |
-| ---                                                        | ---                                         |
-| Qwen3.5-27B-IQ4_XS_unsloth.gguf                            | ✔️ 64k 16 t/s                              |
-| Qwen3.5-27B-GCTH_ST_V121-IQ3_M-16gb_vram_optimized_gammaception.gguf |  128k 17 t/s                      |
-| Qwen3.5-27B-UD-Q3_K_XL_unsloth.gguf                        | 
+| File                                                  | Result                                      |
+| ---                                                   | ---                                         |
+| Qwen3.5-27B-IQ4_XS_unsloth.gguf                       | ✔️ 64k 16 t/s                              |
+| Qwen3.5-27B-IQ3_M_gammaception.gguf                   |  128k 17 t/s                      |
+| Qwen3.5-27B-UD-Q3_K_XL_unsloth.gguf                   | 
        
 
 
 ## ✔️ Qwen3.5-27B-IQ4_XS_unsloth.gguf
 Qwen3.5-27B-IQ4_XS_unsloth.gguf                            13.9 GB
 
+
 ## ✔️ IQ3_K_M (Gammaception)
-Qwen3.5-27B-GCTH_ST_V121-IQ3_M-16gb_vram_optimized_gammaception.gguf              12.4 GB
+Qwen3.5-27B-IQ3_M_gammaception.gguf                        12.4 GB
 **OPTIMIZED FOR 16GB VRAM**
 https://huggingface.co/Gammaception/Qwen3.5-27B-Thireus-16gb-optimized-GGUF
 
@@ -53,16 +54,16 @@ _test_model
 |  16 t/s |  64 k |   0 | 65/65 | 15.0 | 13.3/0.0  | q4_0  |    766 |  47s | N-gram       M=4 N=8 min=1   |  1024/256 |            |
 
 
-model=Qwen3.5-27B-GCTH_ST_V121-IQ3_M-16gb_vram_optimized_gammaception.gguf
-ctx_k=160
+model=Qwen3.5-27B-IQ3_M_gammaception.gguf
+ctx_k=128
 gpu_layers=99
 cpu_moe=0
 spec=none
 draft_model=none
-predict_token=8/16  # N/M
-jinja=1
+predict_token=3/5  # N/M
+jinja=0
 batch=1024
-ubatch=256
+ubatch=512
 _test_model
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
@@ -73,6 +74,9 @@ _test_model
 |  16 t/s |  64 k |   0 | 65/65 | 13.7 | 11.8/0.0  | q4_0  |    587 |  38s | N-gram      N=6 M=10 min=1 (50%) |  1024/256 |            |
 |  17 t/s |  64 k |   0 | 65/65 | 13.7 | 11.8/0.0  | q4_0  |    763 |  46s | N-gram       N=8 M=8 min=1 (64%) |  1024/256 |            |
 |  17 t/s |  64 k |   0 | 65/65 | 13.6 | 11.8/0.0  | q4_0  |    700 |  41s | N-gram      N=8 M=16 min=1 (41%) |  1024/256 |            |
+|  16 t/s | 160 k |   0 | 65/65 | 15.7 | 11.8/0.1  | q4_0  |    616 |  39s | N-gram      N=8 M=16 min=1 (32%) |  1024/256 |            |
+|  16 t/s | 160 k |   0 | 65/65 | 15.7 | 11.8/0.1  | q4_0  |    770 |  48s | N-gram     N=12 M=12 min=1 (26%) |  1024/256 |            |
+|  13 t/s | 160 k |   0 | 65/65 | 15.7 | 11.8/0.2  | q4_0  |    705 |  56s | N-gram       N=5 M=5 min=1 (53%) |  1024/512 |            |
 
 
 model=Qwen3.5-27B-UD-Q3_K_XL_unsloth.gguf

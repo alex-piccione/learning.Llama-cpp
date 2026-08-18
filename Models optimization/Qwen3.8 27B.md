@@ -11,6 +11,10 @@ https://huggingface.co/Jackrong/Qwen3.8-27B-MTP-GGUF
 Try Q4 and Q3 !
 
 
+## 
+Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf                       12.5 GB
+
+
 ## ❌ YMQ-M (zerodigest)
 Qwen3.8-27B-YMQ-M_zerodigest.gguf
 https://huggingface.co/zerodigest/Qwen3.8-27B-YMQ-MTP-GGUF
@@ -20,6 +24,22 @@ https://huggingface.co/zerodigest/Qwen3.8-27B-YMQ-MTP-GGUF
 Qwen3.8-27B-IQ4_XS_unsloth.gguf 
 
 ```bash
+
+
+
+model=Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf
+ctx_k=64
+gpu_layers=99
+cpu_moe=0
+spec=none
+draft_model=none
+predict_token=3/4
+jinja=0
+batch=1024
+ubatch=256
+_test_model
+
+
 
 model=Qwen3.8-27B-YMQ-M_zerodigest.gguf
 ctx_k=64

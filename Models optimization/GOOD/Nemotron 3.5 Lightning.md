@@ -2,12 +2,13 @@
 
 | File                                                                  | Result                                      |
 | ---                                                                   | ---                                         |
-| Nemotron-3.5-Lightning-30B-A3B-IQ4_NL_bartowski.gguf                  | (Pi) 96k: 40 t/s                            |
+| Nemotron-3.5-Lightning-30B-A3B-IQ4_NL_bartowski.gguf                  | ❌ 96k: 40 t/s     DANGEROUS behaviour     |
 
 
-## ✔️ IQ4_NL (bartowski)
+## ❌ IQ4_NL (bartowski)
 Nemotron-3.5-Lightning-30B-A3B-IQ4_NL_bartowski.gguf               17.6 GB
 https://huggingface.co/bartowski/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF
+!!! [DANGER] Edit completely unrelated files when asked to create a PR. It failed to create teh PR for 10 minutes, finning hte context, then started edit skills files and AGENTS.md file. !!!
 
 
 

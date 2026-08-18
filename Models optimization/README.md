@@ -10,12 +10,12 @@
 | Gemma 4 26B         | Unsloth      | Gemma-4-26B-A4B-it-UD-IQ4_NL_unsloth.gguf           | 39 t/s | 160 k | ✔️ 160k 20-25 t/s  |                                  |
 | Gemma 4 26B         | Google       | Gemma-4-26B_Q4_0-it_google.gguf                     | 4? t/s | 128 k | ✔️ 128k 40 t/s     |                                  |
 | KAT Coder           | deucebucket  | KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2               | 50 t/s | 128 k | ✔️ 128k 45 t/s     | Not yet fully tested             |
-| Nemotron-3.5        | bartowski    | Nemotron-3.5-Lightning-30B-A3B-IQ4_NL               | 45 t/s |  96 k | ✔️ 96k: 40 t/s     | Not yet fully tested             |
 
 | Gemma 4 26B         | Noctrex      | Gemma-4-26B-A4B-it-MXFP4_MOE.gguf                   | 36 t/s | 128 k | ✔️ 128k 35 t/s     |                                  |
 | Qwen 3.6 35B A3B    | bazorp       | Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf           | 42 t/s |  64 k | ✔️ 64k 45-80 t/s   | ✔️ Real discussion in PR.       | 
 | Qwen 3.6 35B A3B    | luffithefox  | Qwen3.6-35B-A3B-Un-Genesis-V3-APEX_luffythefox.gguf | 45 t/s | 128 k | ✔️ 128k 45 t/s     | ❌ Indisciplinate                |
 | Qwen 3.6 35B A3B    | tipe         | Qwen3.6-35B-A3B-MOE384-pruned-Q4_K_M_tipe.gguf      |        |  64 k | ✔️ 40 t/s          | ❌ Loop and too much proactive  |
+| Nemotron-3.5        | bartowski    | Nemotron-3.5-Lightning-30B-A3B-IQ4_NL               | 45 t/s |  96 k | ❌ 96k: 40 t/s     | ❌ DANGER (edit unrelated files) |
 
 | Gemma 4 12B         | Unsloth      | Gemma-4-12b-it-IQ4_NL_unsloth.gguf                  | 52 t/s | 256 k |                     |                                  |
 | Qwen 3.5 9B         | Unsloth      |                                                     | 39 t/s | 256 k |                     |                                  |
