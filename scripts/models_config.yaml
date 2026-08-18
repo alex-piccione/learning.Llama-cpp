@@ -75,6 +75,26 @@ models:
 
 
 # Qwen 3.8 27B
+  Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[64k]:
+    file: Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 512
+    spec_type: mtp
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "",
+         "_speed": "16 t/s",
+          "id": "Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[64k]",
+          "name": "Qwen 3.8 27B (Unsloth) Q3-K-XL [64k]",
+          "contextWindow": 65536,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
   Qwen3.8_27B_(Unsloth)_64k:
     file: Qwen3.8-27B-IQ4_XS_unsloth.gguf
     alias: Unsloth/Qwen3.8-27B-IQ4_XS [64k]

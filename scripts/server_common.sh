@@ -8,6 +8,11 @@ source common.sh
 # stop_server: used to stop the Llama.cpp server instance
 # extract_info_from_server_log: rertrieve information from the server log
 
+# sampling config
+TEMPERATURE=0.3
+DRAFT_P_MIN=0.2
+DRAFT_CACHE=q8_0
+
 
 # Array of model patterns of models that should use q4_0 cache
 declare -a Q4_QUANTIZATION_MODELS=(
@@ -102,8 +107,9 @@ start_server() {
 
     local cache_type_k=$cache_kv
     local cache_type_v=$cache_kv
-    local spec_cache_type_k=$cache_kv
-    local spec_cache_type_v=$cache_kv
+    #local spec_cache_type_k=$DRAFT_CACHE
+    #local spec_cache_type_v=$DRAFT_CACHE
+
 
     # A good rule: batch-size = 2x your ubatch-size.
     if [[ "$ubatch" == "auto" || "$ubatch" == "0" || "$ubatch" == "-1" ]]; then
@@ -132,6 +138,11 @@ start_server() {
         --kv-unified \
         --cache-type-k $cache_type_k \
         --cache-type-v $cache_type_v \
+        --cache-type-k-draft $DRAFT_CACHE \
+        --cache-type-v-draft $DRAFT_CACHE \
+        # other names/aliases
+        #--spec-draft-type-k "$spec_cache_type_k" \
+        #--spec-draft-type-v "$spec_cache_type_v" \
 
         --load-mode mmap \
         --fit off \
@@ -139,15 +150,15 @@ start_server() {
         --batch-size $batch \
         --ubatch-size $ubatch \
 
-        --draft-p-min 0.7 \
-        #--spec-draft-p-min 0.2 
+        #--draft-p-min 0.7 \   ### old parameter
+        --spec-draft-p-min $DRAFT_P_MIN \
         # --cache-ram 16384
         # --no-mmproj
 
         #--metrics \
         #--perf \ 
 
-        --temperature 0.1 \
+        --temperature $TEMPERATURE \
         --top-k 20 \
         --top-p 0.80 \
         --min-p 0.05 \
@@ -202,8 +213,8 @@ start_server() {
             args+=(--spec-draft-n-max "$pred_max")
 
             # Configure KV cache type specifically for the draft model
-            args+=(--spec-draft-type-k "$spec_cache_type_k")
-            args+=(--spec-draft-type-v "$spec_cache_type_v")
+            #args+=(--spec-draft-type-k "$spec_cache_type_k")
+            #args+=(--spec-draft-type-v "$spec_cache_type_v")
 
             print_value "Speculative type" "Draft model, draft-simple (min: $pred_min, max: $pred_max)"
             print_value "Draft Model" "$draft_model"
@@ -227,8 +238,8 @@ start_server() {
         args+=(--spec-draft-n-max "$pred_max")
 
         # Configure KV cache type specifically for the draft model
-        args+=(--spec-draft-type-k "$spec_cache_type_k")
-        args+=(--spec-draft-type-v "$spec_cache_type_v")
+        #args+=(--spec-draft-type-k "$spec_cache_type_k")
+        #args+=(--spec-draft-type-v "$spec_cache_type_v")
 
         print_value "Speculative type" "Draft model, draft-simple (min: $pred_min, max: $pred_max)"
         print_value "Draft Model" "$draft_model"
@@ -248,8 +259,8 @@ start_server() {
         args+=(--spec-draft-n-max "$pred_max")
 
         # Configure KV cache type specifically for the draft model
-        args+=(--spec-draft-type-k "$spec_cache_type_k")
-        args+=(--spec-draft-type-v "$spec_cache_type_v")
+        #args+=(--spec-draft-type-k "$spec_cache_type_k")
+        #args+=(--spec-draft-type-v "$spec_cache_type_v")
 
         print_value "Speculative type" "Draft model, draft-dflash (min: $pred_min, max: $pred_max)"
         print_value "Draft Model" "$draft_model"
@@ -264,6 +275,8 @@ start_server() {
 
             args+=(--spec-draft-model "$draft_model_path")
         fi
+
+
         
         args+=(--spec-type "draft-mtp")                            # draft-mtp
         args+=(--spec-draft-n-min "$pred_min")
@@ -465,13 +478,24 @@ extract_info_from_server_log() {
     #get_pred_info
     return_output_values "$(get_pred_info)" 1
 
-    # Extract cache quantization
+    # Extract caches quantization  (example: main + MTP)
     # I llama_kv_cache: size =  680.00 MiB ( 65536 cells,  10 layers,  1/1 seqs), K (q8_0):  340.00 MiB, V (q8_0):  340.00 MiB
-    # [^)]+   everything that is not a closing parenthesis
+    # I llama_kv_cache: size =   96.00 MiB ( 65536 cells,   1 layers,  1/1 seqs), K (q5_1):   48.00 MiB, V (q5_1):   48.00 MiB
+
+    # Grab every kv_cache "size =" line as "TYPE LAYERS" pairs, sorted by layer count desc.
+    # The block with the most layers is always the main model; a second block (if present) is the draft/MTP head.
     # NOTE. Capture only K, assume V = K
-    local cache_kv=$(grep -E "llama_kv_cache:.*K \(" "$log" | head -1 | sed -E 's/.* K \(([^)]+)\).*/\1/')
-    # "$row" | grep "llama_kv_cache:" | sed -E 's/.* K \(([^)]+)\).*/\1/'
+
+    # produces q4_0 16 and q5_1 1   # sort by layer, n=treat as number r=reverse
+    local cache_rows=$(grep -E "llama_kv_cache:.*size.*layers.*K \(" "$log" \
+        | sed -E 's/.*size *= *[0-9.]+ MiB \( *[0-9]+ cells, *([0-9]+) layers.*K \(([^)]+)\).*/\2 \1/' \
+        | sort -k2,2 -nr) 
+
+    local cache_kv=$(echo "$cache_rows" | sed -n '1p' | awk '{print $1}')
+    local cache_kv_draft=$(echo "$cache_rows" | sed -n '2p' | awk '{print $1}')
+    [[ -z "$cache_kv_draft" ]] && cache_kv_draft="none"  # if empty set default value
     return_value "cache_kv" "$cache_kv"
+    return_value "cache_kv_draft" "$cache_kv_draft"
 }
 
 

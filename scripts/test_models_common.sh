@@ -82,9 +82,9 @@ print_test_call() {
     fi
     
     #printf "| Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |\n"
-    printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |\n"
-    printf "| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |\n"
-    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-5s | %6s | %3.0fs | %-10s %21s | %9s | %-10s |\n" \
+    printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Prediction                       | Batch/Ub. | Note       |\n"
+    printf "| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------- | --------- |----------- |\n"
+    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-10s %21s | %9s | %-10s |\n" \
         "$eval_rate" \
         "$ctx_k" \
         "$cpu_moe" \
@@ -92,6 +92,7 @@ print_test_call() {
         "$vram_used" \
         "$cuda_vram_gb/$host_ram_gb" \
         "$cache_kv" \
+        "$cache_kv_draft" \
         "$eval_count" \
         "$total_duration_s" \
         "$pred_type" \
