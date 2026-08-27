@@ -17,6 +17,7 @@ https://huggingface.co/DavidAU/Qwen3.6-27B-Fable-Fusion-711-Uncensored-Heretic-N
 Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf                   12.4 GB
 https://huggingface.co/deucebucket/Qwen3.6-27B-Cerebellum-GGUF
 Max: 96K context
+MTP: NO
 
 With Ngram-simple, Temperature of 0.1 gives 22 t/s while temperature of 0.3 gives 17 t/s.  
 Low temperature increasa the t/s at 40-43 near the end of the stream, I suppose when code is generated, but it creates longher responses.
@@ -90,6 +91,7 @@ _test_model
 |  17 t/s |  96 k |   0 | 65/65 | 15.2 | 12.7/0.1  | q4_0  |   1504 |  90s | none                          -- |  1024/256 |            |
 |  17 t/s |  64 k |   0 | 65/65 | 14.5 | 12.7/0.0  | q4_0  |   1504 |  90s | none                          -- |  1024/256 |            |
 
+
 model=Qwen3.6-27B-Fable-Fus-711-UnHeretic-NM-DAU-NEO-MAX-NEO-LOW-MTP-IQ4_XS_davidau.gguf
 ctx_k=64
 gpu_layers=99
@@ -110,16 +112,23 @@ _test_model
 
 
 model=Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf
-ctx_k=128
+ctx_k=96
 gpu_layers=99
 cpu_moe=0
-spec=simple
+spec=ngram-simple
 draft_model=none
-predict_token=6/12
+predict_token=6/8
 jinja=0
 batch=1024
 ubatch=512
 _test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------- | --------- |----------- |
+|  17 t/s |  96 k |   0 | 65/65 | 14.6 | 12.0/0.1  | q4_0 (none) |    676 |  39s | none                          -- |  1024/512 |            |
+|  15 t/s | 128 k |   0 | 65/65 | 15.3 | 12.0/0.1  | q4_0 (none) |    675 |  44s | N-gram      N=6 M=12 min=1 (34%) |  1024/512 |            |
+|  14 t/s |  96 k |   0 | 65/65 | 14.6 | 12.0/0.1  | q4_0 (none) |    675 |  47s | N-gram       N=6 M=6 min=1 (49%) |  1024/512 |            |
+
 
 | Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Predicion                        | Batch/Ub. | Note       |
 | ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |

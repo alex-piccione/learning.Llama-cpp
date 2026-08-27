@@ -21,7 +21,7 @@ args=(
     --host 127.0.0.1 \
     --port "$SERVER_PORT" \
     #--seed 1
-    --parallel 1 \
+    --parallel $PARALLEL \
     --prio 3 \
     --flash-attn on \
     --kv-unified \
@@ -30,7 +30,7 @@ args=(
 
     --cache-reuse 256 \
 
-    --draft-p-min 0.7 \
+    --draft-p-min $DRAFT_P_MIN \
 
     #--defrag-thold 0.1
 
@@ -45,12 +45,12 @@ args=(
     --samplers "penalties;dry;top_k;top_p;min_p;temperature"
 
     ## strict for large capable models
-    --temperature 0.1 \
+    --temperature $TEMPERATURE \
     --top-k 20 \
-    --top-p 0.80 \
-    --min-p 0.05 \
-    --repeat-penalty 1.15 \
-    --repeat-last-n 1024 \
+    --top-p 0.90 \
+    --min-p 0.02 \
+    --repeat-penalty 1.10 \
+    --repeat-last-n 512 \
 
     # I have the impression this one cause loops also on model that never loop before (Gemma-4-26B)
     #--temperature 0.3 \
@@ -73,7 +73,7 @@ args=(
     #--dry-allowed-length 12 \
     #--dry-penalty-last-n -1 \
 
-    --context-shift \
+    #--context-shift \  not supported by Qwen3.8 27B
     --reasoning-preserve \
 
     --reasoning on \
@@ -94,12 +94,27 @@ require_arg() {
     local var_value="${!var_name}"
     # declare global (to make it visible in the caller function scope)
     declare -g "$var_name=$var_value"
-    debug "$arg_name=$var_value"
+    debug "(require_arg) $arg_name=$var_value"
 
     #args+=("$arg_name" "${!var_name}")
     args+=("$arg_name" "$var_value")
 }
 
+check_var() {
+    local var_name="$1"
+    if [[ ! -v "$var_name" ]]; then 
+        echo -e "❌ Variable \"$var_name\" is missing!" >&2
+        return 1
+    fi
+
+    if [[ -z "$var_name" ]]; then 
+        echo -e "❌ Variable \"$var_name\" is empty!" >&2
+        return 1
+    fi
+}
+
+## TODO: this has to call the server_common start_server function to unify the code
+# the model has to be picked here and passed as parameter
 
 start_server() {
     local model_id="${1:-}"
@@ -157,8 +172,6 @@ start_server() {
             return 0
         fi
     fi
-
-
     if ! yq -e ".models[\"$model_id\"]" "$models_config_file" > /dev/null 2>&1; then
         echo -e "❌ Error: Model '$model_id' not found in ${yellow}$models_config_file${reset}"
         #echo "Available models: $(yq '.models | keys | .[]' $models_config_file | tr '\n' ' ')"
@@ -183,27 +196,43 @@ start_server() {
     done
 
     # stop running server
-    stop_server >&2   
+    stop_server >&2
 
     # variables from models config 
     local ctx_k
     local gpu_layers
     local cpu_moe
+    local quant
     local batch
     local ubatch
     local spec_type
     local jinja
 
-    local cache_kv=$(set_cache_for_model "$file")
+    # check mandatory variables
 
-    args+=(--cache-type-k "$cache_kv")
-    args+=(--cache-type-v "$cache_kv")
+    check_var "quant" || exit 1
 
-    # defaults
-    #local spec_draft_n_max="3"
-    #local spec_draft_n_min="1"
+    # estrapolate Quantization parameters
+    #check_var "quant"
+    local cache_type_kv="${quant%%/*}"  # everyhing before the "/"
+    local cache_type_draft_kv=$cache_type_kv  # same cache type as default
+    [[ "$quant" == */* ]] && cache_type_draft_kv="${quant#*/}"
 
-    local model_file=$GGUF_FOLDER/$file  
+    #local cache_kv=$(set_cache_for_model "$model")
+    #local cache_type_k=$cache_type_kv
+    #local cache_type_v=$cache_type_kv
+    #local cache_type_draft_k=$cache_type_draft_kv
+    #local cache_type_draft_v=$cache_type_draft_kv
+
+    debug "cache_type_kv: $cache_type_kv"
+    debug "cache_type_draft_kv: $cache_type_draft_kv"
+
+    args+=(--cache-type-k "$cache_type_kv")
+    args+=(--cache-type-v "$cache_type_kv")
+    args+=(--cache-type-k-draft "$cache_type_draft_kv")
+    args+=(--cache-type-v-draft "$cache_type_draft_kv")
+
+    local model_file=$GGUF_FOLDER/$file
 
     if [[ ! -f "$model_file" ]]; then
         echo -e "❌ File \"$model_file\" not found!"
@@ -215,7 +244,7 @@ start_server() {
         args+=(--alias "$alias")
     else
         args+=(--alias "$model_id")
-    fi    
+    fi
     args+=(--ctx-size "$(($ctx_k * 1024))")
     args+=(--n-gpu-layers "$gpu_layers")
     args+=(--n-cpu-moe "$cpu_moe")
@@ -225,9 +254,15 @@ start_server() {
 
     args+=(--spec-type "$spec_type" )
 
+    # Disable RAM "cache" if no MoE or GPU offloading
+    if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
+        args+=(--cache-ram 4096) 
+    else
+        args+=(--cache-ram 0) 
+    fi
 
-    # for N-Gram   
-    if [[ "$spec_type" == "ngram-simple"  ]]; then
+    # for N-Gram
+    if [[ "$spec_type" == *ngram-simple*  ]]; then
         require_arg spec_ngram_simple_size_n     --spec-ngram-simple-size-n || return 1
         require_arg spec_ngram_simple_size_m     --spec-ngram-simple-size-m || return 1
         require_arg spec_ngram_simple_min_hits   --spec-ngram-simple-min-hits || return 1
@@ -235,7 +270,7 @@ start_server() {
     fi
 
     # for MTP  
-    if [[ "$spec_type" == "draft-mtp" ]]; then
+    if [[ "$spec_type" == *draft-mtp* ]]; then
         require_arg spec_draft_n_min     --spec-draft-n-min || return 1
         require_arg spec_draft_n_max     --spec-draft-n-max || return 1
         echo "Speculative type: MTP (min: $spec_draft_n_min max: $spec_draft_n_max)"
@@ -245,12 +280,7 @@ start_server() {
     if [[ "$spec_type" == "draft-simple"  ]]; then
         require_arg spec_draft_n_min     --spec-draft-n-min || return 1
         require_arg spec_draft_n_max     --spec-draft-n-max || return 1
-
         echo "Speculative type: MTP (min: $spec_draft_n_min max: $spec_draft_n_max)"
-
-        # TODO: are these required only when the draft-model is specified ?
-        require_arg cache_kv --spec-draft-type-k || return 1
-        require_arg cache_kv --spec-draft-type-v || return 1
     fi
 
     # DFlash
@@ -261,9 +291,9 @@ start_server() {
         return 1
     fi
 
-    if [[ "$jinja" == "1" ]]; then
-        args+=(--jinja)
-    fi
+    [[ "$jinja" == "1" ]] && args+=(--jinja)
+
+    [[ "$QWEN_REASONING_EFFORT_MEDIUM" == "1" ]] && args+=(--chat-template-kwargs '{"reasoning_effort":"medium"}')
 
     echo >&2
     echo "=========================================================" >&2

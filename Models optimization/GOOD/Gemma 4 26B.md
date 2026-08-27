@@ -15,7 +15,7 @@
 Gemma-4-26B_Q4_0-it_google.gguf                                     13.4 GB
 https://huggingface.co/google/gemma-4-26B-A4B-it-qat-q4_0-gguf
 
-❌ For the bug3 fix :it took half an hour and havent done. It failed to cal "edit" very often (sometime instead of edit a single line). I lied saying it did the job: No changes and no test !
+❌ For the bug3 fix :it took half an hour and haven't done. It failed to call "edit" very often (sometime instead of edit a single line). It lied saying it did the job: No changes and no test !
 
 ## ✔️ UD IQ4_NL (by Unsloth)
 https://huggingface.co/unsloth/gemma-4-26B-A4B-it-GGUF
@@ -153,23 +153,6 @@ Draft_file_1:
 
 
 ```bash
-_test_model() {
-    source server_common.sh && \
-    start_server \
-        $model \
-        $ctx_k \
-        $gpu_layers \
-        $cpu_moe \
-        $spec \
-        $draft_model \
-        $predict_token \
-        $jinja \
-        $batch \
-        $ubatch
-
-    source test_models_common.sh && print_test_call
-}
-
 
 ## There is currently a bug for Gemma4 MTP
 model=Gemma4-26B-A4B-QAT-Unc-Balanced-Q4_K_M_hauhaucs.gguf 

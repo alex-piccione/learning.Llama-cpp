@@ -14,9 +14,8 @@ models:
       { 
           "_test": "✔️ Very good",
           "_speed": "22 t/s",
-          "id": "Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mradermacher.gguf",
-          "name": "NAME Qwen3-Coder-Next REAP-40B-A3B i1 IQ3_M (mradermacher) 64k",
-          "alias": "ALIAS mradermacher/Qwen3-Coder-Next REAP-40B-A3B i1 IQ3_M [64k]",
+          "id": "Qwen3-Coder-Next-REAP-40B-A3B.i1-IQ3_M_mradermacher_64k",
+          "name": "Qwen3-Coder-Next REAP-40B-A3B i1 IQ3_M (mradermacher) [64k]",
           "contextWindow": 65536,
           "maxTokens": 4096,
           "reasoning": true
@@ -75,47 +74,132 @@ models:
 
 
 # Qwen 3.8 27B
-  Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[64k]:
+  Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[80k]:
     file: Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf
-    ctx_k: 64
+    ctx_k: 80
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q4_0/q4_0
+    batch: 1024
+    ubatch: 512
+    spec_type: draft-mtp
+    spec_draft_n_min: 5
+    spec_draft_n_max: 6
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "🥇",
+         "_speed": "15-35 t/s",
+          "id": "Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[80k]",
+          "name": "Qwen 3.8 27B Q3-K-XL (Unsloth) [80k]",
+          "contextWindow": 81920,
+          "maxTokens": 8192,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  Qwen3.8-27B-Uncensored-Aggressive-IQ3_M_(HauhauCS)_[128k]:
+    file: Qwen3.8-27B-Uncensored-Aggressive-IQ3_M_HauhauCS.gguf
+    ctx_k: 128
     gpu_layers: 99
     cpu_moe: 0
     batch: 1024
-    ubatch: 512
-    spec_type: mtp
+    ubatch: 256
+    spec_type: draft-mtp
+    spec_draft_n_min: 3
+    spec_draft_n_max: 4
     jinja: 0
     pi_agent_model: >
       { 
          "_test": "",
-         "_speed": "16 t/s",
-          "id": "Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[64k]",
-          "name": "Qwen 3.8 27B (Unsloth) Q3-K-XL [64k]",
+         "_speed": "15-35 t/s",
+          "id": "Qwen3.8-27B-Uncensored-Aggressive-IQ3_M_(HauhauCS)_[128k]",
+          "name": "Qwen 3.8 27B (HauhauCS) IQ3_M [128k]",
+          "contextWindow": 131072,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666_[64k]:
+    file: Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    spec_type: draft-mtp
+    spec_draft_n_min: 3
+    spec_draft_n_max: 5
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "",
+         "_speed": "",
+          "id": "Qwen3.8-27B-Abliterated-IQ4-MIX-MTP_finex666_[64k]",
+          "name": "Qwen3.8-27B Abliterated IQ4-MIX-MTP (finex666)[64k]",
           "contextWindow": 65536,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
-  Qwen3.8_27B_(Unsloth)_64k:
-    file: Qwen3.8-27B-IQ4_XS_unsloth.gguf
-    alias: Unsloth/Qwen3.8-27B-IQ4_XS [64k]
+
+  Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[80k]:
+    file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
+    ctx_k: 80
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    spec_type: draft-mtp
+    spec_draft_n_min: 2
+    spec_draft_n_max: 3
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "🥇",
+         "_speed": "20-40 t/s",
+          "id": "Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[80k]",
+          "name": "🥇 Qwen 3.8 27B UD-IQ4_XS (Unsloth) [80k]",
+          "contextWindow": 81920,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  Qwen3.8-27B-UD-IQ4_XS_(peculiar)_64k:
+    file: Qwen3.8-27B-UD-IQ4_XS_peculiar.gguf
     ctx_k: 64
     gpu_layers: 99
     cpu_moe: 0
     batch: 512
     ubatch: 256
-    spec_type: none
+    spec_type: draft-mtp
+    spec_draft_n_min: 2
+    spec_draft_n_max: 3
     jinja: 0
     pi_agent_model: >
       { 
-         "_test": "",
-         "_speed": "16 t/s",
-          "id": "Qwen3.8-27B-IQ4_XS_unsloth.gguf",
-          "name": "Qwen 3.8 27B (Unsloth) [64k]",
+         "_test": "?",
+         "_speed": "? t/s",
+          "id": "Qwen3.8-27B-UD-IQ4_XS_(peculiar)_64k",
+          "name": "Qwen 3.8 27B UD-IQ4_XS (peculiar) [64k]",
           "contextWindow": 65536,
           "maxTokens": 4096,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
+  Qwen3.8-27B-UD-IQ4_XS_(peculiar)_64k_spec_3-5:
+    file: Qwen3.8-27B-UD-IQ4_XS_peculiar.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 256
+    spec_type: draft-mtp
+    spec_draft_n_min: 3
+    spec_draft_n_max: 5
+    jinja: 0
 
 # Qwen 3.5 27B
   Qwen_3.5_27B_(Unsloth)_48k:
@@ -154,7 +238,6 @@ models:
          "_speed": "? t/s",
           "id": "Qwen3.5-27B-IQ4_XS_unsloth.gguf",
           "name": "name Qwen3.5 27B IQ4_XS (Unsloth) 64k",
-          "alias": "alias Unsloth/Qwen3.5 27B IQ4_XS [64k]",
           "contextWindow": 65536,
           "maxTokens": 4096,
           "reasoning": true,
@@ -175,8 +258,7 @@ models:
          "_test": "?",
          "_speed": "? t/s",
           "id": "Qwen3.5-27B-IQ4_XS_bartowski.gguf",
-          "name": "name Qwen3.5 27B IQ4_XS (bartowski) 64k",
-          "alias": "alias bartowski/Qwen3.5 27B IQ4_XS [64k]",
+          "name": "Qwen3.5 27B IQ4_XS (bartowski) [64k]",
           "contextWindow": 65536,
           "maxTokens": 4096,
           "reasoning": true,
@@ -367,7 +449,30 @@ models:
   
 # Qwopus
 
+# Tiel Coder
+
 # KAT Coder
+
+  KAT-Coder-V2.5-Dev-APEX-dynamic-v2_(myric)_192k:
+    file: KAT-Coder-V2.5-Dev-APEX-dynamic-v2_myric.gguf
+    ctx_k: 192
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0
+    batch: 1024
+    ubatch: 512
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "✔️ Very Good",
+            "_speed": "40 t/s",
+            "id": "KAT-Coder-V2.5-Dev-APEX-dynamic-v2_(myric)_192k",
+            "name": "KAT-Coder-V2.5-Dev APEX dynamic-v2 (myric) [192k]",
+            "contextWindow": 163840,
+            "maxTokens": 8192,
+            "reasoning": true
+       },
+
 
   KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket_160k:
     file: KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf
@@ -380,14 +485,64 @@ models:
     spec_type: none 
     pi_agent_model: >
        { 
-            "_test": "✔️ Good",
+            "_test": "✔️ Very Good",
             "_speed": "50 t/s",
-            "id": "KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf",
+            "id": "KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket_160k",
             "name": "KAT-Coder-V2.5-Dev-Cerebellum (deucebucket) [160k]",
-            "contextWindow": 131072,
-            "maxTokens": 4096,
+            "contextWindow": 163840,
+            "maxTokens": 8192,
             "reasoning": true
        },
+
+  KAT-Coder-V2.5-Dev_Q2_K-AllGPU_(offmonreal)_160k:
+    file: KAT-Coder-V2.5-Dev_Q2_K-AllGPU_offmonreal.gguf
+    ctx_k: 160
+    gpu_layers: 99
+    cpu_moe: 0
+    batch: 1024
+    ubatch: 512
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "✔️ Good and super fast",
+            "_speed": "60 t/s",
+            "id": "KAT-Coder-V2.5-Dev_Q2_K-AllGPU_(offmonreal)_160k",
+            "name": "KAT-Coder-V2.5-Dev_Q2_K-AllGPU (offmonreal) [160k]",
+            "contextWindow": 163840,
+            "maxTokens": 8192,
+            "reasoning": true
+       },
+
+
+  KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_(offmonreal)_64k:
+    file: KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 2
+    quant: q4_0
+    batch: 1024
+    ubatch: 256
+    spec_type: none 
+    pi_agent_model: >
+       { 
+            "_test": "✔️ Very Good",
+            "_speed": "40 t/s",
+            "id": "KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_(offmonreal)_64k",
+            "name": "KAT-Coder-V2.5-Dev Q3_K_M imatrix MTP (offmonreal) [64k]",
+            "contextWindow": 65536,
+            "maxTokens": 8192,
+            "reasoning": true
+       },
+
+  KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_(offmonreal)_64k_Q8:
+    file: KAT-Coder-V2.5-Dev_Q3_K_M_imatrix_MTP_offmonreal.gguf
+    ctx_k: 52
+    gpu_layers: 99
+    cpu_moe: 3
+    quant: q8_0
+    batch: 1024
+    ubatch: 256
+    spec_type: none
 
 # Nemotron 3.5 Lightning
   Nemotron-3.5-Lightning-30B-A3B-IQ4_NL_bartowski:
@@ -453,16 +608,16 @@ models:
     speed: 43 t/s
     file: Gemma-4-26B_Q4_0-it_google.gguf
     ctx_k: 128
-    gpu_layers: -1
-    cpu_moe: 1
+    gpu_layers: 99
+    cpu_moe: 0
     batch: 1024
     ubatch: 512
     spec_type: none 
     pi_agent_model: >
        { 
             "_test": "???",
-            "id": "Gemma-4-26B_Q4_0-it_google.gguf",
-            "name": "Gemma4 26B 128K - Q4_0 (by Google)",
+            "id": "Gemma-4-26B-Q4_0_(Google)_128k",
+            "name": "Gemma4 26B 128K - Q4_0 (Google) [120k]",
             "contextWindow": 131072,
             "maxTokens": 4096,
             "reasoning": true

@@ -58,9 +58,7 @@ print_test_call() {
     if_error && return 1
 
     local tool_flag="❌"
-    if [[ $has_tools = "1" ]]; then
-        tool_flag="✔️"
-    fi
+    [[ $has_tools = "1" ]] && tool_flag="✔️"
 
     #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------" >&2    
     #printf "------------ ------------ ------------ ------------ ------------ ------------ ------------\n"   
@@ -72,19 +70,22 @@ print_test_call() {
     local host_ram_gb=$(awk "BEGIN{printf \"%.1f\", $host_ram/1024}")
 
     # normalize (where is the "--" value came from??)
-    if [[ "$accepted_pct" == "" || "$accepted_pct" == "n.a." ]]; then
-        accepted_pct=""
-    fi
+    [[ "$accepted_pct" == "n.a." ]] && accepted_pct=""
 
     if [[ "$accepted_pct" != "" ]]; then
         print_value "Accepted prediction %" "$accepted_pct"
         pred_info+=" ($(printf "%.0f" "$accepted_pct")%)"
     fi
+
+    local note=""
+
+    [[ "$QWEN_REASONING_EFFORT_MEDIUM" == "1" && "$model" == Qwen3.8* ]] && note="R: medium"
+
+    #[[ "$K_Q8_CACHE" == "1" ]] && note+=" K:q8_0"
     
-    #printf "| Speed   | Ctx   | MoE | GPU    | VRAM    | VRAM/RAM  | Cache | Tokens | Time | Pred type        | Pred info                      | Batch/Ubatch | Note            |\n"
-    printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Prediction                       | Batch/Ub. | Note       |\n"
-    printf "| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | -------------------------------- | --------- |----------- |\n"
-    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-10s %21s | %9s | %-10s |\n" \
+    printf "| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |\n"
+    printf "| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |\n"
+    printf "| %3.0f t/s | %3s k | %3s | %5s | %4.1f | %-9s | %-3s (%3s) | %6s | %3.0fs | %-10s %28s | %9s | %-17s |\n" \
         "$eval_rate" \
         "$ctx_k" \
         "$cpu_moe" \
@@ -98,7 +99,7 @@ print_test_call() {
         "$pred_type" \
         "$pred_info" \
         "$batch/$ubatch" \
-        "" 
+        "$note" 
 }
 
 
@@ -167,7 +168,7 @@ llamacpp_run() {
 
     # Run curl in the background so we can monitor logs simultaneously
     #echo "" > $SERVER_LOG
-    echo "" > logs/llama_api_response.log
+    echo "" > $response_log
     curl -s http://localhost:$SERVER_PORT/v1/chat/completions -d "$json_payload" > "$response_log"  &
     local curl_pid=$!
 
@@ -218,6 +219,43 @@ llamacpp_run() {
         return 1
     fi
 
+    # "Compact" the streaming response to a single text
+    # Strip the "data: " prefix, drop the terminator line, feed each JSON object to jq
+    local reasoning=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' \
+        | jq -j '.choices[0].delta.reasoning_content // empty')
+
+    local content=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' \
+        | jq -j '.choices[0].delta.content // empty')
+    
+    #local tool_calls=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' \
+    #    | jq -c '.choices[0].delta.tool_calls // empty')
+
+    local tool_calls=$(grep '^data: ' "$response_log" | sed 's/^data: //' | grep -v '^\[DONE\]' | \
+        jq -s '[ .[] | select(.choices[0].delta.tool_calls != null) |
+            .choices[0].delta.tool_calls[0] |
+            {
+                id: (.id // null),
+                name: (.function.name // null),
+                arguments: (.function.arguments // null)
+            }
+        ] |
+        group_by(.id) |
+        map({
+            name: .[0].name,
+            arguments: (map(.arguments // "") | join(""))
+        }) |
+        map(select(.name != null)) |
+        .')
+
+    local response_log_text="logs/llama_api_response.txt"
+    echo "" > $response_log_text
+    echo "=== REASONING ===" >> $response_log_text
+    echo "$reasoning" >> $response_log_text
+    echo "" >> $response_log_text
+    echo "=== ANSWER ===" >> $response_log_text
+    echo "$content" >> $response_log_text
+    echo "=== TOOL CALLS ===" >> $response_log_text
+    echo "$tool_calls" >> $response_log_text
 
     # UNCOMMENT THE LINE BELOW TO INSPECT API RAW OUTPUT IN TERMINAL:
     #echo "DEBUG RAW OUTPUT: $raw" >&2

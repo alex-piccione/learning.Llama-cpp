@@ -9,21 +9,11 @@ source common.sh
 # extract_info_from_server_log: rertrieve information from the server log
 
 # sampling config
+PARALLEL=1
 TEMPERATURE=0.3
 DRAFT_P_MIN=0.2
-DRAFT_CACHE=q8_0
 
-
-# Array of model patterns of models that should use q4_0 cache
-declare -a Q4_QUANTIZATION_MODELS=(
-    "Qwen3.5-27B*"
-    "Qwen3.6-27B*"
-    "Qwen3.8-27B*"
-    "Qwen3-Coder-30B*"
-)
-
-
-#---
+QWEN_REASONING_EFFORT_MEDIUM=1
 
 is_server_started() {
     PROCESS_NAME="llama-server.exe"   # Define the exact name of the executable to look for
@@ -40,29 +30,31 @@ server_info() {
     echo "$command"
 }
 
+
 # start_server 
 #   model: the model name
 #   ctx_k: context size (8 for 8k, 16 for 16k...) 
 #   gpu_layers: max. number of layers to store in VRAM, either an exact number, 'auto', or 'all'
-#   cpu_moe: expert layer to offload to the CPU, the lower the better (ignored for non-MOE models)  
+#   cpu_moe: expert layer to offload to the CPU, the lower the better (ignored for non-MOE models) 
+#   quant: quantization of main model and draft model (optional) (examples: "q8_0", "q8_0/q4_0", "q4_0/q5_1") 
 #   spec: Speculative draft. 0=off, 1=on   or use "dflash", "simple", "mtp"
-#   draft_model: draft model, required if Speculative draft is on
+#   draft_model: draft model
 #   predict_token: number of token to predict, min/max (5/10)
-#   mtp: 1 = model support MTP (will set --spec-type draft-mtp) 0 otherwise    [OBSOLETE]
 #   jinja: not used... (possibly required by some models)
-#   batch: batch size... 1024 is the usual value
+#   batch: batch and ubatch size
 start_server() {
     debug_function "start_server"
     local model="$1"
     local ctx_k="$2"
     local gpu_layers="$3"
     local cpu_moe="$4"
-    local spec="$5"
-    local draft_model="$6"
-    local predict_token="$7"
-    local jinja="$8"
-    local batch="$9"
-    local ubatch="${10}"
+    local quant="$5"
+    local spec="$6"
+    local draft_model="$7"
+    local predict_token="$8"
+    local jinja="$9"
+    local batch="${10}"
+    local ubatch="${11}"
         
     # stop running server
     stop_server >&2
@@ -79,6 +71,11 @@ start_server() {
 
     if [ -z "$gpu_layers" ]; then
         echo "‼️ start_server was called with empty gpu_layers" >&2
+        return 1
+    fi
+
+    if [ -z "$quant" ]; then
+        echo "‼️ start_server was called with empty quant" >&2
         return 1
     fi
 
@@ -103,13 +100,16 @@ start_server() {
 
     local context=$(($ctx_k * 1024))
 
-    local cache_kv=$(set_cache_for_model "$model")
+    # estrapolate Quantization parameters
+    local cache_type_kv="${quant%%/*}"  # everyhing before the "/"
+    local cache_type_draft_kv=$cache_type_kv  # same cache type as default
+    [[ "$quant" == */* ]] && cache_type_draft_kv="${quant#*/}"
 
-    local cache_type_k=$cache_kv
-    local cache_type_v=$cache_kv
-    #local spec_cache_type_k=$DRAFT_CACHE
-    #local spec_cache_type_v=$DRAFT_CACHE
-
+    #local cache_kv=$(set_cache_for_model "$model")
+    local cache_type_k=$cache_type_kv
+    local cache_type_v=$cache_type_kv
+    local cache_type_draft_k=$cache_type_draft_kv
+    local cache_type_draft_v=$cache_type_draft_kv
 
     # A good rule: batch-size = 2x your ubatch-size.
     if [[ "$ubatch" == "auto" || "$ubatch" == "0" || "$ubatch" == "-1" ]]; then
@@ -123,32 +123,32 @@ start_server() {
     #local cache_reuse=256     # reuse KV cache chunks across requests (big win for similar prompts)
     local cache_reuse=0        # 0 to have clean benchmark
 
-    args=(
+    local args=(
         --host 127.0.0.1 \
         --port "$SERVER_PORT" \
         --seed "1" \
         --model "$model_path" \
         #--alias 'unsloth/Qwen3.6-27B-MTP-GGUF' \
         --ctx-size "$context" \
-        --parallel 1 \
+        --parallel $PARALLEL \
         --prio 3 \
         --flash-attn on \
         --n-gpu-layers $gpu_layers \
         --n-cpu-moe $cpu_moe \
         --kv-unified \
-        --cache-type-k $cache_type_k \
+        --cache-type-k $cache_type_k  \
         --cache-type-v $cache_type_v \
-        --cache-type-k-draft $DRAFT_CACHE \
-        --cache-type-v-draft $DRAFT_CACHE \
-        # other names/aliases
-        #--spec-draft-type-k "$spec_cache_type_k" \
-        #--spec-draft-type-v "$spec_cache_type_v" \
+        --cache-type-k-draft $cache_type_draft_k \
+        --cache-type-v-draft $cache_type_draft_v \
 
         --load-mode mmap \
         --fit off \
 
         --batch-size $batch \
         --ubatch-size $ubatch \
+
+        # EXPERIMENTAL for 80k of Qwen3.8 27B
+        --ctx-checkpoints 4 --checkpoint-min-step 16384
 
         #--draft-p-min 0.7 \   ### old parameter
         --spec-draft-p-min $DRAFT_P_MIN \
@@ -160,10 +160,10 @@ start_server() {
 
         --temperature $TEMPERATURE \
         --top-k 20 \
-        --top-p 0.80 \
-        --min-p 0.05 \
-        --repeat-penalty 1.15 \
-        --repeat-last-n 1024 \
+        --top-p 0.90 \
+        --min-p 0.02 \
+        --repeat-penalty 1.10 \
+        --repeat-last-n 512 \
 
         --samplers "penalties;dry;top_k;top_p;min_p;temperature"
 
@@ -171,25 +171,34 @@ start_server() {
 
         --cache-reuse $cache_reuse \
 
-        --context-shift \
+        #--context-shift \  not supported by Qwen3.8 27B
         --reasoning-preserve \
+
+        # Qwen3.8
+        --chat-template-kwargs '{"reasoning_effort":"medium"}' \
 
         --reasoning on \
         --reasoning-budget 4096 \
         --reasoning-budget-message "... Considering the limited time by the user, I have to give the solution based on the thinking directly now."
     )
 
-    if [[ "$jinja" == "1" ]]; then
-        args+=(--jinja)
-    fi
+    [[ "$jinja" == "1" ]] && args+=(--jinja)
+
+    [[ "$QWEN_REASONING_EFFORT_MEDIUM" == "1" ]] && args+=(--chat-template-kwargs '{"reasoning_effort":"medium"}')
 
     # Logging settings
     args+=(--log-verbosity 4) # default is 3, we need this level to print out the GPU layers
 
     local pred_type="none" # default value
 
+    # Disable RAM "cache" if no MoE or GPU offloading
+    if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
+        args+=(--cache-ram 4096) 
+    else
+        args+=(--cache-ram 0) 
+    fi
 
-    if [[ "$spec" = "1" || "$spec" == "simple" || "$spec" == "dflash" || "$spec" == "mtp" ]]; then
+    if [[ "$spec" == *draft-simple* || "$spec" == *ngram-simple* || "$spec" == *draft-dflash* || "$spec" == *draft-mtp* ]]; then
         local pred_min
         local pred_max
         # Split the string by '/'
@@ -200,89 +209,57 @@ start_server() {
         fi
     fi
 
-    if [[ "$spec" = "1" || "$spec" == "simple" ]]; then
-        # Case A or B: Speculation enabled
-
-        if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
-            # Case A: External Draft Model
-            local draft_model_path="$GGUF_FOLDER/$draft_model"
-            
-            args+=(--spec-type "draft-simple")                      # draft-simple
-            args+=(--spec-draft-model "$draft_model_path")
-            args+=(--spec-draft-n-min "$pred_min")
-            args+=(--spec-draft-n-max "$pred_max")
-
-            # Configure KV cache type specifically for the draft model
-            #args+=(--spec-draft-type-k "$spec_cache_type_k")
-            #args+=(--spec-draft-type-v "$spec_cache_type_v")
-
-            print_value "Speculative type" "Draft model, draft-simple (min: $pred_min, max: $pred_max)"
-            print_value "Draft Model" "$draft_model"
-        else
-            # Case B: Self-speculative decoding (N-Gram)
-            args+=(--spec-type "ngram-simple")
-
-            # N (lookup size) = pred_min
-            # M (draft size) = pred_max
-            args+=(--spec-ngram-simple-size-n "$pred_min")
-            args+=(--spec-ngram-simple-size-m "$pred_max")
-            args+=(--spec-ngram-simple-min-hits 1)
-
-            print_value "Speculative type" "Internal N-Gram, ngram-simple (size_N: $pred_min, size_M: $pred_max)"
-        fi
-    elif [[ "$spec" == "draft-simple" ]]; then
-        ### TODO: check if draft-simple requires ALWAYS a draft model !!!
-        args+=(--spec-type "draft-simple")                            # draft-simple (again ???)
-        args+=(--spec-draft-model "$draft_model_path")
+    if [[ "$spec" == *draft-simple* ]]; then
+        args+=(--spec-type "draft-simple")
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
-
-        # Configure KV cache type specifically for the draft model
-        #args+=(--spec-draft-type-k "$spec_cache_type_k")
-        #args+=(--spec-draft-type-v "$spec_cache_type_v")
-
         print_value "Speculative type" "Draft model, draft-simple (min: $pred_min, max: $pred_max)"
-        print_value "Draft Model" "$draft_model"
- 
-    elif [[ "$spec" == "dflash" ]]; then
+    fi
+
+    if [[ "$spec" == *ngram-simple* ]]; then
+        args+=(--spec-type "ngram-simple")
+        # N (lookup size) = pred_min
+        # M (draft size) = pred_max
+        args+=(--spec-ngram-simple-size-n "$pred_min")
+        args+=(--spec-ngram-simple-size-m "$pred_max")
+        args+=(--spec-ngram-simple-min-hits 1)
+        print_value "Speculative type" "Internal N-Gram, ngram-simple (size_N: $pred_min, size_M: $pred_max)"
+    fi
+
+    if [[ "$spec" == *draft-dflash* ]]; then
 
         if [[ -z "$draft_model" ||  "$draft_model" == "none" ]]; then
             echo "‼️ draft_model has to be set with Speculative type DFlash" >&2
             return 1
         fi
-
-        local draft_model_path="$GGUF_FOLDER/$draft_model"
         
-        args+=(--spec-type "draft-dflash")                               # draft-dflash
-        args+=(--spec-draft-model "$draft_model_path")
+        args+=(--spec-type "draft-dflash")
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
-
-        # Configure KV cache type specifically for the draft model
-        #args+=(--spec-draft-type-k "$spec_cache_type_k")
-        #args+=(--spec-draft-type-v "$spec_cache_type_v")
-
         print_value "Speculative type" "Draft model, draft-dflash (min: $pred_min, max: $pred_max)"
-        print_value "Draft Model" "$draft_model"
+    fi
 
-    elif [[ "$spec" == "mtp" ]]; then
-        # Case C: MTP (Only if spec=0)
-
-        if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
-            # Case A: External Draft Model
-            local draft_model_path="$GGUF_FOLDER/$draft_model"
-            print_value "Draft Model" "$draft_model"
-
-            args+=(--spec-draft-model "$draft_model_path")
-        fi
-
-
-        
-        args+=(--spec-type "draft-mtp")                            # draft-mtp
+    if [[ "$spec" == *draft-mtp* ]]; then
+        args+=(--spec-type "draft-mtp")
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
-
         print_value "Speculative type" "MTP, draft-mtp (min: $pred_min, max: $pred_max)"
+    fi
+
+
+    if [[ "$spec" == *ngram-mod* ]]; then
+        # EXPERIMENTAL: ngram-mod
+        #args+=(--spec-type "draft-mtp,ngram-mod")
+        args+=(--spec-ngram-mod-n-match 24)  # default:
+        args+=(--spec-ngram-mod-n-min 8)     # default:
+        args+=(--spec-ngram-mod-n-max 32)    # default:
+    fi
+
+    # External draft model
+    if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
+        local draft_model_path="$GGUF_FOLDER/$draft_model"
+        args+=(--spec-draft-model "$draft_model_path")
+        print_value "Draft Model" "$draft_model"
     fi
 
     # clean log

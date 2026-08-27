@@ -5,16 +5,12 @@
 | Qwen3-Coder-30B-A3B-Instruct-IQ4_XS_unsloth.gguf                          | ✔️ 96k  30 t/s                                             |
 | Qwen3-Coder-30B-A3B-Instruct-UD-Q3_K_XL_unsloth.gguf                      | ❌ Q4 96k:70 t/s Q8 96k:30 t/s   Pi: indisciplinate        |
 | Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf                            | ✔️ Max 64k                                                 |
-| Qwen3-Coder-30B-A3B-Instruct-Q4_K_M_unsloth.gguf                          | ❌ too slow                                                |
+| Qwen3-Coder-30B-A3B-Instruct-Q4_K_M_unsloth.gguf                          | ❌ Too slow                                                |
 | Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL_unsloth.gguf                      | ❌ Chatty. Not able to complete a task. 64k:20 t/s         |
 | Qwen3-Coder-30B-A3B-Instruct-RTPurbo.Q4_K_M_mradermacher.gguf             | ❌ No tools capability                                     |
 | Qwen3-Coder-30B-A3B-instruct_REAP-15B-A3B-Q4_K_M_lainlives.gguf           | ❌ No tools capability                                     |
 | qwen3-coder-30b-a3b-instruct_REA-15b-a3b-safetensors-q5_0_lainlives.gguf  | ❌ No tools capability                                     |
-| Qwen3-Coder-30B-A3B-Instruct-128x1.8B-Q4_K_M_intel.gguf                   |  |
-
-
-##
-Qwen3-Coder-30B-A3B-Instruct-128x1.8B-Q4_K_M_intel.gguf                         16.1 GB
+| Qwen3-Coder-30B-A3B-Instruct-128x1.8B-Q4_K_M_intel.gguf                   | ❌ Too slow                                                |
 
 
 ## 
@@ -39,6 +35,11 @@ Context: max 64k
 ## ✔️ REAP-25B-A3B-Q4_K_M (by bartowski)
 Qwen3-Coder-REAP-25B-A3B-Q4_K_M_bartowski.gguf                                  14.1 GB
 https://huggingface.co/bartowski/cerebras_Qwen3-Coder-REAP-25B-A3B-GGUF
+
+
+## ❌
+Qwen3-Coder-30B-A3B-Instruct-128x1.8B-Q4_K_M_intel.gguf                         16.1 GB
+Too slow
 
 
 ## ❌ UD Q4_K_XL (Unsloth)
@@ -99,6 +100,25 @@ qwen3-coder-30b-a3b-instruct_pruned_reap-15b-a3b-safetensors-q5_0_lainlives.gguf
 |  41 t/s |  64 k |   3 | 49/49  | 13.1 GB | 9.5/0.8   | --    |    446 |  11s | none             | --                             | 1024/256     |                 |
 
 ```bash
+
+
+model=Qwen3-Coder-30B-A3B-Instruct-128x1.8B-Q4_K_M_intel.gguf
+ctx_k=80
+gpu_layers=99
+cpu_moe=8
+spec=draft-simple
+draft_model=none
+predict_token=4/6
+jinja=0
+batch=512
+ubatch=256
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note       |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |----------- |
+|  13 t/s |  80 k |   8 | 49/49 | 15.7 | 13.4/0.0  | q4_0 (none) |    969 |  76s | none                                 -- |   512/256 |            |
+|  12 t/s |  96 k |   9 | 49/49 | 15.7 | 13.1/0.1  | q4_0 (none) |    531 |  44s | none                                    |   512/256 |            |
+|   6 t/s |  96 k |   8 | 49/49 | 15.7 | 13.4/0.1  | q4_0 (none) |    969 | 150s | none                                 -- |   512/256 |            |
 
 
 model=Qwen3-Coder-30B-A3B-Instruct-128x1.8B-Q4_K_M_intel.gguf

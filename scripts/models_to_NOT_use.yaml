@@ -203,6 +203,49 @@
         "reasoning": true
       },
 
+# Tiel Coder
+  Tiel-Coder-35B-A3B-UD-IQ4_XS_(peculiar)_64k:
+    file: Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf
+    note: ...
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 5
+    batch : 1024
+    ubatch: 256
+    spec_type: none
+    pi_agent_model: >
+      { 
+          "_test": "?",
+          "_speed": "? t/s",
+          "id": "Tiel-Coder-35B-A3B-UD-IQ4_XS_(peculiar)_64k",
+          "name": "Tiel-Coder-35B-A3B UD-IQ4_XS (peculiar) [64k]",
+          "contextWindow": 65536,
+          "maxTokens": 4096,
+          "reasoning": true
+      },
+  Tiel-Coder-35B-A3B-UD-IQ4_XS_(peculiar)_SPEC_64k:
+    file: Tiel-Coder-35B-A3B-UD-IQ4_XS_peculiar.gguf
+    note: ...
+    ctx_k: 64
+    gpu_layers: 99
+    cpu_moe: 3
+    batch : 512
+    ubatch: 256
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 8
+    spec_ngram_simple_size_m: 12
+    spec_ngram_simple_min_hits: 1
+    pi_agent_model: >
+      { 
+          "_test": "?",
+          "_speed": "? t/s",
+          "id": "Tiel-Coder-35B-A3B-UD-IQ4_XS_(peculiar)_SPEC_64k",
+          "name": "Tiel-Coder-35B-A3B UD-IQ4_XS (peculiar) SPEC [64k]",
+          "contextWindow": 65536,
+          "maxTokens": 4096,
+          "reasoning": true
+      },
+
 # Gemma 4 12B
   Gemma-4-12B_IQ4_NL:
     file: Gemma-4-12b-it-IQ4_NL_unsloth.gguf
