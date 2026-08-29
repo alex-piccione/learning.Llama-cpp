@@ -49,7 +49,6 @@ Context: MAX 96K, can't go over!
   - With 96K speed pass from 35-40 t/s at 7 after few messages
   - With 64K is fine for a little bit more
 
-
 Speed on Pi
 | N/M   |   t/s | Note                                 |
 | ----- | ----- | ------------------------------------ |
@@ -94,7 +93,7 @@ https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 
 ❌ Too big, too slow.
 
-## Run results
+## Run results [OLD]
 
 | ❌ Qwen3.6-27B-A3B-Coder-CD-Q4_K_M_mannix.gguf
 |  51 t/s | 128 k |   1 | 42/42  | 14.9 GB | 12.9/0.8  | --    |   1185 |  24s | none             | --                             | 1024/512     |                 |
@@ -176,37 +175,77 @@ https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF
 
 ```bash
 
+# Q4
 model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-ctx_k=96
+ctx_k=128
 gpu_layers=99
-cpu_moe=6
+cpu_moe=4
+quant=q4_0
 spec=0
 draft_model=none
 predict_token=0/0
 jinja=0
-batch=512
-ubatch=256
+batch=1024
+ubatch=512
 _test_model
 
-| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
-| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
-|  42 t/s |  96 k |   5 | 41/41 | 15.5 | 13.9/0.1  | q8_0  |   1281 |  30s | none                          -- |   512/256 |            |
-|  40 t/s |  96 k |   6 | 41/41 | 15.2 | 13.5/0.1  | q8_0  |   2048 |  51s | none                          -- |   512/256 |            |
-|  30 t/s |  96 k |  11 | 41/41 | 13.4 | 11.7/0.1  | q8_0  |   1228 |  41s | none                          -- |   512/256 |            |
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  45 t/s | 128 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q4_0 (none) |   1280 |  28s | none                                 -- |  1024/512 |                   |
+|  43 t/s | 128 k |   5 | 41/41 | 15.4 | 13.9/0.1  | q4_0 (none) |    623 |  14s | none                                 -- |  1024/512 |                   |
+|  46 t/s |  96 k |   4 | 41/41 | 15.5 | 14.2/0.1  | q4_0 (none) |   1280 |  28s | none                                 -- |  1024/512 |                   |
+|  43 t/s |  96 k |   5 | 41/41 | 15.1 | 13.9/0.1  | q4_0 (none) |    623 |  14s | none                                 -- |  1024/512 |                   |
+|  40 t/s |  96 k |   6 | 41/41 | 14.7 | 13.5/0.1  | q4_0 (none) |    844 |  21s | none                                 -- |  1024/256 |                   |
 
-|  48 t/s |  64 k |   3 | 41/41 | 15.7 | 14.6/0.0  | q8_0  |   2048 |  43s | none                          -- |   512/256 |            |
-|  46 t/s |  64 k |   4 | 41/41 | 15.5 | 14.2/0.0  | q8_0  |   1282 |  28s | none                          -- |   512/256 |            |
+|  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1224 |  27s | none                                 -- |  1024/512 |                   |
+|  43 t/s |  96 k |   5 | 41/41 | 15.6 | 13.9/0.1  | q8_0 (none) |   1378 |  32s | none                                 -- |  1024/512 |                   |
 
-[OLD]
-| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | Cache | Tokens | Time | Prediction                       | Batch/Ub. | Note       |
-| ------- | ----- | --- | ----- | ---- | --------- | ----- | ------ | ---- | -------------------------------- | --------- |----------- |
-| ✔️ Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-|  44 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0  |   1282 |  29s | none                          -- |  1024/256 |            |
-|  42 t/s |  96 k |   5 | 41/41 | 15.5 | 13.9/0.1  | q8_0  |   1281 |  30s | none                          -- |  1024/256 |            |
-|  44 t/s |  64 k |   4 | 41/41 | 15.5 | 14.2/0.0  | q8_0  |   1282 |  29s | none                          -- |  1024/256 |            |
-|  38 t/s |  64 k |   4 | 40/41 | 15.5 | 14.2/0.0  | q8_0  |   2048 |  53s | none                          -- |  1024/256 |            |
-|  39 t/s |  64 k |   3 | 41/41 | 15.7 | 14.6/0.1  | q8_0  |   1266 |  32s | none                          -- |  1024/512 |            |
+# Q4 SPEC
+model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+ctx_k=128
+gpu_layers=99
+cpu_moe=4
+quant=q4_0
+spec=ngram-simple
+draft_model=none
+predict_token=16/24
+jinja=0
+batch=1024
+ubatch=512
+_test_model
 
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  46 t/s | 128 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q4_0 (none) |   1280 |  28s | N-gram            N=16 M=16 min=1 (78%) |  1024/512 |                   |
+|  45 t/s |  96 k |   4 | 41/41 | 15.5 | 14.2/0.1  | q4_0 (none) |   1280 |  28s | N-gram            N=16 M=16 min=1 (78%) |  1024/512 |                   |
+|  41 t/s |  96 k |   4 | 41/41 | 15.5 | 14.2/0.1  | q4_0 (none) |   1280 |  31s | N-gram            N=12 M=16 min=1 (67%) |  1024/512 |                   |
+|  39 t/s |  96 k |   4 | 41/41 | 15.5 | 14.2/0.1  | q4_0 (none) |   1280 |  33s | N-gram            N=12 M=12 min=1 (74%) |  1024/512 |                   |
+
+
+# Q8
+model=Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+ctx_k=96
+gpu_layers=99
+cpu_moe=4
+quant=q8_0
+#spec=ngram-simple
+spec=none
+draft_model=none
+predict_token=3/5
+jinja=0
+batch=1024
+ubatch=512
+_test_model
+
+| Speed   | Ctx   | MoE | GPU   | VRAM | VRAM/RAM  | CH  (draft) | Tokens | Time | Speculative Prediction                  | Batch/Ub. | Note              |
+| ------- | ----- | --- | ----- | ---- | --------- | ----------- | ------ | ---- | --------------------------------------- | --------- |------------------ |
+|  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1224 |  27s | N-gram                  N=16 M=24 min=1 |  1024/512 |                   |
+|  45 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1224 |  27s | N-gram                  N=16 M=16 min=1 |  1024/512 |                   |
+|  39 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1169 |  30s | N-gram            N=12 M=12 min=1 (73%) |  1024/512 |                   |
+|  37 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |    834 |  22s | N-gram             N=16 M=24 min=1 (7%) |  1024/512 |                   |
+|  36 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1307 |  36s | N-gram              N=8 M=8 min=1 (80%) |  1024/512 |                   |
+|  29 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1169 |  40s | N-gram            N=24 M=24 min=1 (39%) |  1024/512 |                   |
+|  28 t/s |  96 k |   4 | 41/41 | 15.7 | 14.2/0.1  | q8_0 (none) |   1169 |  41s | N-gram            N=16 M=16 min=1 (39%) |  1024/512 |                   |
 
 
 model=Qwen3.6-35B-A3B-Unc-Genesis-V3-APEX-Compact_luffythefox.gguf

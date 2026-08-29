@@ -100,7 +100,7 @@ require_arg() {
     args+=("$arg_name" "$var_value")
 }
 
-check_var() {
+required_var() {
     local var_name="$1"
     if [[ ! -v "$var_name" ]]; then 
         echo -e "❌ Variable \"$var_name\" is missing!" >&2
@@ -172,6 +172,7 @@ start_server() {
             return 0
         fi
     fi
+
     if ! yq -e ".models[\"$model_id\"]" "$models_config_file" > /dev/null 2>&1; then
         echo -e "❌ Error: Model '$model_id' not found in ${yellow}$models_config_file${reset}"
         #echo "Available models: $(yq '.models | keys | .[]' $models_config_file | tr '\n' ' ')"
@@ -209,8 +210,8 @@ start_server() {
     local jinja
 
     # check mandatory variables
-
-    check_var "quant" || exit 1
+    required_var "spec_type" || exit 1 
+    required_var "quant" || exit 1
 
     # estrapolate Quantization parameters
     #check_var "quant"
@@ -223,9 +224,6 @@ start_server() {
     #local cache_type_v=$cache_type_kv
     #local cache_type_draft_k=$cache_type_draft_kv
     #local cache_type_draft_v=$cache_type_draft_kv
-
-    debug "cache_type_kv: $cache_type_kv"
-    debug "cache_type_draft_kv: $cache_type_draft_kv"
 
     args+=(--cache-type-k "$cache_type_kv")
     args+=(--cache-type-v "$cache_type_kv")
@@ -252,7 +250,10 @@ start_server() {
     args+=(--batch-size $batch)
     args+=(--ubatch-size $ubatch)
 
-    args+=(--spec-type "$spec_type" )
+    [[ "$spec_type" != "none" ]] && args+=(--spec-type "$spec_type")
+
+    echo "dioporco"
+    echo "$args"
 
     # Disable RAM "cache" if no MoE or GPU offloading
     if [[ "$cpu_moe" != "0" || "$gpu_layers" != "99" ]]; then
@@ -261,26 +262,33 @@ start_server() {
         args+=(--cache-ram 0) 
     fi
 
+    if [[ "$spec_type" == *draft-simple* ]]; then
+        require_arg spec_draft_n_min     --spec-draft-n-min || return 1
+        require_arg spec_draft_n_max     --spec-draft-n-max || return 1
+        print_value "Speculative type" "draft-simple (min: $spec_draft_n_min max: $spec_draft_n_max)"
+    fi
+
     # for N-Gram
     if [[ "$spec_type" == *ngram-simple*  ]]; then
         require_arg spec_ngram_simple_size_n     --spec-ngram-simple-size-n || return 1
         require_arg spec_ngram_simple_size_m     --spec-ngram-simple-size-m || return 1
         require_arg spec_ngram_simple_min_hits   --spec-ngram-simple-min-hits || return 1
-        echo "Speculative type: ngram-simple (size_N: $spec_ngram_simple_size_n size_M: $spec_ngram_simple_size_m min_hits: $spec_ngram_simple_min_hits)"
+        print_value "Speculative type" "ngram-simple (size_N: $spec_ngram_simple_size_n size_M: $spec_ngram_simple_size_m min_hits: $spec_ngram_simple_min_hits)"
     fi
 
     # for MTP  
     if [[ "$spec_type" == *draft-mtp* ]]; then
         require_arg spec_draft_n_min     --spec-draft-n-min || return 1
         require_arg spec_draft_n_max     --spec-draft-n-max || return 1
-        echo "Speculative type: MTP (min: $spec_draft_n_min max: $spec_draft_n_max)"
+        print_value "Speculative type" "draft-mtp (min: $spec_draft_n_min max: $spec_draft_n_max)"
     fi
 
-    # for Draft
-    if [[ "$spec_type" == "draft-simple"  ]]; then
-        require_arg spec_draft_n_min     --spec-draft-n-min || return 1
-        require_arg spec_draft_n_max     --spec-draft-n-max || return 1
-        echo "Speculative type: MTP (min: $spec_draft_n_min max: $spec_draft_n_max)"
+    if [[ "$spec_type" == *ngram-mod* ]]; then
+        # EXPERIMENTAL: ngram-mod
+        #args+=(--spec-type "draft-mtp,ngram-mod")
+        args+=(--spec-ngram-mod-n-match 24)  # default:
+        args+=(--spec-ngram-mod-n-min 8)     # default:
+        args+=(--spec-ngram-mod-n-max 32)    # default:
     fi
 
     # DFlash
@@ -289,6 +297,13 @@ start_server() {
         echo "Speculative type: DFlash ... "
         echo -e "❌ Spec \"DFlash\" not supported!"
         return 1
+    fi
+
+    # External draft model
+    if [[ -n "$draft_model" && "$draft_model" != "none" ]]; then
+        local draft_model_path="$GGUF_FOLDER/$draft_model"
+        args+=(--spec-draft-model "$draft_model_path")
+        print_value "Draft Model" "$draft_model"
     fi
 
     [[ "$jinja" == "1" ]] && args+=(--jinja)

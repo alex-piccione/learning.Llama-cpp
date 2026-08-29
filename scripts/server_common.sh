@@ -16,8 +16,9 @@ DRAFT_P_MIN=0.2
 QWEN_REASONING_EFFORT_MEDIUM=1
 
 is_server_started() {
-    PROCESS_NAME="llama-server.exe"   # Define the exact name of the executable to look for
-    if ps -ef | grep -v grep | grep "$PROCESS_NAME" > /dev/null; then
+    PROCESS_NAME="llama-server"   # Define the exact name of the executable to look for
+    # -a is required to treat it as text
+    if ps -ef | grep -av grep | grep -a "$PROCESS_NAME" > /dev/null; then
         return 0
     else
         return 1
@@ -26,7 +27,7 @@ is_server_started() {
 
 
 server_info() {
-    local command=$(ps -ef | grep llama-server | sed 's/ -/\n-/g' | sed 's/^.*\llama-b/"llama-b/')
+    local command=$(ps -ef | grep -a llama-server | sed 's/ -/\n-/g' | sed 's/^.*\llama-b/"llama-b/')
     echo "$command"
 }
 
@@ -135,6 +136,7 @@ start_server() {
         --flash-attn on \
         --n-gpu-layers $gpu_layers \
         --n-cpu-moe $cpu_moe \
+        --n-cpu-ffn 0 \
         --kv-unified \
         --cache-type-k $cache_type_k  \
         --cache-type-v $cache_type_v \
@@ -174,9 +176,6 @@ start_server() {
         #--context-shift \  not supported by Qwen3.8 27B
         --reasoning-preserve \
 
-        # Qwen3.8
-        --chat-template-kwargs '{"reasoning_effort":"medium"}' \
-
         --reasoning on \
         --reasoning-budget 4096 \
         --reasoning-budget-message "... Considering the limited time by the user, I have to give the solution based on the thinking directly now."
@@ -198,6 +197,8 @@ start_server() {
         args+=(--cache-ram 0) 
     fi
 
+    [[ "$spec" != "none" ]] && args+=(--spec-type "$spec")
+
     if [[ "$spec" == *draft-simple* || "$spec" == *ngram-simple* || "$spec" == *draft-dflash* || "$spec" == *draft-mtp* ]]; then
         local pred_min
         local pred_max
@@ -210,20 +211,19 @@ start_server() {
     fi
 
     if [[ "$spec" == *draft-simple* ]]; then
-        args+=(--spec-type "draft-simple")
+        #args+=(--spec-type "draft-simple")
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
-        print_value "Speculative type" "Draft model, draft-simple (min: $pred_min, max: $pred_max)"
+        print_value "Speculative type" "draft-simple (min: $pred_min, max: $pred_max)"
     fi
 
     if [[ "$spec" == *ngram-simple* ]]; then
-        args+=(--spec-type "ngram-simple")
         # N (lookup size) = pred_min
         # M (draft size) = pred_max
         args+=(--spec-ngram-simple-size-n "$pred_min")
         args+=(--spec-ngram-simple-size-m "$pred_max")
         args+=(--spec-ngram-simple-min-hits 1)
-        print_value "Speculative type" "Internal N-Gram, ngram-simple (size_N: $pred_min, size_M: $pred_max)"
+        print_value "Speculative type" "ngram-simple (size_N: $pred_min, size_M: $pred_max)"
     fi
 
     if [[ "$spec" == *draft-dflash* ]]; then
@@ -233,19 +233,16 @@ start_server() {
             return 1
         fi
         
-        args+=(--spec-type "draft-dflash")
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
-        print_value "Speculative type" "Draft model, draft-dflash (min: $pred_min, max: $pred_max)"
+        print_value "Speculative type" "draft-dflash (min: $pred_min, max: $pred_max)"
     fi
 
     if [[ "$spec" == *draft-mtp* ]]; then
-        args+=(--spec-type "draft-mtp")
         args+=(--spec-draft-n-min "$pred_min")
         args+=(--spec-draft-n-max "$pred_max")
-        print_value "Speculative type" "MTP, draft-mtp (min: $pred_min, max: $pred_max)"
+        print_value "Speculative type" "draft-mtp (min: $pred_min, max: $pred_max)"
     fi
-
 
     if [[ "$spec" == *ngram-mod* ]]; then
         # EXPERIMENTAL: ngram-mod

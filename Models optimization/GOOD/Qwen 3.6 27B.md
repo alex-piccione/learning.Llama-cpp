@@ -10,9 +10,6 @@
 | Qwen3.6-27B-Bedrock-13.26GB_enginetown.gguf                | ❌ 1500 tokens (90s) for the test           | 
 
 
-##
-https://huggingface.co/DavidAU/Qwen3.6-27B-Fable-Fusion-711-Uncensored-Heretic-NM-DAU-NEO-MAX-MTP-GGUF
-
 ## 🥇 Cerebellum v5 Q2_K Mixed (deucebucket)
 Qwen3.6-27B-Cerebellum-v5-Q2_K_deucebucket.gguf                   12.4 GB
 https://huggingface.co/deucebucket/Qwen3.6-27B-Cerebellum-GGUF
@@ -29,6 +26,7 @@ https://huggingface.co/enginetown/Qwen3.6-27B-Calibrated
 
 ##
 Qwen3.6-27B-Fable-Fus-711-UnHeretic-NM-DAU-NEO-MAX-NEO-LOW-MTP-IQ4_XS_davidau.gguf            14 GB
+https://huggingface.co/DavidAU/Qwen3.6-27B-Fable-Fusion-711-Uncensored-Heretic-NM-DAU-NEO-MAX-MTP-GGUF
 
 
 ## ❌ Esper 3.1 (by mr adermacher)

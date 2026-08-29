@@ -73,7 +73,8 @@ models:
       },
 
 
-# Qwen 3.8 27B
+### Qwen 3.8 27B ###
+
   Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[80k]:
     file: Qwen3.8-27B-UD-Q3_K_XL_unsloth.gguf
     ctx_k: 80
@@ -82,13 +83,16 @@ models:
     quant: q4_0/q4_0
     batch: 1024
     ubatch: 512
-    spec_type: draft-mtp
-    spec_draft_n_min: 5
-    spec_draft_n_max: 6
+    spec_type: draft-mtp,ngram-simple
+    spec_draft_n_min: 2
+    spec_draft_n_max: 3
+    spec_ngram_simple_size_n: 12
+    spec_ngram_simple_size_m: 12
+    spec_ngram_simple_min_hits: 1
     jinja: 0
     pi_agent_model: >
       { 
-         "_test": "🥇",
+         "_test": "🥇🥇",
          "_speed": "15-35 t/s",
           "id": "Qwen3.8-27B_UD-Q3-K-XL_Unsloth_[80k]",
           "name": "Qwen 3.8 27B Q3-K-XL (Unsloth) [80k]",
@@ -149,11 +153,15 @@ models:
     ctx_k: 80
     gpu_layers: 99
     cpu_moe: 0
+    quant: q4_0
     batch: 1024
     ubatch: 256
-    spec_type: draft-mtp
+    spec_type: draft-mtp,ngram-simple
     spec_draft_n_min: 2
-    spec_draft_n_max: 3
+    spec_draft_n_max: 5
+    spec_ngram_simple_size_n: 12
+    spec_ngram_simple_size_m: 12
+    spec_ngram_simple_min_hits: 1
     jinja: 0
     pi_agent_model: >
       { 
@@ -161,6 +169,33 @@ models:
          "_speed": "20-40 t/s",
           "id": "Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[80k]",
           "name": "🥇 Qwen 3.8 27B UD-IQ4_XS (Unsloth) [80k]",
+          "contextWindow": 81920,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+
+  Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[32k]_Q8:
+    file: Qwen3.8-27B-UD-IQ4_XS_unsloth.gguf
+    ctx_k: 32
+    gpu_layers: 99
+    cpu_moe: 0
+    quant: q8_0/q4_0
+    batch: 1024
+    ubatch: 256
+    spec_type: draft-mtp,ngram-simple
+    spec_draft_n_min: 2
+    spec_draft_n_max: 3
+    spec_ngram_simple_size_n: 12
+    spec_ngram_simple_size_m: 12
+    spec_ngram_simple_min_hits: 1
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "",
+         "_speed": " t/s",
+          "id": "Qwen3.8_27B_UD-IQ4_XS_(Unsloth)_[32k]_Q8",
+          "name": "Qwen 3.8 27B UD-IQ4_XS (Unsloth) [80k]",
           "contextWindow": 81920,
           "maxTokens": 4096,
           "reasoning": true,
@@ -381,46 +416,69 @@ models:
 
 
 # Qwen 3.6 35B A3B
-  Qwen_3.6_28b_reap_20_(barozp)_64k:
+  Qwen_3.6_28b_reap_20_(barozp)_128k_Q4:
     file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-    alias: barozp/Qwen 3.6 28B-REAP20-A3B Q4_K_M [64k]
-    ctx_k: 64
+    ctx_k: 128
     gpu_layers: 99
     cpu_moe: 4
-    batch: 512
-    ubatch: 256
+    quant: q4_0
+    batch: 1024
+    ubatch: 512
     spec_type: none
     jinja: 0
     pi_agent_model: >
       { 
          "_test": "✔️ Really good",
          "_speed": "35 t/s",
-          "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
-          "name": "Qwen 3.6 28B REAP20 (barozp) 64k",
-          "alias": "barozp/Qwen 3.6 28B REAP20 A3B [64k]",
-          "contextWindow": 65536,
-          "maxTokens": 4096,
+          "id": "Qwen_3.6_28b_reap_20_(barozp)_128k_Q4",
+          "name": "Qwen 3.6 28B REAP20 (barozp) [128k] Q4",
+          "contextWindow": 131072,
+          "maxTokens": 8192,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
-  Qwen_3.6_28b_reap_20_(barozp)_96k:
+  Qwen_3.6_28b_reap_20_(barozp)_96k_Q8:
     file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
-    alias: barozp/Qwen 3.6 28B-REAP20-A3B Q4_K_M [96k]
     ctx_k: 96
     gpu_layers: 99
-    cpu_moe: 5
-    batch: 512
-    ubatch: 256
+    cpu_moe: 4
+    quant: q8_0
+    batch: 1024
+    ubatch: 512
     spec_type: none
     jinja: 0
     pi_agent_model: >
       { 
          "_test": "Really good",
          "_speed": "35 t/s",
-          "id": "Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf",
-          "name": "Qwen 3.6 28B REAP20 (barozp) 96k",
+          "id": "Qwen_3.6_28b_reap_20_(barozp)_96k_Q8",
+          "name": "Qwen 3.6 28B REAP20 (barozp) [96k] Q8",
           "contextWindow": 98304,
-          "maxTokens": 4096,
+          "maxTokens": 8192,
+          "reasoning": true,
+          "input": [ "text", "image" ]
+      },
+  Qwen_3.6_28b_reap_20_(barozp)_96k_Q8_NGRAM_16_16:
+    file: Qwen3.6-28B-REAP20-A3B-Q4_K_M_barozp.gguf
+    ctx_k: 96
+    gpu_layers: 99
+    cpu_moe: 4
+    quant: q8_0
+    batch: 1024
+    ubatch: 512
+    spec_type: ngram-simple
+    spec_ngram_simple_size_n: 16
+    spec_ngram_simple_size_m: 16
+    spec_ngram_simple_min_hits: 1
+    jinja: 0
+    pi_agent_model: >
+      { 
+         "_test": "Really good",
+         "_speed": "35 t/s",
+          "id": "Qwen_3.6_28b_reap_20_(barozp)_96k_Q8",
+          "name": "Qwen 3.6 28B REAP20 (barozp) [96k] Q8",
+          "contextWindow": 98304,
+          "maxTokens": 8192,
           "reasoning": true,
           "input": [ "text", "image" ]
       },
@@ -473,13 +531,13 @@ models:
             "reasoning": true
        },
 
-
   KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket_160k:
     file: KAT-Coder-V2.5-Dev-Cerebellum-14GB-v2_deucebucket.gguf
     alias: KAT-Coder-V2.5-Dev-Cerebellum_(deucebucket)_[160k]
     ctx_k: 160
     gpu_layers: 99
     cpu_moe: 0
+    quant: q8_0
     batch: 1024
     ubatch: 512
     spec_type: none 
