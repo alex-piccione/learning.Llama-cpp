@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json;
 using LlamaServerCore;
 
 namespace LlamaServerUI;
@@ -8,13 +9,22 @@ public sealed class MainForm : Form
     private readonly ListBox _modelsList = new();
     private readonly Button _startButton = new() { Text = "Start", AutoSize = true };
     private readonly Button _stopButton = new() { Text = "Stop", AutoSize = true, Enabled = false };
-    private readonly Label _statusLabel = new() { AutoSize = true, Text = "Idle" };
+    private readonly Button _configureButton = new() { Text = "\u2699 Configure", Width = 100, FlatStyle = FlatStyle.Standard };
     private readonly TextBox _logBox = new()
     {
         Multiline = true,
         ReadOnly = true,
         ScrollBars = ScrollBars.Vertical,
         Font = new Font(FontFamily.GenericMonospace, 9f),
+    };
+
+    // Warning label — shown when config is incomplete
+    private readonly Label _warningLabel = new()
+    {
+        AutoSize = true,
+        ForeColor = Color.DarkRed,
+        Font = new Font(FontFamily.GenericSansSerif, 9f, FontStyle.Bold),
+        Visible = false,
     };
 
     private readonly List<string> _modelIds = [];
@@ -28,14 +38,41 @@ public sealed class MainForm : Form
         MinimumSize = new Size(700, 450);
         Icon = LoadAppIcon();
 
-        var topPanel = new Panel { Dock = DockStyle.Top, Height = 36, Padding = new Padding(8) };
-        topPanel.Controls.Add(_startButton);
-        topPanel.Controls.Add(_stopButton);
-        topPanel.Controls.Add(_statusLabel);
-        _startButton.Location = new Point(8, 8);
-        _stopButton.Location = new Point(_startButton.Right + 8, 8);
-        _statusLabel.Location = new Point(_stopButton.Right + 16, 11);
+        // Parent panel for all top content (deterministic stacking)
+        var headerPanel = new Panel
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            Padding = new Padding(0),
+        };
 
+        // Status bar (top of header)
+        var statusBarRow = new FlowLayoutPanel
+        {
+            Height = 24,
+            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
+            Padding = new Padding(8, 0, 0, 0),
+            BackColor = Color.LightGray,
+        };
+        statusBarRow.Controls.Add(_warningLabel);
+
+        // Button row (below status)
+        var buttonRow = new FlowLayoutPanel
+        {
+            Height = 32,
+            FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight,
+            Padding = new Padding(8),
+        };
+        buttonRow.Controls.Add(_configureButton);
+        buttonRow.Controls.Add(new Panel { Width = 4 });
+        buttonRow.Controls.Add(_startButton);
+        buttonRow.Controls.Add(new Panel { Width = 4 });
+        buttonRow.Controls.Add(_stopButton);
+
+        headerPanel.Controls.Add(statusBarRow);
+        headerPanel.Controls.Add(buttonRow);
+
+        // Main layout
         _modelsList.Dock = DockStyle.Fill;
         _modelsList.SelectionMode = SelectionMode.One;
 
@@ -47,12 +84,19 @@ public sealed class MainForm : Form
 
         Controls.Add(modelsSplitter);
         Controls.Add(logHost);
-        Controls.Add(topPanel);
+        Controls.Add(headerPanel);
+        Controls.Add(_modelsList);
 
-        _startButton.Click += OnStartClick;
-        _stopButton.Click += OnStopClick;
+        _configureButton.Click += OnConfigureClick;
 
         _config = AppConfig.Load(AppConfig.DefaultConfigPath);
+
+        // Auto-discover llama-server.exe on first run.
+        if (_config.LlamaBinsFolder.Length == 0)
+        {
+            DiscoverLlamaBins();
+        }
+
         LoadModels();
     }
 
@@ -69,6 +113,24 @@ public sealed class MainForm : Form
         }
     }
 
+    private void ShowError(string message)
+    {
+        _warningLabel.Text = "\u26A0 " + message;
+        _warningLabel.ForeColor = Color.DarkRed;
+        _warningLabel.Visible = true;
+    }
+
+    private void SetStatus(string text)
+    {
+        _warningLabel.Text = text;
+        _warningLabel.ForeColor = Color.Black;
+        _warningLabel.Visible = true;
+    }
+
+    private void ClearStatus() => _warningLabel.Visible = false;
+
+
+
     private void LoadModels()
     {
         try
@@ -78,7 +140,7 @@ public sealed class MainForm : Form
             {
                 _modelIds.Add(id);
                 var exists = File.Exists(Path.Combine(_config.GgufFolder, model.File));
-                _modelsList.Items.Add($"{id} {(exists ? "🟢" : "🔴")}");
+                _modelsList.Items.Add($"{id} {(exists ? "\uD83D\uDFE2" : "\uD83C\uDFA4")}");
             }
 
             if (_config.LastModelId.Length > 0)
@@ -92,12 +154,24 @@ public sealed class MainForm : Form
                 _modelsList.SelectedIndex = 0;
             }
 
-            SetStatus($"Loaded {_modelIds.Count} model(s) from config");
+            ClearStatus();
+            SetStatus($"{_modelIds.Count} model(s) loaded");
+        }
+       catch (FileNotFoundException)
+        {
+            ShowError("The configuration of the app is not complete");
+        }
+       catch (JsonException ex)
+        {
+            ShowError("Invalid config.json — " + ex.Message);
+        }
+       catch (InvalidOperationException ex)
+        {
+            ShowError(ex.Message);
         }
        catch (Exception ex)
         {
-            SetStatus($"Error: {ex.Message}");
-            MessageBox.Show(this, ex.Message, "Llama Server", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            SetStatus($"Unexpected error: {ex.Message}");
         }
     }
 
@@ -106,9 +180,65 @@ public sealed class MainForm : Form
 
     private void AppendLog(string line) => _logBox.AppendText(line + Environment.NewLine);
 
-    private void SetStatus(string text) => _statusLabel.Text = text;
+    // --- Configuration dialog ---
 
-    // Stubs: server lifecycle arrives in a follow-up change.
+    private void OnConfigureClick(object? sender, EventArgs e)
+    {
+        Visible = false;
+        Application.Run(new ConfigurationForm(_config, () =>
+        {
+            Visible = true;
+            LoadModels();
+        }));
+    }
+
+    private void DiscoverLlamaBins()
+    {
+        var candidates = new[]
+        {
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "llama-b*-bin-win-cuda*"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "llama-b*-bin-win-cuda*"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "llama-b*-bin-win-cuda*"),
+        };
+
+        foreach (var pattern in candidates)
+        {
+            try
+            {
+                var dir = Directory.GetParent(pattern);
+                if (dir is null) continue;
+                foreach (var match in dir.GetDirectories(Path.GetFileName(pattern)))
+                {
+                    var exe = Path.Combine(match.FullName, "llama-server.exe");
+                    if (File.Exists(exe))
+                    {
+                        _config.LlamaBinsFolder = match.FullName;
+                        _config.Save(AppConfig.DefaultConfigPath);
+                        return;
+                    }
+                }
+            }
+            catch { /* skip unreadable dirs */ }
+        }
+
+        var pathDirs = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) ?? Array.Empty<string>();
+        foreach (var p in pathDirs)
+        {
+            var exe = Path.Combine(p, "llama-server.exe");
+            if (File.Exists(exe))
+            {
+                _config.LlamaBinsFolder = p;
+                _config.Save(AppConfig.DefaultConfigPath);
+                return;
+            }
+        }
+
+        ShowError("The configuration of the app is not complete");
+        _startButton.Enabled = false;
+    }
+
+    // --- Server stubs ---
+
     private void OnStartClick(object? sender, EventArgs e)
     {
         var id = SelectedModelId;
