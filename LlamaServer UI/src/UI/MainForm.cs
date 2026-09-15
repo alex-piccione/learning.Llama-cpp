@@ -69,8 +69,10 @@ public sealed class MainForm : Form
         buttonRow.Controls.Add(new Panel { Width = 4 });
         buttonRow.Controls.Add(_stopButton);
 
-        headerPanel.Controls.Add(statusBarRow);
+        // Last added is docked first; add buttonRow before statusBarRow so
+        // the status/message bar appears above the button row.
         headerPanel.Controls.Add(buttonRow);
+        headerPanel.Controls.Add(statusBarRow);
 
         // Main layout
         _modelsList.Dock = DockStyle.Fill;
@@ -88,6 +90,8 @@ public sealed class MainForm : Form
         Controls.Add(_modelsList);
 
         _configureButton.Click += OnConfigureClick;
+        _startButton.Click += OnStartClick;
+        _stopButton.Click += OnStopClick;
 
         _config = AppConfig.Load(AppConfig.DefaultConfigPath);
 
@@ -185,11 +189,19 @@ public sealed class MainForm : Form
     private void OnConfigureClick(object? sender, EventArgs e)
     {
         Visible = false;
-        Application.Run(new ConfigurationForm(_config, () =>
+        try
+        {
+            using var dlg = new ConfigurationForm(_config, () =>
+            {
+                Visible = true;
+                LoadModels();
+            });
+            dlg.ShowDialog(this);
+        }
+        finally
         {
             Visible = true;
-            LoadModels();
-        }));
+        }
     }
 
     private void DiscoverLlamaBins()
